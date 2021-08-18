@@ -1,0 +1,45 @@
+############################################################################
+# Copyright (c) 2018, Martin Renou, Johan Mabille, Sylvain Corlay and      #
+# Wolf Vollprecht                                                          #
+#                                                                          #
+# Distributed under the terms of the BSD 3-Clause License.                 #
+#                                                                          #
+# The full license is in the file LICENSE, distributed with this software. #
+############################################################################
+
+# xeus-python cmake module
+# This module sets the following variables in your project::
+#
+#   xeus-python_FOUND - true if xeus-python found on the system
+#   xeus-python_INCLUDE_DIRS - the directory containing xeus-python headers
+#   xeus-python_LIBRARY - the library for dynamic linking
+#   xeus-python_STATIC_LIBRARY - the library for static linking
+
+@PACKAGE_INIT@
+
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR};${CMAKE_MODULE_PATH}")
+
+@XEUS_CONFIG_CODE@
+
+include(CMakeFindDependencyMacro)
+find_dependency(xtl @xtl_REQUIRED_VERSION@)
+find_dependency(xeus @xeus_REQUIRED_VERSION@)
+find_dependency(cppzmq @cppzmq_REQUIRED_VERSION@)
+find_dependency(pybind11 @pybind11_REQUIRED_VERSION@)
+
+if (NOT TARGET xeus-python AND NOT TARGET xeus-python-static)
+    include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+
+    if (TARGET xeus-python AND TARGET xeus-python-static)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-python INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_LIBRARY xeus-python LOCATION)
+        get_target_property(@PROJECT_NAME@_STATIC_LIBRARY xeus-python-static LOCATION)
+    elseif (TARGET xeus-python)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-python INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_LIBRARY xeus-python LOCATION)
+    elseif (TARGET xeus-python-static)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-python-static INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_STATIC_LIBRARY xeus-python-static LOCATION)
+        set(@PROJECT_NAME@_LIBRARY ${@PROJECT_NAME@_STATIC_LIBRARY})
+    endif ()
+endif ()

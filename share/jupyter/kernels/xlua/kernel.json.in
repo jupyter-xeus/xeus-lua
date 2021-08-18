@@ -1,0 +1,10 @@
+{
+  "display_name": "Python @PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@ (XPython)",
+  "argv": [
+      "@XPYTHON_KERNELSPEC_PATH@xpython",
+      "-f",
+      "{connection_file}"
+  ],
+  "language": "python",
+  "metadata": { "debugger": true }
+}
