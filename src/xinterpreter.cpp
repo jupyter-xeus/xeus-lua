@@ -36,34 +36,16 @@
 
 #include "xeus-lua/sol/sol.hpp"
 
-// #ifdef EMSCRIPTEN
 
 
-
-
-// EM_ASYNC_JS(std::string, get_input, (), {
-//   console.log("waiting for a fetch");
-//   const response = await self.theFunc()
-//   console.log("got the fetch response",response,self)
-//   return response
-// });
-
-
-EM_JS(char *, get_input, (), {
+EM_JS(char *, async_get_input_function, (const char* str), {
   return Asyncify.handleAsync(function () {
-    out("waiting for a fetch", self.theFunc);
-    return self.theFunc("jojo").then(function (jsString) {
-      out("got the fetch jsString",jsString);
-
-
+    return self.async_get_input_function( UTF8ToString(str))
+    .then(function (jsString) {
       var lengthBytes = lengthBytesUTF8(jsString)+1;
       var stringOnWasmHeap = _malloc(lengthBytes);
       stringToUTF8(jsString, stringOnWasmHeap, lengthBytes);
       return stringOnWasmHeap;
-
-
-      // (normally you would do something with the fetch here)
-      //return jsString;
     });
   });
 });
@@ -239,7 +221,6 @@ namespace xlua
     interpreter::interpreter()
     {
       
-        std::cout<<"register_interpreter\n";
         xeus::register_interpreter(this);
         //luaL_openlibs(L);
         lua.open_libraries(
@@ -301,35 +282,27 @@ namespace xlua
                 }
             }
             ss<<"\n";
-            std::cout<<"should print:"<<ss.str();
             this->publish_stream("stream", ss.str());
         });
      
-        lua.set_function("myinput", [this]( ) {
-            std::cout<<"run async\n";
-            //eturn std::string("fubar");
-            // .auto res =  xeus::blocking_input_request("prompt", false);
-            // auto ems_this = dynamic_cast<xeus::ems_interpreter<interpreter>*>(this);
-            // if(ems_this->m_async_input_func != nullptr)
-            // {
-            //    const std::string value = (*ems_this->m_async_input_func)().await();
-                char* str = get_input();
-                std::string as_string(str);
-                free(str);
-                std::cout<<"as_string "<<as_string<<"\n";
-                return as_string;
-            // }
-            // else{
-            //     return std::string("is nullptr");
-            // }
-
-        });
-        // lua_pushlightuserdata(self->L, cbk);
-        // lua_pushcclosure(self->L, this, 1);
-        // lua_setglobal(self->L, "print_custom");
+        lua.set_function("myinput", 
+            sol::overload( 
+                [this]( ) {
+                    char* str = async_get_input_function("");
+                    std::string as_string(str);
+                    free(str);
+                    return as_string;
+                },
+                [this](const std::string name ) {
+                    char* str = async_get_input_function(name.c_str());
+                    std::string as_string(str);
+                    free(str);
+                    return as_string;
+                }
+            )
+        );
 
         L = lua;
-
 
     }
 
@@ -349,6 +322,7 @@ namespace xlua
                                                nl::json user_expressions,
                                                bool allow_stdin)
     {
+
         nl::json kernel_res;
 
 
@@ -360,30 +334,23 @@ namespace xlua
         // check if printing the code would yield an error
         std::stringstream test_code;
         test_code<<"print("<<code<<")";
-        std::cout<<"test if printable\n";
         auto test_code_result = lua.script(test_code.str());
-        std::cout<<"test if printable done\n";
         // only if just printing does not work we do evaluate the code itself
         if(!test_code_result.valid()){
-            std::cout<<"run code: "<<code<<"\n";
             auto code_result= lua.script(code);
 
             if (code_result.valid())
             {
-                std::cout<<"code ran fine\n";
-
                 kernel_res["status"] = "ok";
                 kernel_res["user_expressions"] = nl::json::object();
             }
             else
             {
-                std::cout<<"code had an error\n";
+
                 sol::error err = code_result;
                 const auto error_str = err.what();
-
                 if (!silent)
-                {
-                    std::cout<<"publish error "<<error_str<<"\n";
+                {   
                     publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
                 }
 
