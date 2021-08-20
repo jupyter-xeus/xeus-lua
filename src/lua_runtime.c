@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -55,7 +56,7 @@ const char * reserved_words[] = {
 
 
 int is_identifier(char c) {
-  return isalpha(c) || isnumber(c) || c == '_';
+  return isalpha(c) || std::isdigit(c) || c == '_';
 }
 
 
@@ -156,7 +157,7 @@ int complete(lua_State * L, const char * code, int cursor_pos, PyObject * py_mat
   int cursor_start = i+1;
 
   // don't try to match numbers
-  if (isnumber(code[cursor_start])) { return 0; }
+  if (std::isdigit(code[cursor_start])) { return 0; }
 
   int match_count = 0;
   if (dot_loc > 0) {

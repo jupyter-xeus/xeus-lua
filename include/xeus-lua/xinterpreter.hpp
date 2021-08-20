@@ -26,6 +26,7 @@
 
 #include "sol/sol.hpp"
 
+//#include "xeus/xems_interpreter.hpp"
 
 namespace nl = nlohmann;
 
@@ -66,6 +67,7 @@ namespace xlua
         void redirect_output();
     private:
         sol::state lua;
+        lua_State * L;
     };
 }
 
