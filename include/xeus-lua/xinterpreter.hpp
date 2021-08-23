@@ -8,8 +8,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XPYT_INTERPRETER_HPP
-#define XPYT_INTERPRETER_HPP
+#ifndef XLUA_INTERPRETER_HPP
+#define XLUA_INTERPRETER_HPP
 
 #ifdef __GNUC__
     #pragma GCC diagnostic push
@@ -24,7 +24,8 @@
 #include "xeus_lua_config.hpp"
 #include "xeus/xinterpreter.hpp"
 
-#include "sol/sol.hpp"
+#include "xeus-lua/sol/sol.hpp"
+
 
 //#include "xeus/xems_interpreter.hpp"
 
@@ -66,8 +67,20 @@ namespace xlua
 
         void redirect_output();
     private:
+
+        void monkeypatch_io();
+        void set_package_path();
+        void set_payload_functions();
+
+        int complete(const char * code, int cursor_pos, nl::json & matches);
+        int get_path(const char * path, int path_length);
+        int table_matches(int table_index, const char * identifier, int identifier_length, nl::json & matches);
+        int get_metaindex();
+
         sol::state lua;
         lua_State * L;
+
+        nl::json m_collected_payload;
     };
 }
 

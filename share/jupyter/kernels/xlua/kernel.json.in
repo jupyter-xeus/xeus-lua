@@ -1,10 +1,13 @@
 {
-  "display_name": "Python @PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@ (XPython)",
+  "display_name": "Lua @LUA_VERSION_MAJOR@.@LUA_VERSION_MINOR@ (XLua)",
   "argv": [
-      "@XPYTHON_KERNELSPEC_PATH@xpython",
+      "@XLUA_KERNELSPEC_PATH@xlua",
       "-f",
       "{connection_file}"
   ],
-  "language": "python",
-  "metadata": { "debugger": true }
+  "language": "lua",
+  "metadata": { 
+    "debugger": false,
+    "lua_extra_package_path": "@XLUA_LUA_EXTRA_PACKAGE_PATH@"
+  }
 }

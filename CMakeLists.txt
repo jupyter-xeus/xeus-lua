@@ -37,6 +37,9 @@ if (NOT DEFINED XLUA_KERNELSPEC_PATH)
     set(XLUA_KERNELSPEC_PATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/")
 endif ()
 
+if (NOT DEFINED XLUA_LUA_EXTRA_PACKAGE_PATH)
+    set(XLUA_LUA_EXTRA_PACKAGE_PATH "${CMAKE_INSTALL_PREFIX}/share/jupyter/kernels/xlua/lua_packages")
+endif ()
 
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json.in"
@@ -155,6 +158,15 @@ if(EMSCRIPTEN)
     # async
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s ASYNCIFY=1 -s 'ASYNCIFY_IMPORTS=[\"async_get_input_function\"]'")
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s 'ASYNCIFY_STACK_SIZE=20480'")
+
+    # ENV (https://github.com/emscripten-core/emscripten/commit/6d9681ad04f60b41ef6345ab06c29bbc9eeb84e0)
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s \"EXTRA_EXPORTED_RUNTIME_METHODS=[ENV']\"")
+
+    # filesystem
+    file(COPY asset_dir DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} --embed-file asset_dir")
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EMSCRIPTEN_FEATURES}")
     set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}  ${EMSCRIPTEN_FEATURES} ")
 endif()
@@ -269,6 +281,8 @@ macro(xlua_create_target target_name linkage output_name)
 
     target_compile_definitions(${target_name} PUBLIC "XEUS_LUA_EXPORTS")
 
+    target_compile_features(${target_name} PRIVATE cxx_std_17)
+
     target_include_directories(${target_name}
                                PUBLIC
                                ${LUA_INCLUDE_DIR}
@@ -322,19 +336,19 @@ endif ()
 if (XLUA_BUILD_XLUA_EXECUTABLE)
     add_executable(xlua ${XLUA_SRC})
     target_link_libraries(xlua PRIVATE ${LUA_LIBRARIES})
-
+    target_compile_features(xlua PRIVATE cxx_std_17)
     xlua_set_common_options(xlua)
     xlua_set_kernel_options(xlua)
 endif()
+
+
+
 
 if(EMSCRIPTEN)
     message(STATUS ${LUA_LIBRARIES})
     add_executable(xeus_lua src/main_emscripten.cpp )
     target_link_libraries(xeus_lua  xeus-lua-static ${LUA_LIBRARY} )
-    target_compile_features(xeus-lua-static PRIVATE cxx_std_17)
     target_compile_features(xeus_lua PRIVATE cxx_std_17)
-
-
 endif()
 
 
@@ -383,6 +397,13 @@ if (XLUA_BUILD_XLUA_EXECUTABLE)
     set(XLUA_KERNELSPEC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels)
     install(DIRECTORY ${XLUA_KERNELSPEC_DIR}
             DESTINATION ${XJUPYTER_DATA_DIR}
+            PATTERN "*.in" EXCLUDE)
+
+
+    # lua packages (json and ilua)
+    set(XLUA_PACKAGES_DIR "asset_dir/lua_packages"    CACHE STRING "Jupyter data directory")
+    install(DIRECTORY ${XLUA_PACKAGES_DIR}
+            DESTINATION ${XJUPYTER_DATA_DIR}/kernels/xlua
             PATTERN "*.in" EXCLUDE)
 
     # Extra path for installing Jupyter kernelspec

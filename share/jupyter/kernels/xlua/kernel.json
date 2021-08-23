@@ -1,10 +1,13 @@
 {
-  "display_name": "Python . (XPython)",
+  "display_name": "Lua . (XLua)",
   "argv": [
-      "xpython",
+      "/home/derthorsten/miniconda3/envs/jupyterlite-dev//bin/xlua",
       "-f",
       "{connection_file}"
   ],
-  "language": "python",
-  "metadata": { "debugger": true }
+  "language": "lua",
+  "metadata": { 
+    "debugger": false,
+    "lua_extra_package_path": "/home/derthorsten/miniconda3/envs/jupyterlite-dev//share/jupyter/kernels/xlua/lua_packages"
+  }
 }
