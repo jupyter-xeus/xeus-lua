@@ -1,5 +1,5 @@
 {
-  "display_name": "Lua . (XLua)",
+  "display_name": "Lua 0.12 (XLua)",
   "argv": [
       "/home/derthorsten/miniconda3/envs/jupyterlite-dev//bin/xlua",
       "-f",

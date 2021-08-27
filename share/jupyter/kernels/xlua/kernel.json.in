@@ -1,5 +1,5 @@
 {
-  "display_name": "Lua @LUA_VERSION_MAJOR@.@LUA_VERSION_MINOR@ (XLua)",
+  "display_name": "Lua @XLUA_VERSION_MAJOR@.@XLUA_VERSION_MINOR@ (XLua)",
   "argv": [
       "@XLUA_KERNELSPEC_PATH@xlua",
       "-f",

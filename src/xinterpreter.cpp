@@ -8,6 +8,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+// https://github.com/pakozm/IPyLua/blob/master/IPyLua/rlcompleter.lua
+
 
 // a lot is copied from https://raw.githubusercontent.com/tomstitt/lupyter/main/lupyter/lua_runtime/lua_runtime.c
 
@@ -47,6 +49,10 @@ extern "C" {
 #include <lualib.h>
 
 }
+
+#ifdef XLUA_WITH_XWIDGETS
+#include "xwidgets.hpp"
+#endif
 
 
 #ifdef __EMSCRIPTEN__
@@ -97,7 +103,6 @@ namespace xlua
     auto string_func( sol::variadic_args va, bool spaces, bool new_line) {
         std::stringstream ss;
         for (auto v : va) {
-            auto s = spaces? std::string(" ") : std::string();
             switch(v.get_type())
             {
                 case sol::type::none:
@@ -179,7 +184,7 @@ namespace xlua
         this->set_package_path();
 
         // payload
-        this->set_payload_functions();
+        this->set_special_functions();
     }
 
     // TODO: this misses tables with __index metafields and indexes using []
@@ -314,22 +319,82 @@ namespace xlua
       return 1;
     }
 
-    void interpreter::set_payload_functions()
+    void interpreter::set_special_functions()
     {
-        lua.set_function("set_json_payload", [this](const std::string & payload_str){
 
-            nl::json j;
+        lua.set_function("_display_data", [this](
+            const std::string & data_str,
+            const std::string & metadata_str,
+            const std::string & transient_str
+        ){
             try
             {
-                j = nl::json::parse(payload_str);
-                this->m_collected_payload.push_back(j);
+                const auto data = nl::json::parse(data_str);
+                const auto metadata = nl::json::parse(data_str);
+                const auto transient = nl::json::parse(data_str);
+                std::cout<<"display data\n";
+                this->display_data(data, metadata, transient);
+                std::cout<<"display data done\n";
             }
             catch (nl::json::parse_error& ex)
             {
                 publish_execution_error("json::parse_error",ex.what(),std::vector<std::string>());
             }
-
         });
+
+
+        lua.set_function("_update_display_data", [this](
+            const std::string & data_str,
+            const std::string & metadata_str,
+            const std::string & transient_str
+        ){
+            try
+            {
+                const auto data = nl::json::parse(data_str);
+                const auto metadata = nl::json::parse(data_str);
+                const auto transient = nl::json::parse(data_str);
+                std::cout<<"update display data\n";
+                this->update_display_data(data, metadata, transient);
+                std::cout<<"update display data done\n";
+            }
+            catch (nl::json::parse_error& ex)
+            {
+                publish_execution_error("json::parse_error",ex.what(),std::vector<std::string>());
+            }
+        });
+
+
+        // lua.set_function("_fetch", [this](
+        //     const std::string & url,
+        //     const std::string & filename
+        // ){
+            
+
+
+        //     emscripten_fetch_attr_t attr;
+        //     emscripten_fetch_attr_init(&attr);
+        //     strcpy(attr.requestMethod, "GET");
+        //     attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY | EMSCRIPTEN_FETCH_SYNCHRONOUS;
+        //     emscripten_fetch_t *fetch = emscripten_fetch(&attr, "file.dat"); // Blocks here until the operation is complete.
+        //     if (fetch->status == 200) {
+        //     printf("Finished downloading %llu bytes from URL %s.\n", fetch->numBytes, fetch->url);
+        //     // The data is now available at fetch->data[0] through fetch->data[fetch->numBytes-1];
+        //     } else {
+        //     printf("Downloading %s failed, HTTP failure status code: %d.\n", fetch->url, fetch->status);
+        //     }
+        //     emscripten_fetch_close(fetch);
+            
+        // });
+
+        #ifdef XLUA_WITH_XWIDGETS
+
+        register_xwidgets(lua);
+
+        using xwidgtes_type = xw::slider<double>;
+        const std::string widget_name = "xslider";
+        
+            
+        #endif        
     }
 
     void interpreter::monkeypatch_io()
@@ -423,21 +488,17 @@ namespace xlua
     {
 
 
-        // reset collected payload
-        m_collected_payload = nl::json::array();
+        // reset  payload
         nl::json kernel_res;
 
 
-        //kernel_res["payload"] = nl::json::object();
+        kernel_res["payload"] = nl::json::object();
         kernel_res["status"] = "ok";
 
        
         // check if printing the code would yield an error
         std::stringstream test_code;
         test_code<<"print("<<code<<")";
-
-        std::cout<<"SIZE PRE "<<m_collected_payload.size()<<"\n";
-
         auto test_code_result = lua.script(test_code.str());
         
 
@@ -467,8 +528,6 @@ namespace xlua
                 kernel_res["traceback"] = error_str;
             }
         }
-        std::cout<<"SIZE POST "<<m_collected_payload.size()<<"\n";
-        kernel_res["payload"] = m_collected_payload;
 
         return kernel_res;
     }

@@ -57,6 +57,9 @@ option(XLUA_BUILD_STATIC "Build xeus-lua static library" ON)
 OPTION(XLUA_BUILD_SHARED "Split xlua build into executable and library" ON)
 OPTION(XLUA_BUILD_XLUA_EXECUTABLE "Build the xlua executable" ON)
 
+option(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
+OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (instead of the static library)" ON)
+
 OPTION(XLUA_USE_SHARED_XEUS "Link xlua  with the xeus shared library (instead of the static library)" ON)
 OPTION(XLUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (instead of the static library)" ON)
 
@@ -85,8 +88,18 @@ endif()
 
 set(xtl_REQUIRED_VERSION 0.6.23)
 set(xeus_REQUIRED_VERSION 0.25.0)
+set(xwidgets_REQUIRED_VERSION 0.25.0)
+set(xproperty_REQUIRED_VERSION 0.11.0)
+
 set(Lua_REQUIRED_VERSION 5.3.4)
 
+if(XLUA_WITH_XWIDGETS)
+    if (NOT TARGET xwidgets)
+        find_package(xwidgets ${xwidgets_REQUIRED_VERSION} REQUIRED)
+        find_package(xproperty ${xproperty_REQUIRED_VERSION} REQUIRED)
+
+    endif ()
+endif()
 if (NOT TARGET xtl)
     find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
 endif ()
@@ -129,7 +142,9 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     endif ()
 endif ()
 
-
+if(XLUA_WITH_XWIDGETS)
+    add_compile_definitions(XLUA_WITH_XWIDGETS)
+endif()
 
 if(EMSCRIPTEN)
 
@@ -150,8 +165,13 @@ if(EMSCRIPTEN)
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s EXIT_RUNTIME=1")
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s WASM=1")
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s ERROR_ON_UNDEFINED_SYMBOLS=1")
+
     # threads
-    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s USE_PTHREADS=1")
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s USE_PTHREADS=1 -pthread  -mbulk-memory  -matomics")
+
+    # fetch related
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES}")
+
     # exceptions    
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s DISABLE_EXCEPTION_CATCHING=0 ")
 
@@ -168,7 +188,7 @@ if(EMSCRIPTEN)
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} --embed-file asset_dir")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EMSCRIPTEN_FEATURES}")
-    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}  ${EMSCRIPTEN_FEATURES} ")
+    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}  ${EMSCRIPTEN_FEATURES} ---proxy-to-worker")
 endif()
 
 # Source files
@@ -200,7 +220,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib; ${CMAKE_INSTALL_PREFIX}/${
 
 macro(xlua_set_common_options target_name)
     if (MSVC)
-        target_compile_options(${target_name} PUBLIC /wd4251 /wd4141)
+        target_compilex_options(${target_name} PUBLIC /wd4251 /wd4141)
         target_compile_options(${target_name} PUBLIC /wd4018 /wd4267 /wd4715 /wd4146 /wd4129)
     endif ()
 
@@ -296,7 +316,19 @@ macro(xlua_create_target target_name linkage output_name)
         set(XLUA_XEUS_TARGET xeus-static)
     endif ()
 
-    target_link_libraries(${target_name} PUBLIC ${XLUA_XEUS_TARGET} xtl )
+    if(XLUA_WITH_XWIDGETS)
+        if (XLUA_USE_SHARED_XWIDGETS)
+            set(XLUA_XWIDGETS_TARGET xwidgets)
+        else ()
+            set(XLUA_XWIDGETS_TARGET xwidgets-static)
+        endif ()
+        set(XLUA_XPROPERTY_TARGET xproperty)
+    else()
+        set(XLUA_XPROPERTY_TARGET "")
+        set(XLUA_XWIDGETS_TARGET "")
+    endif()
+
+    target_link_libraries(${target_name} PUBLIC ${XLUA_XEUS_TARGET} ${XLUA_XWIDGETS_TARGET} xproperty)
     if (WIN32 OR CYGWIN)
         # 
     elseif (APPLE)
@@ -346,9 +378,14 @@ endif()
 
 if(EMSCRIPTEN)
     message(STATUS ${LUA_LIBRARIES})
+
     add_executable(xeus_lua src/main_emscripten.cpp )
     target_link_libraries(xeus_lua  xeus-lua-static ${LUA_LIBRARY} )
     target_compile_features(xeus_lua PRIVATE cxx_std_17)
+
+    add_executable(xeus_lua_kernel src/main_emscripten_kernel.cpp )
+    target_link_libraries(xeus_lua_kernel  xeus-lua-static ${LUA_LIBRARY} )
+    target_compile_features(xeus_lua_kernel PRIVATE cxx_std_17)
 endif()
 
 

@@ -70,7 +70,7 @@ namespace xlua
 
         void monkeypatch_io();
         void set_package_path();
-        void set_payload_functions();
+        void set_special_functions();
 
         int complete(const char * code, int cursor_pos, nl::json & matches);
         int get_path(const char * path, int path_length);
@@ -79,8 +79,6 @@ namespace xlua
 
         sol::state lua;
         lua_State * L;
-
-        nl::json m_collected_payload;
     };
 }
 
