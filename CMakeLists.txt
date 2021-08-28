@@ -203,10 +203,15 @@ set(XEUS_LUA_HEADERS
     include/xeus-lua/xinterpreter.hpp
 )
 
-set(XLUA_SRC
-    src/main.cpp
+
+set(XLUA_COMMON_SRC
+    src/xwidgets.cpp
 )
 
+set(XLUA_SRC
+    src/main.cpp
+     ${XLUA_COMMON_SRC}
+)
 
 
 # Targets and link - Macros
@@ -379,11 +384,11 @@ endif()
 if(EMSCRIPTEN)
     message(STATUS ${LUA_LIBRARIES})
 
-    add_executable(xeus_lua src/main_emscripten.cpp )
+    add_executable(xeus_lua src/main_emscripten.cpp ${XLUA_COMMON_SRC})
     target_link_libraries(xeus_lua  xeus-lua-static ${LUA_LIBRARY} )
     target_compile_features(xeus_lua PRIVATE cxx_std_17)
 
-    add_executable(xeus_lua_kernel src/main_emscripten_kernel.cpp )
+    add_executable(xeus_lua_kernel src/main_emscripten_kernel.cpp  ${XLUA_COMMON_SRC})
     target_link_libraries(xeus_lua_kernel  xeus-lua-static ${LUA_LIBRARY} )
     target_compile_features(xeus_lua_kernel PRIVATE cxx_std_17)
 endif()

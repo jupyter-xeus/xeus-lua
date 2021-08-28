@@ -330,8 +330,8 @@ namespace xlua
             try
             {
                 const auto data = nl::json::parse(data_str);
-                const auto metadata = nl::json::parse(data_str);
-                const auto transient = nl::json::parse(data_str);
+                const auto metadata = nl::json::parse(metadata_str);
+                const auto transient = nl::json::parse(transient_str);
                 std::cout<<"display data\n";
                 this->display_data(data, metadata, transient);
                 std::cout<<"display data done\n";
@@ -351,8 +351,8 @@ namespace xlua
             try
             {
                 const auto data = nl::json::parse(data_str);
-                const auto metadata = nl::json::parse(data_str);
-                const auto transient = nl::json::parse(data_str);
+                const auto metadata = nl::json::parse(metadata_str);
+                const auto transient = nl::json::parse(transient_str);
                 std::cout<<"update display data\n";
                 this->update_display_data(data, metadata, transient);
                 std::cout<<"update display data done\n";
@@ -387,13 +387,7 @@ namespace xlua
         // });
 
         #ifdef XLUA_WITH_XWIDGETS
-
-        register_xwidgets(lua);
-
-        using xwidgtes_type = xw::slider<double>;
-        const std::string widget_name = "xslider";
-        
-            
+        register_xwidgets(lua);            
         #endif        
     }
 
@@ -412,7 +406,7 @@ namespace xlua
 
         lua.set_function("print", print_func);
         lua.set_function("__io_write_custom", write_func);
-        lua.set_function("__io_flush_custom", [](sol::variadic_args va){});
+        lua.set_function("__io_flush_custom", [](sol::variadic_args ){});
         lua.set_function("__io_read_custom", 
             [this]( ) {
                 #ifdef __EMSCRIPTEN__
