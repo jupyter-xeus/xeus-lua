@@ -1,6 +1,9 @@
 #ifndef XLUA_XWIDGETS_HPP
 #define XLUA_XWIDGETS_HPP
 
+#include <vector>
+#include <string>
+
 #include "xeus-lua/sol/sol.hpp"
 #include "xeus/xinterpreter.hpp"
 #include "xeus/xguid.hpp"
@@ -13,15 +16,19 @@
 #include "xwidgets/xaccordion.hpp"
 #include "xwidgets/xaudio.hpp"
 #include "xwidgets/xcheckbox.hpp"
-
-
-
 #include "xwidgets/xcolor_picker.hpp"
 #include "xwidgets/xcontroller.hpp"
 #include "xwidgets/xdropdown.hpp"
 #include "xwidgets/xhtml.hpp"
+#include "xwidgets/ximage.hpp"
+#include "xwidgets/xlabel.hpp"
+#include "xwidgets/xhtml.hpp"
+#include "xwidgets/xnumeral.hpp"
 
-
+#include "xwidgets/xpassword.hpp"
+#include "xwidgets/xplay.hpp"
+#include "xwidgets/xradiobuttons.hpp"
+#include "xwidgets/xselectionslider.hpp"
 
 #include "xwidgets/xoutput.hpp"
 
@@ -32,6 +39,9 @@ namespace sol {
 
         template <>
         struct is_container<xeus::xguid> : std::false_type {};
+
+        template <>
+        struct is_container<std::vector<xw::xholder> > : std::false_type {};
 
 }
 
@@ -44,10 +54,66 @@ namespace xlua
         [](xwidgtes_type & widget){\
             return PROPERTY_TYPE(widget.PROPERTY_NAME);\
         }, \
-        [](xwidgtes_type & widget, const PROPERTY_TYPE val){\
+        [](xwidgtes_type & widget, const PROPERTY_TYPE & val){\
             widget.PROPERTY_NAME = val;\
         })\
     )
+
+#define XLUA_ADD_INDEX_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
+    CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
+        [](xwidgtes_type & widget){\
+            return PROPERTY_TYPE(widget.PROPERTY_NAME) + 1;\
+        }, \
+        [](xwidgtes_type & widget, const PROPERTY_TYPE & val){\
+            widget.PROPERTY_NAME = val -1;\
+        })\
+    )
+
+
+#define XLUA_ADD_CONTAINER_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
+    CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
+        [](xwidgtes_type & widget){\
+            return PROPERTY_TYPE(widget.PROPERTY_NAME);\
+        }, \
+        [](xwidgtes_type & widget, sol::as_table_t<PROPERTY_TYPE> val){\
+            widget.PROPERTY_NAME = val;\
+        })\
+    )
+
+
+
+
+#define XLUA_REGISTER_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
+    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){ \
+        auto callback = [function](const auto& s) { \
+            auto res = function.call(PROPERTY_TYPE(s.PROPERTY_NAME)); \
+            if (!res.valid()) \
+            { \
+                auto & interpreter =  xeus::get_interpreter(); \
+                sol::error err = res; \
+                const auto error_str = err.what(); \
+                interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str)); \
+            } \
+        }; \
+        XOBSERVE(widget, value, callback); \
+    }; 
+
+#define XLUA_REGISTER_INDEX_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
+    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){ \
+        auto callback = [function](const auto& s) { \
+            auto res = function.call(PROPERTY_TYPE(s.PROPERTY_NAME)+1); \
+            if (!res.valid()) \
+            { \
+                auto & interpreter =  xeus::get_interpreter(); \
+                sol::error err = res; \
+                const auto error_str = err.what(); \
+                interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str)); \
+            } \
+        }; \
+        XOBSERVE(widget, value, callback); \
+    }; 
+
+
 
 template<class xwidgtes_type, class extend_f>
 void register_widget_impl(sol::state & lua, const std::string widget_name, extend_f && extend)
@@ -103,6 +169,14 @@ void register_widget_related_types(sol::state & lua)
             sol::constructors<binded_type()>()
         );
     }
+    // string vector
+    {
+        using binded_type = std::vector<std::string>;
+        std::string name = vector_cls_name("string");
+        sol::usertype<binded_type> xwidgtes_lua_type = lua.new_usertype<binded_type>(name,
+            sol::constructors<binded_type()>()
+        );
+    }
 
 }
 
@@ -153,19 +227,8 @@ void register_xwidgets(sol::state & lua)
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, continuous_update);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
 
-            xwidgtes_lua_type["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){
-                auto callback = [function](const auto& s) {
-                    auto res = function.call(double(s.value));
-                    if (!res.valid())
-                    {
-                        auto & interpreter =  xeus::get_interpreter();
-                        sol::error err = res;
-                        const auto error_str = err.what();
-                        interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
-                    }
-                };
-                XOBSERVE(widget, value, callback);
-            };
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
+
         });
     }
 
@@ -236,7 +299,6 @@ void register_xwidgets(sol::state & lua)
         using xwidgtes_type =  xw::audio;
         register_widget_impl<xwidgtes_type>(lua, "xaudio",[](auto && xwidgtes_lua_type){
 
-
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, autoplay);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, loop);
@@ -252,19 +314,7 @@ void register_xwidgets(sol::state & lua)
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, indent);
 
-            xwidgtes_lua_type["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){
-                auto callback = [function](const auto& s) {
-                    auto res = function.call(bool(s.value));
-                    if (!res.valid())
-                    {
-                        auto & interpreter =  xeus::get_interpreter();
-                        sol::error err = res;
-                        const auto error_str = err.what();
-                        interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
-                    }
-                };
-                XOBSERVE(widget, value, callback);
-            };
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, bool, value);
 
         });
     }
@@ -277,20 +327,108 @@ void register_xwidgets(sol::state & lua)
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, concise);
 
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, std::string, value);
 
-            xwidgtes_lua_type["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){
-                auto callback = [function](const auto& s) {
-                    auto res = function.call(std::string(s.value));
-                    if (!res.valid())
-                    {
-                        auto & interpreter =  xeus::get_interpreter();
-                        sol::error err = res;
-                        const auto error_str = err.what();
-                        interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
-                    }
-                };
-                XOBSERVE(widget, value, callback);
-            };
+        });
+    }
+    {
+        using xwidgtes_type =  xw::controller;
+        register_widget_impl<xwidgtes_type>(lua, "xcontroller",[](auto && xwidgtes_lua_type){
+       
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, int, index);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, name);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, mapping);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, connected);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, timestamp);
+            //XLUA_ADD_PROPERTY(xwidgtes_lua_type, xcontroller_button_list_type, buttons);
+            //XLUA_ADD_PROPERTY(xwidgtes_lua_type, xcontroller_axis_list_type, axes);
+
+        });
+    }
+    {
+        using xwidgtes_type =  xw::dropdown;
+        register_widget_impl<xwidgtes_type>(lua, "xdropdown",[](auto && xwidgtes_lua_type){
+       
+            using options_type = typename xwidgtes_type::options_type;
+            using value_type = typename xwidgtes_type::value_type;
+            using index_type = typename xwidgtes_type::index_type;
+
+            XLUA_ADD_INDEX_PROPERTY(xwidgtes_lua_type, index_type, index);
+            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, options_type, _options_labels);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, description);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, value_type, value);
+
+            XLUA_REGISTER_INDEX_OBSERVER(xwidgtes_lua_type, int, index);
+        });
+    }
+    {
+        using xwidgtes_type =  xw::html;
+        register_widget_impl<xwidgtes_type>(lua, "xhtml",[](auto && xwidgtes_lua_type){
+       
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, description);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, placeholder);
+
+            //XLUA_REGISTER_INDEX_OBSERVER(xwidgtes_lua_type, int, index);
+        });
+    }
+    {
+        using xwidgtes_type =  xw::image;
+        register_widget_impl<xwidgtes_type>(lua, "ximage",[](auto && xwidgtes_lua_type){
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, format);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, width);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, height);
+
+        });
+    }
+    {
+        using xwidgtes_type =  xw::numeral<double>;
+        register_widget_impl<xwidgtes_type>(lua, "xnumeral",[](auto && xwidgtes_lua_type){
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, min);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, max);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, step);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, continuous_update);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
+
+        });
+    }
+    {
+        using xwidgtes_type =  xw::password;
+        register_widget_impl<xwidgtes_type>(lua, "xpassword",[](auto && xwidgtes_lua_type){
+       
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, description);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, placeholder);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+            
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, std::string, value);
+        });
+    }
+    {
+        using xwidgtes_type =  xw::play;
+        register_widget_impl<xwidgtes_type>(lua, "xplay",[](auto && xwidgtes_lua_type){
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, min);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, max);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, value);
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, interval);
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, step);
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, _playing);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, _repeat);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, show_repeat);
+
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
 
         });
     }
@@ -298,5 +436,6 @@ void register_xwidgets(sol::state & lua)
 
 }
 
+#undef XLUA_REGISTER_OBSERVER
 #undef XLUA_ADD_PROPERTY
 #endif
