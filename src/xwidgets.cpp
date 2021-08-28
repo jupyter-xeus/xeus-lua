@@ -24,11 +24,12 @@
 #include "xwidgets/xlabel.hpp"
 #include "xwidgets/xhtml.hpp"
 #include "xwidgets/xnumeral.hpp"
-
 #include "xwidgets/xpassword.hpp"
 #include "xwidgets/xplay.hpp"
+#include "xwidgets/xprogress.hpp"
 #include "xwidgets/xradiobuttons.hpp"
 #include "xwidgets/xselectionslider.hpp"
+#include "xwidgets/xtab.hpp"
 
 #include "xwidgets/xoutput.hpp"
 
@@ -110,7 +111,22 @@ namespace xlua
                 interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str)); \
             } \
         }; \
-        XOBSERVE(widget, value, callback); \
+        XOBSERVE(widget, PROPERTY_NAME, callback); \
+    }; 
+
+#define XLUA_REGISTER_OPTIONAL_INDEX_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
+    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){ \
+        auto callback = [function](const auto& s) { \
+            auto res = function.call(xtl::xoptional<int>(s.PROPERTY_NAME).value()+1); \
+            if (!res.valid()) \
+            { \
+                auto & interpreter =  xeus::get_interpreter(); \
+                sol::error err = res; \
+                const auto error_str = err.what(); \
+                interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str)); \
+            } \
+        }; \
+        XOBSERVE(widget, PROPERTY_NAME, callback); \
     }; 
 
 
@@ -432,6 +448,57 @@ void register_xwidgets(sol::state & lua)
 
         });
     }
+    {
+        using xwidgtes_type =  xw::progress<double>;
+        register_widget_impl<xwidgtes_type>(lua, "xprogress",[](auto && xwidgtes_lua_type){
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, min);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, max);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, orientation);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, bar_style);
+
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
+
+        });
+    }
+    {
+        using xwidgtes_type =  xw::selectionslider;
+        register_widget_impl<xwidgtes_type>(lua, "xselectionslider",[](auto && xwidgtes_lua_type){
+       
+            using options_type = typename xwidgtes_type::options_type;
+            using value_type = typename xwidgtes_type::value_type;
+            using index_type = typename xwidgtes_type::index_type;
+
+            XLUA_ADD_INDEX_PROPERTY(xwidgtes_lua_type, index_type, index);
+            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, options_type, _options_labels);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, description);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, value_type, value);
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, orientation);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, readout);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, continuous_update);
+
+            XLUA_REGISTER_INDEX_OBSERVER(xwidgtes_lua_type, int, index);
+        });
+    }
+    {
+        using xwidgtes_type =  xw::tab;
+        register_widget_impl<xwidgtes_type>(lua, "xtab",[](auto && xwidgtes_lua_type){
+
+            using titles_type = typename xwidgtes_type::titles_type;
+            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, titles_type, _titles);
+
+            xwidgtes_lua_type["add"] = [](xwidgtes_type & widget, xeus::xguid id){
+                widget.add(id);
+            };
+
+            XLUA_REGISTER_OPTIONAL_INDEX_OBSERVER(xwidgtes_lua_type, int, selected_index);
+        });
+    }
+
+
 }
 
 }
