@@ -30,11 +30,28 @@
 #include "xwidgets/xradiobuttons.hpp"
 #include "xwidgets/xselectionslider.hpp"
 #include "xwidgets/xtab.hpp"
-
+#include "xwidgets/xtextarea.hpp"
+#include "xwidgets/xtext.hpp"
+#include "xwidgets/xtogglebutton.hpp"
+#include "xwidgets/xtogglebuttons.hpp"
+#include "xwidgets/xvideo.hpp"
+#include "xwidgets/xvalid.hpp"
+#include "xwidgets/xlink.hpp"
 #include "xwidgets/xoutput.hpp"
 
 
 namespace sol {
+
+        template <>
+        struct is_automagical<xw::xholder> : std::false_type {};
+
+
+        // template <>
+        // struct is_container<std::pair<>> : std::false_type {};
+
+        template <>
+        struct is_container<xw::xholder> : std::false_type {};
+
         template <>
         struct is_automagical<xeus::xguid> : std::false_type {};
 
@@ -159,15 +176,14 @@ std::string vector_cls_name(const std::string cls_name)
 
 void register_widget_related_types(sol::state & lua)
 {
-    // xholder
-    {
-        using binded_type = xw::xholder;
-        std::string name = "xholder";
-        sol::usertype<binded_type> xwidgtes_lua_type = lua.new_usertype<binded_type>(name,
-            sol::constructors<binded_type()>()
-        );
-    }
-
+    // // xholder
+    // {
+    //     using binded_type = xw::xholder;
+    //     std::string name = "xholder";
+    //     sol::usertype<binded_type> xwidgtes_lua_type = lua.new_usertype<binded_type>(name,
+    //         sol::constructors<binded_type()>()
+    //     );
+    // }
     // xguid
     {
         using binded_type = xeus::xguid;
@@ -306,7 +322,7 @@ void register_xwidgets(sol::state & lua)
             };
 
             xwidgtes_lua_type["set_title"] = [](xwidgtes_type & widget, std::size_t i, std::string title){
-                widget.set_title(i, title);
+                widget.set_title(i-1, title);
             };
 
         });
@@ -497,7 +513,154 @@ void register_xwidgets(sol::state & lua)
             XLUA_REGISTER_OPTIONAL_INDEX_OBSERVER(xwidgtes_lua_type, int, selected_index);
         });
     }
+    {
+        using xwidgtes_type =  xw::text;
+        register_widget_impl<xwidgtes_type>(lua, "xtext",[](auto && xwidgtes_lua_type){
 
+            using submit_callback_type = typename xwidgtes_type::submit_callback_type;
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, description);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, placeholder);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, continuous_update);
+
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, std::string, value);
+
+            xwidgtes_lua_type["on_submit"] = [](xwidgtes_type & widget, sol::unsafe_function function){
+                auto callback = [function]() {
+                    auto res = function.call();
+                    if (!res.valid())
+                    {
+                        auto & interpreter =  xeus::get_interpreter();
+                        sol::error err = res;
+                        const auto error_str = err.what();
+                        interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
+                    }
+                };
+                widget.on_submit(submit_callback_type(callback));
+            };
+
+        });
+    }
+    {
+        using xwidgtes_type =  xw::textarea;
+        register_widget_impl<xwidgtes_type>(lua, "xtextarea",[](auto && xwidgtes_lua_type){
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, description);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, placeholder);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, continuous_update);
+
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, std::string, value);
+
+        });
+    }
+
+    {
+        using xwidgtes_type =  xw::togglebutton;
+        register_widget_impl<xwidgtes_type>(lua, "xtogglebutton",[](auto && xwidgtes_lua_type){
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, tooltip);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, icon);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, button_style);
+
+
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, bool, value);
+
+        });
+    }
+    {
+        using xwidgtes_type =  xw::togglebuttons;
+        register_widget_impl<xwidgtes_type>(lua, "xtogglebuttons",[](auto && xwidgtes_lua_type){
+
+       
+            using options_type = typename xwidgtes_type::options_type;
+            using value_type = typename xwidgtes_type::value_type;
+            using index_type = typename xwidgtes_type::index_type;
+
+            XLUA_ADD_INDEX_PROPERTY(xwidgtes_lua_type, index_type, index);
+            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, options_type, _options_labels);
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, description);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+
+            // XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, std::vector<std::string>, tooltips);
+            // XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, std::vector<std::string>, icons);
+            // XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, button_style);
+
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, std::string, value);
+
+        });
+    }
+    {
+        using xwidgtes_type =  xw::video;
+        register_widget_impl<xwidgtes_type>(lua, "xvideo",[](auto && xwidgtes_lua_type){
+
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, format);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, width);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, height);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, autoplay);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, loop);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, controls);
+
+        });
+    }
+    {
+        using xwidgtes_type =  xw::valid;
+        register_widget_impl<xwidgtes_type>(lua, "xvalid",[](auto && xwidgtes_lua_type){
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string,  readout);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, value);
+            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, bool, value);
+        });
+    }
+    {
+        using xwidgtes_type =  xw::link;
+        sol::usertype<xwidgtes_type> xwidgtes_lua_type = lua.new_usertype<xwidgtes_type>(
+            "xlink",
+            sol::factories([](
+                const xeus::xguid id_source,
+                std::string n_source,
+                const xeus::xguid id_target,
+                std::string n_target
+            ){
+                return xwidgtes_type(
+                    xw::make_id_holder(id_source),
+                    n_source,
+                    xw::make_id_holder(id_target),
+                    n_target
+                );
+            })
+        );
+        // typical member function that returns a variable
+        xwidgtes_lua_type["display"] = &xwidgtes_type::display;
+        xwidgtes_lua_type["id"] = &xwidgtes_type::id;
+    }
+    {
+        using xwidgtes_type =  xw::directional_link;
+        sol::usertype<xwidgtes_type> xwidgtes_lua_type = lua.new_usertype<xwidgtes_type>(
+            "xdirectional_link",
+            sol::factories([](
+                const xeus::xguid id_source,
+                std::string n_source,
+                const xeus::xguid id_target,
+                std::string n_target
+            ){
+                return xwidgtes_type(
+                    xw::make_id_holder(id_source),
+                    n_source,
+                    xw::make_id_holder(id_target),
+                    n_target
+                );
+            })
+        );
+        // typical member function that returns a variable
+        xwidgtes_lua_type["display"] = &xwidgtes_type::display;
+        xwidgtes_lua_type["id"] = &xwidgtes_type::id;
+    }
 
 }
 
