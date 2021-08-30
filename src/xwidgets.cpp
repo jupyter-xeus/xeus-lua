@@ -213,10 +213,8 @@ void register_widget_related_types(sol::state & lua)
 }
 
 
-void register_xwidgets(sol::state & lua)
+void register_xwidgets_impl(sol::state & lua)
 {
-    register_widget_related_types(lua);
-
     {
         using xwidgtes_type =  xw::button;
         register_widget_impl<xwidgtes_type>(lua, "xbutton",[](auto && xwidgtes_lua_type){
@@ -661,7 +659,70 @@ void register_xwidgets(sol::state & lua)
         xwidgtes_lua_type["display"] = &xwidgtes_type::display;
         xwidgtes_lua_type["id"] = &xwidgtes_type::id;
     }
+}
 
+void extend_xwidgets(sol::state & lua)
+{
+    const std::string extend = R""""(
+
+
+new_ilua = {}
+
+__atomic_widgets = {
+    "xslider",
+    "xbutton",
+    "xaudio",
+    "xcheckbox",
+    "xcolor_picker",
+    "xcontroller",
+    "xdropdown",
+    "xhtml",
+    "ximage",
+    "xlabel",
+    "xhtml",
+    "xnumeral",
+    "xpassword",
+    "xplay",
+    "xprogress",
+    "xradiobuttons",
+    "xselectionslider",
+    "xtextarea",
+    "xtext",
+    "xtogglebutton",
+    "xtogglebuttons",
+    "xvideo",
+    "xvalid",
+    "xoutput"
+}
+
+__link_widgets = {
+    "xlink",
+    "xdirectional_link"
+}
+__layout_widgets = {
+    "xvbox",
+    "xhbox",
+    "xtab",
+    "xaccordion"
+}
+
+
+function xoutput:captured_call(func)
+    self:capture()
+    func()
+    self:release()
+end
+
+    )"""";
+    lua.script(extend);  
+}
+
+
+void register_xwidgets(sol::state & lua)
+{
+    register_widget_related_types(lua);
+    register_xwidgets_impl(lua);
+    extend_xwidgets(lua);
 }
 
 }

@@ -13,4 +13,12 @@ function widgets.slider(options)
     end
     return slider
 end
+
+
+-- function xoutput:captured_call(func)
+--     self:capture()
+--     func()
+--     self:release()
+-- end
+
 return widgets
