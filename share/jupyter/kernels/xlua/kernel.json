@@ -1,12 +1,12 @@
 {
   "display_name": "Lua 0.12 (XLua)",
   "argv": [
-      "/home/derthorsten/miniconda3/envs/jupyterlite-dev//bin/xlua",
-      "-f",
-      "{connection_file}"
+    "/home/derthorsten/miniconda3/envs/jupyterlite-dev//bin/xlua",
+    "-f",
+    "{connection_file}"
   ],
   "language": "lua",
-  "metadata": { 
+  "metadata": {
     "debugger": false,
     "lua_extra_package_path": "/home/derthorsten/miniconda3/envs/jupyterlite-dev//share/jupyter/kernels/xlua/lua_packages"
   }
