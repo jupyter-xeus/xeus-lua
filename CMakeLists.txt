@@ -155,7 +155,7 @@ if(EMSCRIPTEN)
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -Wno-unused-parameter -Wno-deprecated -Wno-unused-command-line-argument")
     #set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -lwebsocket.js")
     # module / import 
-    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s MODULARIZE=1 -s EXPORT_NAME=\"createXeusLuaModule\" -s EXPORT_ES6=0 -s USE_ES6_IMPORT_META=0")
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s MODULARIZE=1 -s EXPORT_NAME=\"createXeusModule\" -s EXPORT_ES6=0 -s USE_ES6_IMPORT_META=0")
     # safty
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES}  -s  DEMANGLE_SUPPORT=1 -s SAFE_HEAP=0  -s ASSERTIONS=2   -s STACK_OVERFLOW_CHECK=1 ")
     # web
@@ -204,9 +204,14 @@ set(XEUS_LUA_HEADERS
 )
 
 
-set(XLUA_COMMON_SRC
-    src/xwidgets.cpp
-)
+set(XLUA_COMMON_SRC "")
+
+if(XLUA_WITH_XWIDGETS)
+    set(XLUA_COMMON_SRC
+        ${XLUA_COMMON_SRC}
+        src/xwidgets.cpp
+    )
+endif()
 
 set(XLUA_SRC
     src/main.cpp
@@ -333,7 +338,7 @@ macro(xlua_create_target target_name linkage output_name)
         set(XLUA_XWIDGETS_TARGET "")
     endif()
 
-    target_link_libraries(${target_name} PUBLIC ${XLUA_XEUS_TARGET} ${XLUA_XWIDGETS_TARGET} xproperty)
+    target_link_libraries(${target_name} PUBLIC ${XLUA_XEUS_TARGET} ${XLUA_XWIDGETS_TARGET} ${XLUA_XPROPERTY_TARGET})
     if (WIN32 OR CYGWIN)
         # 
     elseif (APPLE)

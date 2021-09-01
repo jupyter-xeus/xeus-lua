@@ -332,9 +332,7 @@ namespace xlua
                 const auto data = nl::json::parse(data_str);
                 const auto metadata = nl::json::parse(metadata_str);
                 const auto transient = nl::json::parse(transient_str);
-                std::cout<<"display data\n";
                 this->display_data(data, metadata, transient);
-                std::cout<<"display data done\n";
             }
             catch (nl::json::parse_error& ex)
             {
@@ -353,9 +351,7 @@ namespace xlua
                 const auto data = nl::json::parse(data_str);
                 const auto metadata = nl::json::parse(metadata_str);
                 const auto transient = nl::json::parse(transient_str);
-                std::cout<<"update display data\n";
                 this->update_display_data(data, metadata, transient);
-                std::cout<<"update display data done\n";
             }
             catch (nl::json::parse_error& ex)
             {
@@ -453,7 +449,6 @@ namespace xlua
             io.flush = __io_flush_dispatch
 
         )"""";
-        std::cout<<"monkeypatch\n";
         lua.script(monkeypatch);  
     }
 
@@ -480,7 +475,7 @@ namespace xlua
                                                nl::json user_expressions,
                                                bool allow_stdin)
     {
-
+        std::cout<<"execute request IN LUA KERNEL "<<code<<"\n";
 
         // reset  payload
         nl::json kernel_res;
