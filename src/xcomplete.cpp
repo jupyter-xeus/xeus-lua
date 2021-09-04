@@ -1,3 +1,32 @@
+// the completed implementation is basd on:
+// https://github.com/tomstitt/lupyter
+// https://github.com/tomstitt/lupyter/blob/main/lupyter/lua_runtime/lua_runtime.c
+// MIT License
+
+// Copyright (c) 2021 Tom Stitt
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+
+
+
+
 #include "xeus-lua/sol/sol.hpp"
 #include "xcomplete.hpp"
 
@@ -7,7 +36,12 @@ namespace nl = nlohmann;
 namespace xlua
 {
 
+#include <string>
 
+bool startswith(const std::string& str, const std::string& cmp)
+{
+  return str.compare(0, cmp.length(), cmp) == 0;
+}
 
 const char * reserved_words[] = {
   "and", "break", "do", "else", "elseif", "end",
@@ -84,7 +118,11 @@ int table_matches(lua_State * L, int table_index, const char * identifier, int i
     if (lua_type(L, -2) == LUA_TSTRING) {
       const char * key = lua_tostring(L, -2);
       if (strncmp(identifier, key, identifier_length) == 0) {
-        matches.push_back(key);
+        std::string str_key(key);
+        if(!startswith(str_key, "sol."))
+        {
+            matches.push_back(key);
+        }
         match_count++;
       }
     }

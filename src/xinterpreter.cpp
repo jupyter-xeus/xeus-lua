@@ -1,7 +1,7 @@
 /***************************************************************************
-* Copyright (c) 2018, Martin Renou, Johan Mabille, Sylvain Corlay, and     *
+* Copyright (c) 2021, Thorsten Beier                                       *
 * Wolf Vollprecht                                                          *
-* Copyright (c) 2018, QuantStack                                           *
+* Copyright (c) 2021, QuantStack                                           *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
 *                                                                          *
@@ -9,8 +9,6 @@
 ****************************************************************************/
 
 // https://github.com/pakozm/IPyLua/blob/master/IPyLua/rlcompleter.lua
-
-
 // a lot is copied from https://raw.githubusercontent.com/tomstitt/lupyter/main/lupyter/lua_runtime/lua_runtime.c
 
 
@@ -164,6 +162,7 @@ namespace xlua
 
 
     interpreter::interpreter()
+    : m_allow_stdin(true)
     {
         
         L = lua;
@@ -180,9 +179,12 @@ namespace xlua
             sol::lib::table,
             sol::lib::debug,
             sol::lib::bit32,
-            sol::lib::io//,
-            // sol::lib::ffi,
-            //sol::lib::jit,
+            sol::lib::io
+            #ifndef __EMSCRIPTEN__ 
+            ,
+            sol::lib::ffi,
+            sol::lib::jit 
+            #endif
         );
 
         extend(lua);
@@ -202,7 +204,12 @@ namespace xlua
     void interpreter::set_special_functions()
     {
 
-        lua.set_function("_display_data", [this](
+        // get display table
+        sol::table ilua_table = lua["ilua"];
+        sol::table display_table = ilua_table["display"];
+        sol::table detail_table = display_table["detail"];
+
+        detail_table.set_function("_display_data", [this](
             const std::string & data_str,
             const std::string & metadata_str,
             const std::string & transient_str
@@ -221,7 +228,7 @@ namespace xlua
         });
 
 
-        lua.set_function("_update_display_data", [this](
+        detail_table.set_function("_update_display_data", [this](
             const std::string & data_str,
             const std::string & metadata_str,
             const std::string & transient_str
@@ -240,28 +247,6 @@ namespace xlua
         });
 
 
-        // lua.set_function("_fetch", [this](
-        //     const std::string & url,
-        //     const std::string & filename
-        // ){
-            
-
-
-        //     emscripten_fetch_attr_t attr;
-        //     emscripten_fetch_attr_init(&attr);
-        //     strcpy(attr.requestMethod, "GET");
-        //     attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY | EMSCRIPTEN_FETCH_SYNCHRONOUS;
-        //     emscripten_fetch_t *fetch = emscripten_fetch(&attr, "file.dat"); // Blocks here until the operation is complete.
-        //     if (fetch->status == 200) {
-        //     printf("Finished downloading %llu bytes from URL %s.\n", fetch->numBytes, fetch->url);
-        //     // The data is now available at fetch->data[0] through fetch->data[fetch->numBytes-1];
-        //     } else {
-        //     printf("Downloading %s failed, HTTP failure status code: %d.\n", fetch->url, fetch->status);
-        //     }
-        //     emscripten_fetch_close(fetch);
-            
-        // });
-
         #ifdef XLUA_WITH_XWIDGETS
         register_xwidgets(lua);            
         #endif        
@@ -269,6 +254,9 @@ namespace xlua
 
     void interpreter::monkeypatch_io()
     {
+        // get display table
+        sol::table ilua_table = lua["ilua"];
+        sol::table detail_table = ilua_table["detail"];
 
         auto print_func_save = [this]( sol::variadic_args va) {
             const auto s = variadic_string_func(this->lua, va, /*spaces*/true,/*newline*/true, /*cosave*/true);
@@ -279,71 +267,85 @@ namespace xlua
             this->publish_stream("stream", s);
         };
 
-        auto write_func = [this]( sol::variadic_args va) {
-            const auto s = variadic_string_func(this->lua, va, /*spaces*/false,/*newline*/true, true);
+        auto write_func_unsave = [this]( sol::variadic_args va) {
+            const auto s = variadic_string_func(this->lua, va, /*spaces*/false,/*newline*/true, /*cosave*/false);
+            this->publish_stream("stream", s);
+        };
+        auto write_func_save = [this]( sol::variadic_args va) {
+            const auto s = variadic_string_func(this->lua, va, /*spaces*/false,/*newline*/true, /*cosave*/true);
             this->publish_stream("stream", s);
         };
 
-        lua.set_function("__print_save", print_func_save);
-        lua.set_function("__print_unsave", print_func_unsave);
+        detail_table.set_function("__print_save", print_func_save);
+        detail_table.set_function("__print_unsave", print_func_unsave);
         lua.script(R""""(
             function print(...)
                 p = ilua.config.printer
                 if p == "pprint" or p == "default" then
                     pprint.pprint(...)
                 elseif p == "lua" then
-                    __print_unsave(...)
+                    ilua.detail.__print_unsave(...)
                 elseif p == "save" then
-                    __print_save(...)
+                    ilua.detail.__print_save(...)
                 end
             end
         )"""");
-        lua.set_function("__io_write_custom", write_func);
-        lua.set_function("__io_flush_custom", [](sol::variadic_args ){});
-        lua.set_function("__io_read_custom", 
+        detail_table.set_function("__io_write_custom_save", write_func_save);
+        detail_table.set_function("__io_write_custom_unsave", write_func_unsave);
+        detail_table.set_function("__io_write_custom", write_func_save);
+        detail_table.set_function("__io_flush_custom", [](sol::variadic_args ){});
+        detail_table.set_function("__io_read_custom", 
             [this]( ) {
-                #ifdef __EMSCRIPTEN__
-                    char* str = async_get_input_function("");
-                    std::string as_string(str);
-                    free(str);
-                    return as_string;
-                #else
-                    return xeus::blocking_input_request("", false);
-                #endif
+                if(this->m_allow_stdin)
+                {
+                    #ifdef __EMSCRIPTEN__
+                        char* str = async_get_input_function("");
+                        std::string as_string(str);
+                        free(str);
+                        return as_string;
+                    #else
+                        return xeus::blocking_input_request("", false);
+                    #endif
+                }
+                else
+                {
+                    std::string error_str = "stdin is not allowed";
+                    this->publish_execution_error(error_str,error_str,std::vector<std::string>());
+                }
             }
         );
 
         const std::string monkeypatch = R""""(
             require "io"
-            __io_read = io.read
-            __io_write = io.write
-            __io_flush = io.flush
-            function __io_read_dispatch(...)
+            ilua.detail.__io_read = io.read
+            ilua.detail.__io_write = io.write
+            ilua.detail.__io_flush = io.flush
+            function ilua.detail.__io_read_dispatch(...)
                 local args = table.pack(...)
                 if io.input() == io.stdin and args.n == 0 then
-                    return __io_read_custom(...)
+                    return ilua.detail.__io_read_custom(...)
                 else
-                    return __io_read(...)
+                    return ilua.detail.__io_read(...)
                 end
             end
-            io.read = __io_read_dispatch
+            io.read = ilua.detail.__io_read_dispatch
 
-            function __io_write_dispatch(...)
+            function ilua.detail.__io_write_dispatch(...)
                 if io.output() == io.stdout then
-                    return __io_write_custom(...)
+                    return ilua.detail.__io_write_custom(...)
                 else
-                    return __io_write(...)
+                    return ilua.detail.__io_write(...)
                 end
             end
-            io.write = __io_write_dispatch
-            function __io_flush_dispatch(...)
+            io.write = ilua.detail.__io_write_dispatch
+            function ilua.detail.__io_flush_dispatch(...)
                 if io.output() == io.stdout then
-                    return __io_flush_custom(...)
+                    return ilua.detail.__io_flush_custom(...)
                 else
-                    return __io_flush(...)
+                    return ilua.detail.__io_flush(...)
                 end
             end
-            io.flush = __io_flush_dispatch
+            io.flush = ilua.detail.__io_flush_dispatch
 
         )"""";
         lua.script(monkeypatch);  
@@ -372,6 +374,7 @@ namespace xlua
                                                nl::json user_expressions,
                                                bool allow_stdin)
     {
+        m_allow_stdin = allow_stdin;
         // reset  payload
         nl::json kernel_res;
 
@@ -433,9 +436,9 @@ namespace xlua
         return result;
     }
 
-    nl::json interpreter::inspect_request_impl(const std::string& code,
-                                               int cursor_pos,
-                                               int detail_level)
+    nl::json interpreter::inspect_request_impl(const std::string& ,
+                                               int ,
+                                               int )
     {
         nl::json result;
         result["status"] = "ok";
@@ -448,10 +451,16 @@ namespace xlua
     nl::json interpreter::is_complete_request_impl(const std::string& code)
     {
         nl::json result;
-        result["status"] = code;
-        if (code.compare("incomplete") == 0)
+        sol::load_result code_result = lua.load(code);//, "[string]", sol::load_mode::text);
+        if (code_result.valid()) {
+            std::cout<<code<<" is complete\n";
+            result["status"] = "complete";
+        }
+        else
         {
-            result["indent"] = "   ";
+            std::cout<<code<<" is NOT complete\n";
+            result["indent"] = "    ";
+            result["status"] = "incomplete";
         }
         return result;
     }

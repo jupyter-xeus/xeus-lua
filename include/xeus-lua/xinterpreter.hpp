@@ -72,6 +72,9 @@ namespace xlua
 
         sol::state lua;
         lua_State * L;
+
+        // allow stdin for the current request
+        bool m_allow_stdin;
     };
 }
 

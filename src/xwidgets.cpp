@@ -42,6 +42,9 @@
 
 namespace sol {
 
+        template<template <class> class B, class... P>
+        struct is_container<xw::xmaterialize<B, P...>> : std::false_type {};
+
         template <>
         struct is_automagical<xw::xholder> : std::false_type {};
 
@@ -151,9 +154,15 @@ namespace xlua
 template<class xwidgtes_type, class extend_f>
 void register_widget_impl(sol::state & lua, const std::string widget_name, extend_f && extend)
 {
+    // get widgets table
+    sol::table ilua_table = lua["ilua"];
+    sol::table widgets_table = ilua_table["widgets"];
+    sol::table detail_table = widgets_table["detail"];
+
+
     // make usertype metatable
-    sol::usertype<xwidgtes_type> xwidgtes_lua_type = lua.new_usertype<xwidgtes_type>(
-        widget_name.c_str(),
+    sol::usertype<xwidgtes_type> xwidgtes_lua_type = detail_table.new_usertype<xwidgtes_type>(
+        widget_name,
         // 1 constructors
         sol::constructors<xwidgtes_type()>()
     );
@@ -161,8 +170,12 @@ void register_widget_impl(sol::state & lua, const std::string widget_name, exten
     xwidgtes_lua_type["display"] = &xwidgtes_type::display;
     xwidgtes_lua_type["id"] = &xwidgtes_type::id;
 
-    extend(xwidgtes_lua_type);
+    xwidgtes_lua_type[sol::meta_function::to_string] = [widget_name](xwidgtes_type & ){
+        return widget_name;
+    };
 
+    extend(xwidgtes_lua_type);
+    detail_table[widget_name] = xwidgtes_lua_type;
 }
 
 
@@ -176,45 +189,48 @@ std::string vector_cls_name(const std::string cls_name)
 
 void register_widget_related_types(sol::state & lua)
 {
-    // // xholder
-    // {
-    //     using binded_type = xw::xholder;
-    //     std::string name = "xholder";
-    //     sol::usertype<binded_type> xwidgtes_lua_type = lua.new_usertype<binded_type>(name,
-    //         sol::constructors<binded_type()>()
-    //     );
-    // }
-    // xguid
+    // get widgets table
+    sol::table ilua_table = lua["ilua"];
+    sol::table widgets_table = ilua_table["widgets"];
+    sol::table detail_table = widgets_table["detail"];
+
     {
         using binded_type = xeus::xguid;
         std::string name = "xguid";
-        sol::usertype<binded_type> xwidgtes_lua_type = lua.new_usertype<binded_type>(name,
+        sol::usertype<binded_type> lua_type = detail_table.new_usertype<binded_type>(name,
             sol::constructors<binded_type()>()
         );
+        detail_table[name] = lua_type;
     }
 
-    // char vector
-    {
-        using binded_type = std::vector<char>;
-        std::string name = vector_cls_name("char");
-        sol::usertype<binded_type> xwidgtes_lua_type = lua.new_usertype<binded_type>(name,
-            sol::constructors<binded_type()>()
-        );
-    }
-    // string vector
-    {
-        using binded_type = std::vector<std::string>;
-        std::string name = vector_cls_name("string");
-        sol::usertype<binded_type> xwidgtes_lua_type = lua.new_usertype<binded_type>(name,
-            sol::constructors<binded_type()>()
-        );
-    }
+    // // char vector
+    // {
+    //     using binded_type = std::vector<char>;
+    //     std::string name = vector_cls_name("char");
+    //     sol::usertype<binded_type> xwidgtes_lua_type = detail_table.new_usertype<binded_type>(name,
+    //         sol::constructors<binded_type()>()
+    //     );
+    // }
+    // // string vector
+    // {
+    //     using binded_type = std::vector<std::string>;
+    //     std::string name = vector_cls_name("string");
+    //     sol::usertype<binded_type> xwidgtes_lua_type = detail_table.new_usertype<binded_type>(name,
+    //         sol::constructors<binded_type()>()
+    //     );
+    // }
 
 }
 
 
 void register_xwidgets_impl(sol::state & lua)
 {
+
+    // get widgets table
+    sol::table ilua_table = lua["ilua"];
+    sol::table widgets_table = ilua_table["widgets"];
+    sol::table detail_table = widgets_table["detail"];
+
     {
         using xwidgtes_type =  xw::button;
         register_widget_impl<xwidgtes_type>(lua, "xbutton",[](auto && xwidgtes_lua_type){
@@ -265,9 +281,10 @@ void register_xwidgets_impl(sol::state & lua)
     {
         using xwidgtes_type = xw::output;
         const std::string widget_name = "xoutput";
-        
+
+
          // make usertype metatable
-        sol::usertype<xwidgtes_type> xwidgtes_lua_type = lua.new_usertype<xwidgtes_type>(
+        sol::usertype<xwidgtes_type> xwidgtes_lua_type = detail_table.new_usertype<xwidgtes_type>(
             widget_name.c_str(),
             // 1 constructors
             sol::constructors<xwidgtes_type()>()
@@ -288,6 +305,7 @@ void register_xwidgets_impl(sol::state & lua)
             }
             widget.release();
         };
+        detail_table[widget_name] = xwidgtes_lua_type;
     }
 
 
@@ -295,16 +313,16 @@ void register_xwidgets_impl(sol::state & lua)
     {
         using xwidgtes_type =  xw::hbox;
         register_widget_impl<xwidgtes_type>(lua, "xhbox",[](auto && xwidgtes_lua_type){
-            xwidgtes_lua_type["add"] = [](xwidgtes_type & widget, xeus::xguid id){
+            xwidgtes_lua_type["_add"] = [](xwidgtes_type & widget, xeus::xguid id){
                 widget.add(id);
             };
         });
     }
     {
-        using xwidgtes_type =  xw::hbox;
-        register_widget_impl<xwidgtes_type>(lua, "vhbox",[](auto && xwidgtes_lua_type){
+        using xwidgtes_type =  xw::vbox;
+        register_widget_impl<xwidgtes_type>(lua, "xvbox",[](auto && xwidgtes_lua_type){
 
-            xwidgtes_lua_type["add"] = [](xwidgtes_type & widget, xeus::xguid id){
+            xwidgtes_lua_type["_add"] = [](xwidgtes_type & widget, xeus::xguid id){
                 widget.add(id);
             };
 
@@ -315,7 +333,7 @@ void register_xwidgets_impl(sol::state & lua)
         using xwidgtes_type =  xw::accordion;
         register_widget_impl<xwidgtes_type>(lua, "xaccordion",[](auto && xwidgtes_lua_type){
 
-            xwidgtes_lua_type["add"] = [](xwidgtes_type & widget, xeus::xguid id){
+            xwidgtes_lua_type["_add"] = [](xwidgtes_type & widget, xeus::xguid id){
                 widget.add(id);
             };
 
@@ -504,7 +522,7 @@ void register_xwidgets_impl(sol::state & lua)
             using titles_type = typename xwidgtes_type::titles_type;
             XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, titles_type, _titles);
 
-            xwidgtes_lua_type["add"] = [](xwidgtes_type & widget, xeus::xguid id){
+            xwidgtes_lua_type["_add"] = [](xwidgtes_type & widget, xeus::xguid id){
                 widget.add(id);
             };
 
@@ -617,7 +635,7 @@ void register_xwidgets_impl(sol::state & lua)
     }
     {
         using xwidgtes_type =  xw::link;
-        sol::usertype<xwidgtes_type> xwidgtes_lua_type = lua.new_usertype<xwidgtes_type>(
+        sol::usertype<xwidgtes_type> xwidgtes_lua_type = detail_table.new_usertype<xwidgtes_type>(
             "xlink",
             sol::factories([](
                 const xeus::xguid id_source,
@@ -636,10 +654,11 @@ void register_xwidgets_impl(sol::state & lua)
         // typical member function that returns a variable
         xwidgtes_lua_type["display"] = &xwidgtes_type::display;
         xwidgtes_lua_type["id"] = &xwidgtes_type::id;
+        detail_table["xlink"] = xwidgtes_lua_type;
     }
     {
         using xwidgtes_type =  xw::directional_link;
-        sol::usertype<xwidgtes_type> xwidgtes_lua_type = lua.new_usertype<xwidgtes_type>(
+        sol::usertype<xwidgtes_type> xwidgtes_lua_type = detail_table.new_usertype<xwidgtes_type>(
             "xdirectional_link",
             sol::factories([](
                 const xeus::xguid id_source,
@@ -658,63 +677,114 @@ void register_xwidgets_impl(sol::state & lua)
         // typical member function that returns a variable
         xwidgtes_lua_type["display"] = &xwidgtes_type::display;
         xwidgtes_lua_type["id"] = &xwidgtes_type::id;
+        detail_table["xdirectional_link"] = xwidgtes_lua_type;        
     }
 }
 
 void extend_xwidgets(sol::state & lua)
 {
     const std::string extend = R""""(
-
-
-new_ilua = {}
-
-__atomic_widgets = {
-    "xslider",
-    "xbutton",
-    "xaudio",
-    "xcheckbox",
-    "xcolor_picker",
-    "xcontroller",
-    "xdropdown",
-    "xhtml",
-    "ximage",
-    "xlabel",
-    "xhtml",
-    "xnumeral",
-    "xpassword",
-    "xplay",
-    "xprogress",
-    "xradiobuttons",
-    "xselectionslider",
-    "xtextarea",
-    "xtext",
-    "xtogglebutton",
-    "xtogglebuttons",
-    "xvideo",
-    "xvalid",
-    "xoutput"
+local atomic_widgets = {
+    xslider =  ilua.widgets.detail.xslider,
+    xbutton =  ilua.widgets.detail.xbutton,
+    xaudio =  ilua.widgets.detail.xaudio,
+    xcheckbox =  ilua.widgets.detail.xcheckbox,
+    xcolor_picker =  ilua.widgets.detail.xcolor_picker,
+    xcontroller =  ilua.widgets.detail.xcontroller,
+    xdropdown =  ilua.widgets.detail.xdropdown,
+    xhtml =  ilua.widgets.detail.xhtml,
+    ximage =  ilua.widgets.detail.ximage,
+    xlabel =  ilua.widgets.detail.xlabel,
+    xhtml =  ilua.widgets.detail.xhtml,
+    xnumeral =  ilua.widgets.detail.xnumeral,
+    xpassword =  ilua.widgets.detail.xpassword,
+    xplay =  ilua.widgets.detail.xplay,
+    xprogress =  ilua.widgets.detail.xprogress,
+    xradiobuttons =  ilua.widgets.detail.xradiobuttons,
+    xselectionslider =  ilua.widgets.detail.xselectionslider,
+    xtextarea =  ilua.widgets.detail.xtextarea,
+    xtext =  ilua.widgets.detail.xtext,
+    xtogglebutton =  ilua.widgets.detail.xtogglebutton,
+    xtogglebuttons =  ilua.widgets.detail.xtogglebuttons,
+    xvideo =  ilua.widgets.detail.xvideo,
+    xvalid =  ilua.widgets.detail.xvalid,
+    xoutput =  ilua.widgets.detail.xoutput
 }
 
-__link_widgets = {
-    "xlink",
-    "xdirectional_link"
+local layout_widgets = {
+    xvbox = ilua.widgets.detail.xvbox,
+    xhbox = ilua.widgets.detail.xhbox,
+    xtab = ilua.widgets.detail.xtab,
+    xaccordion = ilua.widgets.detail.xaccordion
 }
-__layout_widgets = {
-    "xvbox",
-    "xhbox",
-    "xtab",
-    "xaccordion"
+local link_widgets = {
+    xlink = ilua.widgets.detail.xlink,
+    xdirectional_link = ilua.widgets.detail.xdirectional_link
 }
 
 
-function xoutput:captured_call(func)
-    self:capture()
-    func()
-    self:release()
+local concat_tables = function(...)
+    ret = {}
+    tables = table.pack(...)
+    for i=1,tables.n do
+        t = tables[i]
+        for kw,val in pairs(t) do
+            ret[kw] = val
+        end
+    end
+    
+    return ret
 end
 
+
+-- add 
+for k,widget_cls in pairs(layout_widgets) do
+    function widget_cls:add(...)
+        args = table.pack(...)
+        for i=1,args.n do
+            arg = args[i]
+            self:_add(arg.id(arg))
+        end
+    end
+end
+
+-- add factory function
+for k,widget_cls in pairs( concat_tables( layout_widgets, atomic_widgets)) do
+    ilua.widgets[k:sub(2)] = function(options) 
+        options = options or {}
+        w = widget_cls.new()
+        for kw,val in pairs(options) do
+            if w[kw] ~= nil then
+                w[kw] = val
+            else
+                error(k.." has no attribute `"..kw.."`")
+            end
+        end
+        return w
+    end
+end
+
+-- add factory function
+for k,widget_cls in pairs( link_widgets) do
+    ilua.widgets[k:sub(2)] = function(widget_a, property_a, widget_b, property_b) 
+        w = widget_cls.new(widget_a:id(), property_a, widget_b:id(), property_b)
+        return w
+    end
+end
+
+for k,widget_cls in pairs( concat_tables( link_widgets, layout_widgets, atomic_widgets)) do
+    mc = getmetatable(widget_cls)
+    function mc.__tostring(...)
+        return k
+    end
+end
     )"""";
-    lua.script(extend);  
+    auto code_result = lua.script(extend);
+    if (!code_result.valid()) {
+        sol::error err = code_result;
+        std::cerr << "failed to load string-based script into the program" << err.what() << std::endl;
+        throw std::runtime_error(err.what());
+    }
 }
 
 

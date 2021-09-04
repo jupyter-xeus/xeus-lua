@@ -44,13 +44,13 @@ void add_pprint_module(sol::state & lua){
         show_table = true,
         show_function = true,
         show_thread = true,
-        show_userdata = true,
+        show_userdata = false,
         -- additional display trigger
         show_metatable = false,     -- show metatable
         show_all = false,           -- override other show settings and show everything
-        use_tostring = false,       -- use __tostring to print table if available
+        use_tostring = true,       -- use __tostring to print table if available
         filter_function = nil,      -- called like callback(value[,key, parent]), return truty value to hide
-        object_cache = 'local',     -- cache blob and table to give it a id, 'local' cache per print, 'global' cache
+        object_cache = false,     -- cache blob and table to give it a id, 'local' cache per print, 'global' cache
                                     -- per process, falsy value to disable (might cause infinite loop)
         -- format settings
         indent_size = 2,            -- indent for each nested table level
@@ -470,10 +470,10 @@ void add_pprint_module(sol::state & lua){
         formatter['string'] = option.show_string and tostring_formatter or nop_formatter
         formatter['table'] = option.show_table and table_formatter or nop_formatter
 
-        if option.object_cache then
-            -- needs to visit the table before start printing
-            cache_apperance(obj, cache, option)
-        end
+        -- if option.object_cache then
+        --     -- needs to visit the table before start printing
+        --     cache_apperance(obj, cache, option)
+        -- end
 
         _p(format(obj))
         printer(last) -- close the buffered one
@@ -513,7 +513,7 @@ void add_pprint_module(sol::state & lua){
             pprint.pformat(args[ix], nil, ilua_printer)
             ilua_printer(' ')
         end
-        io.write(ilua_printer.data)
+        ilua.detail.__io_write_custom_save(ilua_printer.data)
     end
 
     setmetatable(pprint, {
@@ -936,43 +936,51 @@ void add_ilua_module(sol::state & lua){
 
 
     ilua = {
-        display = { _version = "0.1.0" },
+        display = { _version = "0.1.0" ,
+            detail = {}
+        },
+        widgets = {
+            detail = {}
+        },
         config = {
             printer = "default"
+        },
+        detail = {
+
         }
     }
     local display = ilua.display
 
 
     local function display_data(data,metadata,transient)
-        _display_data(
+        display.detail._display_data(
             json.encode(data),
             json.encode(metadata),
             json.encode(transient)
         )
     end
 
-    function display.mimetype(mimetype, data, update)
+    function display.mimetype(mimetype, data)
         data = {
             [mimetype] = data
         }
-        display_data(data, {}, {}, update)
+        display_data(data, {}, {})
     end
 
-    function display.plain_text(str, update)
-        display.mimetype("text/plain", str, update)
+    function display.plain_text(str)
+        display.mimetype("text/plain", str)
     end
 
-    function display.html(html, update)
-        display.mimetype("text/html", html, update)
+    function display.html(html)
+        display.mimetype("text/html", html)
     end
 
-    function display.json(j, update)
-        display.mimetype("application/json", j, update)
+    function display.json(j)
+        display.mimetype("application/json", j)
     end
 
-    function display.latex(j, update)
-        display.mimetype("text/latex", j, update)
+    function display.latex(j)
+        display.mimetype("text/latex", j)
     end
 
 
