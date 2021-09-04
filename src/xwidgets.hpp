@@ -9,5 +9,4 @@ namespace xlua
 void register_xwidgets(sol::state & lua);
 }
 
-#undef XLUA_ADD_PROPERTY
 #endif

@@ -63,19 +63,12 @@ namespace xlua
 
         void shutdown_request_impl() override;
 
-        nl::json internal_request_impl(const nl::json& content) override;
-
         void redirect_output();
     private:
 
         void monkeypatch_io();
         void set_package_path();
         void set_special_functions();
-
-        int complete(const char * code, int cursor_pos, nl::json & matches);
-        int get_path(const char * path, int path_length);
-        int table_matches(int table_index, const char * identifier, int identifier_length, nl::json & matches);
-        int get_metaindex();
 
         sol::state lua;
         lua_State * L;

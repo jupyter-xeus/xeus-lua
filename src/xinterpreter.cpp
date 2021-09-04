@@ -50,6 +50,9 @@ extern "C" {
 
 }
 
+#include "xextend.hpp"
+#include "xcomplete.hpp"
+
 #ifdef XLUA_WITH_XWIDGETS
 #include "xwidgets.hpp"
 #endif
@@ -83,26 +86,13 @@ namespace nl = nlohmann;
 
 namespace xlua
 {
-    const char * reserved_words[] = {
-      "and", "break", "do", "else", "elseif", "end",
-      "false", "for", "function", "if", "in",
-      "local", "nil", "not", "or", "repeat", "return",
-      "then", "true", "until", "while"
-    #if LUA_VERSION_NUM >= 502
-      , "goto"
-    #endif
-    };
+   
 
-
-
-
-    int is_identifier(char c){
-      return isalpha(c) || std::isdigit(c) || c == '_';
-    }
-
-    auto string_func( sol::variadic_args va, bool spaces, bool new_line) {
-        std::stringstream ss;
-        for (auto v : va) {
+    template<class sol_obj>
+    auto string_func(sol::state & lua, sol_obj & v, bool co_save)
+    {
+        if(co_save){
+            std::stringstream ss;
             switch(v.get_type())
             {
                 case sol::type::none:
@@ -137,7 +127,28 @@ namespace xlua
                     break;
                 default:
                     ss<<"unknown";
+
+                return ss.str();
             }
+            return ss.str();
+        } 
+        else{
+            sol::main_protected_function  to_string_func = lua["tostring"];
+
+            //return "nope";
+            auto code_result = to_string_func(v);
+            if (!code_result.valid()) {
+                sol::error err = code_result;
+                throw std::runtime_error(err.what());
+            }
+            return std::string(code_result);
+        }
+    }
+
+    auto variadic_string_func(sol::state & lua, sol::variadic_args va, bool spaces, bool new_line, bool co_save) {
+        std::stringstream ss;
+        for (auto v : va) {
+            ss << string_func(lua, v, co_save);
             if(spaces)
             {
                 ss<<" ";
@@ -149,8 +160,6 @@ namespace xlua
         }
         return ss.str();
     };
-
-
 
 
 
@@ -176,6 +185,8 @@ namespace xlua
             //sol::lib::jit,
         );
 
+        extend(lua);
+
         // replace / monkeypatch functions like
         // io.read / io.write / io.flush print 
         this->monkeypatch_io();
@@ -187,137 +198,6 @@ namespace xlua
         this->set_special_functions();
     }
 
-    // TODO: this misses tables with __index metafields and indexes using []
-    int interpreter::complete(const char * code, int cursor_pos, nl::json & matches) {
-      int dot_loc = -1;
-      int i;
-
-
-      // cursor is one to the right of the starting char for completion
-      cursor_pos -= 1;
-      for (i = cursor_pos; i >= 0; --i) {
-        if (code[i] == '.') {
-          // check for string concat
-          if (i > 0 && code[i-1] == '.') { break; }
-          if (dot_loc == -1) { dot_loc = i; }
-        }
-        else if (code[i] == ':') {
-          // check for '::', only in >= 5.2
-            #if LUA_VERSION_NUM >= 502
-            if (i > 0 && code[i-1] == ':') { break; }
-            #endif
-          if (dot_loc == -1) { dot_loc = i; }
-          // invalid to have a colon after finding a dot/colon
-          else { return 0; }
-        }
-        else if (!is_identifier(code[i])) {
-          break;
-        }
-      }
-
-      // break char is to the left of the start of the identifier
-      int cursor_start = i+1;
-
-      // don't try to match numbers
-      if (std::isdigit(code[cursor_start])) { return 0; }
-
-      int match_count = 0;
-      if (dot_loc > 0) {
-        const char * identifier = code+dot_loc+1;
-        const char * path = code+cursor_start;
-        int identifier_length = cursor_pos-dot_loc;
-        int path_length = dot_loc-cursor_start+1;
-        if (this->get_path(path, path_length) == 0) {
-          return 0;
-        }
-        match_count = this->table_matches(-1, identifier, identifier_length, matches);
-        // cursor_start for fields is just the start of the "basename"
-        cursor_start = identifier-code;
-      }
-
-      else {
-        int identifier_length = cursor_pos-cursor_start+1;
-        const char * identifier = code+cursor_start;
-
-        // check for global matches
-        lua_pushglobaltable(L);
-        match_count = this->table_matches(-1, identifier, identifier_length, matches);
-
-        // check for reserved word match
-        for (unsigned i = 0; i < sizeof(reserved_words)/sizeof(reserved_words[0]); ++i) {
-          if (strncmp(identifier, reserved_words[i], identifier_length) == 0) {
-            match_count++;
-            matches.push_back(reserved_words[i]);
-          }
-        }
-      }
-      return cursor_start;
-    }
-
-    int interpreter::table_matches(int table_index, const char * identifier, int identifier_length, nl::json & matches) {
-      int match_count = 0;
-      lua_pushnil(L);
-      // fix offset after pushing
-      table_index = table_index < 0 ? table_index-1 : table_index;
-
-
-      while (lua_next(L, table_index)) {
-        if (lua_type(L, -2) == LUA_TSTRING) {
-          const char * key = lua_tostring(L, -2);
-          if (strncmp(identifier, key, identifier_length) == 0) {
-            matches.push_back(key);
-            match_count++;
-          }
-        }
-        lua_pop(L, 1);
-      }
-
-      return match_count;
-    }
-
-    int interpreter::get_metaindex() {
-      if (luaL_getmetafield(L, -1, "__index") == LUA_TNIL /* 0 in Lua51 */) {
-        lua_pop(L, 1);
-        return 0;
-      }
-
-      if (lua_type(L, -1) != LUA_TTABLE) {
-        lua_pop(L, 2);
-        return 0;
-      }
-
-      return 1;
-    }
-
-
-    int interpreter::get_path(const char * path, int path_length) {
-      int offset = 0;
-      char op = '.';
-      lua_pushglobaltable(L);
-      for (int i = 0; i < path_length; ++i) {
-        if (path[i] == ':' || path[i] == '.') {
-          if (lua_type(L, -1) != LUA_TTABLE && this->get_metaindex() == 0) {
-            return 0;
-          }
-          lua_pushlstring(L, path+offset, i-offset);
-          lua_gettable(L, -2);
-          lua_replace(L, -2);
-          op = path[i];
-          offset = i+1;
-        }
-      }
-
-      if (op == ':' && this->get_metaindex() == 0) {
-        return 0;
-      }
-
-      if (lua_type(L, -1) != LUA_TTABLE) {
-        lua_pop(L, 1);
-        return 0;
-      }
-
-      return 1;
-    }
 
     void interpreter::set_special_functions()
     {
@@ -390,17 +270,34 @@ namespace xlua
     void interpreter::monkeypatch_io()
     {
 
-        auto print_func = [this]( sol::variadic_args va) {
-            const auto s = string_func(va, /*spaces*/true,/*newline*/true);
+        auto print_func_save = [this]( sol::variadic_args va) {
+            const auto s = variadic_string_func(this->lua, va, /*spaces*/true,/*newline*/true, /*cosave*/true);
+            this->publish_stream("stream", s);
+        };
+        auto print_func_unsave = [this]( sol::variadic_args va) {
+            const auto s = variadic_string_func(this->lua, va, /*spaces*/true,/*newline*/true, /*cosave*/false);
             this->publish_stream("stream", s);
         };
 
         auto write_func = [this]( sol::variadic_args va) {
-            const auto s = string_func(va, /*spaces*/false,/*newline*/true);
+            const auto s = variadic_string_func(this->lua, va, /*spaces*/false,/*newline*/true, true);
             this->publish_stream("stream", s);
         };
 
-        lua.set_function("print", print_func);
+        lua.set_function("__print_save", print_func_save);
+        lua.set_function("__print_unsave", print_func_unsave);
+        lua.script(R""""(
+            function print(...)
+                p = ilua.config.printer
+                if p == "pprint" or p == "default" then
+                    pprint.pprint(...)
+                elseif p == "lua" then
+                    __print_unsave(...)
+                elseif p == "save" then
+                    __print_save(...)
+                end
+            end
+        )"""");
         lua.set_function("__io_write_custom", write_func);
         lua.set_function("__io_flush_custom", [](sol::variadic_args ){});
         lua.set_function("__io_read_custom", 
@@ -475,8 +372,6 @@ namespace xlua
                                                nl::json user_expressions,
                                                bool allow_stdin)
     {
-        std::cout<<"execute request IN LUA KERNEL "<<code<<"\n";
-
         // reset  payload
         nl::json kernel_res;
 
@@ -487,7 +382,7 @@ namespace xlua
        
         // check if printing the code would yield an error
         std::stringstream test_code;
-        test_code<<"print("<<code<<")";
+        test_code<<"pprint.pprint("<<code<<")";
         auto test_code_result = lua.script(test_code.str());
         
 
@@ -527,7 +422,7 @@ namespace xlua
     {
         nl::json matches = nl::json::array();
 
-        int cursor_start =  this->complete(code.c_str(), cursor_pos, matches);
+        int cursor_start =  complete(lua, code.c_str(), cursor_pos, matches);
 
         nl::json result;
         result["status"] = "ok";
@@ -578,10 +473,6 @@ namespace xlua
     {
     }
 
-    nl::json interpreter::internal_request_impl(const nl::json& content)
-    {
-       return nl::json::object();
-    }
 
 
 }
