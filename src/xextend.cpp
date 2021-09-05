@@ -513,7 +513,7 @@ void add_pprint_module(sol::state & lua){
             pprint.pformat(args[ix], nil, ilua_printer)
             ilua_printer(' ')
         end
-        ilua.detail.__io_write_custom_save(ilua_printer.data)
+        ilua.detail.__custom_print(ilua_printer.data)
     end
 
     setmetatable(pprint, {

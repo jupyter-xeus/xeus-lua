@@ -23,20 +23,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-
-
+#include <string>
 
 #include "xeus-lua/sol/sol.hpp"
-#include "xcomplete.hpp"
-
 #include "nlohmann/json.hpp"
+
 namespace nl = nlohmann;
 
 namespace xlua
 {
 
-#include <string>
+
 
 bool startswith(const std::string& str, const std::string& cmp)
 {

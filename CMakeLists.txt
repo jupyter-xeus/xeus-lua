@@ -207,6 +207,8 @@ set(XEUS_LUA_HEADERS
 set(XLUA_COMMON_SRC 
     src/xextend.cpp
     src/xcomplete.cpp
+    src/xio.cpp
+    src/xdisplay.cpp
 )
 
 if(XLUA_WITH_XWIDGETS)

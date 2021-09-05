@@ -39,7 +39,7 @@ namespace xlua
 
         interpreter();
         virtual ~interpreter();
-
+        bool allow_stdin()const;
     protected:
 
         void configure_impl() override;
@@ -64,11 +64,9 @@ namespace xlua
         void shutdown_request_impl() override;
 
         void redirect_output();
-    private:
 
-        void monkeypatch_io();
-        void set_package_path();
-        void set_special_functions();
+
+    private:
 
         sol::state lua;
         lua_State * L;
