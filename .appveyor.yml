@@ -40,7 +40,7 @@ install:
   - conda install mamba -c conda-forge
   - mamba install pytest nbval ipympl jupyter_kernel_test -c conda-forge
 
-build_script:
-  # - cd test
-  # - test_xeus_python
-  - cd..  && cd test && pytest . -vvv
+# build_script:
+#   # - cd test
+#   # - test_xeus_python
+#   - cd..  && cd test && pytest . -vvv
