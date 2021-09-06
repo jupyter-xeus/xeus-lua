@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "xeus-lua/sol/sol.hpp"
 #include "xeus/xinterpreter.hpp"

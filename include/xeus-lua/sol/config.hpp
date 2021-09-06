@@ -29,6 +29,8 @@
 
 // beginning of sol/config.hpp
 
+#include <limits>
+#include <algorithm>
 /* Base, empty configuration file!
 
      To override, place a file in your include paths of the form:

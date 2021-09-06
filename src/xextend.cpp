@@ -1,4 +1,5 @@
 #include "xeus-lua/sol/sol.hpp"
+#include <iostream>
 
 namespace xlua
 {
