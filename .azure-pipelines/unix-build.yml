@@ -19,10 +19,10 @@ steps:
       source activate xeus-lua
       mkdir build
       cd build
-      if [[ $(xpyt_used_shared_xeus_lua) == '0' ]]; then
+      if [[ $(xlua_used_shared_xeus_lua) == '0' ]]; then
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXLUA_BUILD_SHARED=OFF -DXLUA_USE_SHARED_XEUS_LUA=OFF";
       fi
-      if [[ $(xpyt_used_shared_xeus) == '0' ]]; then
+      if [[ $(xlua_used_shared_xeus) == '0' ]]; then
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXLUA_USE_SHARED_XEUS=OFF";
       fi
       # The xeus conda package is built with CMAKE_CXX_STANDARD=17
