@@ -1,6 +1,6 @@
 # ![xeus-lua](docs/source/xeus-lua.svg)
 
-[![Azure Pipelines](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_apis/build/status/jupyter-xeus.xeus-lua?branchName=master)](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_build/latest?definitionId=2&branchName=master)
+[![Azure Pipelines](https://dev.azure.com/DerThorsten/xeus-lua/_apis/build/status/jupyter-xeus.xeus-lua?branchName=main)](https://dev.azure.com/DerThorsten/xeus-lua/_build/latest?definitionId=2&branchName=master)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/vy6rhqdw24pjduip?svg=true)](https://ci.appveyor.com/project/DerThorsten/xeus-lua)
 [![Documentation Status](http://readthedocs.org/projects/xeus-lua/badge/?version=latest)](https://xeus-lua.readthedocs.io/en/latest/?badge=latest)
 <!-- [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DerThorsten/xeus-lua/main?urlpath=/lab/tree/notebooks/xeus-lua.ipynb) -->
