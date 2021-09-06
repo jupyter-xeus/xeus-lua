@@ -383,9 +383,10 @@ endif ()
 if (XLUA_BUILD_XLUA_EXECUTABLE)
     add_executable(xlua ${XLUA_SRC})
     target_link_libraries(xlua PRIVATE ${LUA_LIBRARIES})
-    #target_compile_features(xlua PRIVATE cxx_std_17)
+    target_compile_features(xlua PRIVATE cxx_std_17)
     xlua_set_common_options(xlua)
     xlua_set_kernel_options(xlua)
+
 endif()
 
 
@@ -400,7 +401,7 @@ if(EMSCRIPTEN)
 
     add_executable(xeus_lua_kernel src/main_emscripten_kernel.cpp  ${XLUA_COMMON_SRC})
     target_link_libraries(xeus_lua_kernel  xeus-lua-static ${LUA_LIBRARY} )
-    #target_compile_features(xeus_lua_kernel PRIVATE cxx_std_17)
+    target_compile_features(xeus_lua_kernel PRIVATE cxx_std_17)
 endif()
 
 

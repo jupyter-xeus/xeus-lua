@@ -1,5 +1,5 @@
 {
-  "display_name": "Lua 0.12 (XLua)",
+  "display_name": "Lua 0.1 (XLua)",
   "argv": [
       "/home/derthorsten/miniconda3/envs/newjj//bin/xlua",
       "-f",
