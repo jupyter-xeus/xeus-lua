@@ -9,10 +9,8 @@ dependencies:
   - nlohmann_json
   - cppzmq
   - xtl>=0.7, <0.8
-  - pybind11=2.6.0
-  - pybind11_json>=0.2.6,<0.3
-  - ipython>=7.21.0,<8
-  - debugpy
+  - lua>=5.2.0
+  - xwidgets>=0.25.1
   # Test dependencies
   - pytest
   - nbval

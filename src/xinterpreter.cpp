@@ -16,10 +16,6 @@
 #include <emscripten.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 
 #include <algorithm>
 #include <string>
@@ -34,12 +30,8 @@
 
 
 #include "xeus/xinterpreter.hpp"
-
 #include "xeus-lua/xinterpreter.hpp"
 #include "xeus-lua/sol/sol.hpp"
-
-
-
 
 
 namespace nl = nlohmann;
@@ -125,8 +117,8 @@ namespace xlua
     nl::json interpreter::execute_request_impl(int /*execution_count*/,
                                                const std::string& code,
                                                bool silent,
-                                               bool store_history,
-                                               nl::json user_expressions,
+                                               bool /*store_history*/,
+                                               nl::json /*user_expressions*/,
                                                bool allow_stdin)
     {
         m_allow_stdin = allow_stdin;

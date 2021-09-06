@@ -1,4 +1,4 @@
-PROJECT_NAME      = "xeus-python"
+PROJECT_NAME      = "xeus-lua"
 XML_OUTPUT        = xml
 INPUT             = ../include
 GENERATE_LATEX    = NO

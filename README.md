@@ -1,73 +1,42 @@
-# ![xeus-python](docs/source/xeus-python.svg)
+# ![xeus-lua](docs/source/xeus-lua.svg)
 
-[![Azure Pipelines](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_apis/build/status/jupyter-xeus.xeus-python?branchName=master)](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_build/latest?definitionId=2&branchName=master)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/vy6rhqdw24pjduip?svg=true)](https://ci.appveyor.com/project/jupyter-xeus/xeus-python)
-[![Documentation Status](http://readthedocs.org/projects/xeus-python/badge/?version=latest)](https://xeus-python.readthedocs.io/en/latest/?badge=latest)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-python/stable?urlpath=/lab/tree/notebooks/xeus-python.ipynb)
+[![Azure Pipelines](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_apis/build/status/jupyter-xeus.xeus-lua?branchName=master)](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_build/latest?definitionId=2&branchName=master)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/vy6rhqdw24pjduip?svg=true)](https://ci.appveyor.com/project/DerThorsten/xeus-lua)
+[![Documentation Status](http://readthedocs.org/projects/xeus-lua/badge/?version=latest)](https://xeus-lua.readthedocs.io/en/latest/?badge=latest)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DerThorsten/xeus-lua/stable?urlpath=/lab/tree/notebooks/xeus-lua.ipynb)
 [![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-`xeus-python` is a Jupyter kernel for Python based on the native implementation of the
+`xeus-lua` is a Jupyter kernel for Python based on the native implementation of the
 Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus).
 
 ## Installation
 
-xeus-python has been packaged for the mamba (or conda) package manager.
+xeus-lua has **not yet** been packaged for the mamba (or conda) package manager, but will be soon.
 
-To ensure that the installation works, it is preferable to install `xeus-python` in a
+To ensure that the installation works, it is preferable to install `xeus-lua` in a
 fresh environment. It is also needed to use a
 [miniforge](https://github.com/conda-forge/miniforge#mambaforge) or
 [miniconda](https://conda.io/miniconda.html) installation because with the full
 [anaconda](https://www.anaconda.com/) you may have a conflict with the `zeromq` library
 which is already installed in the anaconda distribution.
 
-The safest usage is to create an environment named `xeus-python`
+The safest usage is to create an environment named `xeus-lua`
 
 ```bash
-mamba create -n xeus-python
-source activate xeus-python
+mamba create -n xeus-lua
+source activate xeus-lua
 ```
 
 ### Installing from conda-forge
 
-Then you can install in this environment `xeus-python` and its dependencies
-
-```bash
-mamba install xeus-python notebook -c conda-forge
-```
-
-### Installing from PyPI
-
-Depending on the platform, PyPI wheels may be available for xeus-python.
-
-```bash
-pip install xeus-python notebook
-```
-
-If you encounter the following error message
-
-```bash
-Collecting xeus-python
-  Cache entry deserialization failed, entry ignored
-  Could not find a version that satisfies the requirement xeus-python (from versions: )
-No matching distribution found for xeus-python
-```
-
-you probably need to upgrade pip: `pip install --upgrade pip` before attempting to
-install `xeus-python` again.
-
-The wheels uploaded on PyPI are **experimental**. In general we strongly recommend using
-a package manager instead. We maintain the conda-forge package, and nothing prevents you
-from creating a package your favorite Linux distribution or FreeBSD.
-
-The ongoing effort to package xeus-python for pip takes place in the
-[xeus-python-wheel](https://github.com/jupyter-xeus/xeus-python-wheel) repository.
+not yet
 
 ### Installing from source
 
 Or you can install it from the sources, you will first need to install dependencies
 
 ```bash
-mamba install cmake xeus nlohmann_json cppzmq xtl pybind11 pybind11_json ipython debugpy jupyterlab -c conda-forge
+mamba install cmake xeus xwidgets nlohmann_json cppzmq xtl lua  jupyterlab -c conda-forge
 ```
 
 Then you can compile the sources (replace `$CONDA_PREFIX` with a custom installation
@@ -75,67 +44,69 @@ prefix if need be)
 
 ```bash
 mkdir build && cd build
-cmake .. -D CMAKE_PREFIX_PATH=$CONDA_PREFIX -D CMAKE_INSTALL_PREFIX=$CONDA_PREFIX -D CMAKE_INSTALL_LIBDIR=lib -D PYTHON_EXECUTABLE=`which python`
+cmake .. -D CMAKE_PREFIX_PATH=$CONDA_PREFIX -D CMAKE_INSTALL_PREFIX=$CONDA_PREFIX -D CMAKE_INSTALL_LIBDIR=lib
 make && make install
 ```
 
 ## Trying it online
 
-To try out xeus-python interactively in your web browser, just click on the binder link:
+To try out xeus-lua interactively in your web browser, just click on the binder link:
 
-[![Binder](binder-logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-python/stable?urlpath=/lab/tree/notebooks/xeus-python.ipynb)
+[![Binder](binder-logo.svg)](https://mybinder.org/v2/gh/DerThorsten/xeus-lua/stable?urlpath=/lab/tree/notebooks/xeus-lua.ipynb)
 
 ## Usage
 
 Launch the Jupyter notebook with `jupyter notebook` or Jupyter lab with `jupyter lab`
-and launch a new Python notebook by selecting the **xpython** kernel.
+and launch a new Python notebook by selecting the **xlua** kernel.
 
 **Code execution and variable display**:
 
-![Basic code execution](docs/source/code_exec.gif)
+TODO
 
 **Output streams**:
 
-![Streams](docs/source/streams.gif)
+TODO
 
 **Input streams**:
 
-![Input](docs/source/input.gif)
+TODO
 
 **Error handling**:
 
-![Erro handling](docs/source/error.gif)
+TODO
 
 **Inspect**:
 
-![Inspect](docs/source/inspect.gif)
+TODO
 
 **Code completion**:
 
-![Completion](docs/source/code_completion.gif)
+TODO
 
 **Rich display**:
 
-![Rich display](docs/source/rich_disp.gif)
+TODO
 
 **And of course widgets**:
 
-![Widgets](docs/source/widgets.gif) ![Widgets binary](docs/source/binary.gif)
+TODO
 
 ## Documentation
 
-To get started with using `xeus-python`, check out the full documentation
+To get started with using `xeus-lua`, check out the full documentation (once its available :-) )
 
-http://xeus-python.readthedocs.io
+http://xeus-lua.readthedocs.io
 
-## What are the advantages of using xeus-python over ipykernel (IPython kernel)?
+## Why a lua kernel in 2021?
 
-Check-out this blog post for the answer:
-https://blog.jupyter.org/a-new-python-kernel-for-jupyter-fcdf211e30a8. Long story short:
+- 
 
-- xeus-python is a lot lighter than ipykernel, which makes it a lot easier to implement
+## What are the advantages of using xeus-lua over other lua kernels?
+
+
+- xeus-lua is a lot lighter than ipykernel, which makes it a lot easier to implement
   new features on top of it.
-- xeus-python already works with the **Jupyter Lab debugger**:
+- xeus-lua already works with the **Jupyter Lab debugger**:
   https://github.com/jupyterlab/debugger
 - xeus-based kernels are more versatile in that one can overload e.g. the concurrency
   model. This is something that Kitware’s SlicerJupyter project takes advantage of to
@@ -143,27 +114,26 @@ https://blog.jupyter.org/a-new-python-kernel-for-jupyter-fcdf211e30a8. Long stor
 
 ## Dependencies
 
-`xeus-python` depends on
+`xeus-lua` depends on
 
 - [xeus](https://github.com/jupyter-xeus/xeus)
 - [xtl](https://github.com/xtensor-stack/xtl)
-- [pybind11](https://github.com/pybind/pybind11)
-- [pybind11_json](https://github.com/pybind/pybind11_json)
-- [nlohmann_json](https://github.com/nlohmann/json)
+- [xwidgets](https://github.com/jupyter-xeus/xwidgets)
+- [pybind11](https://www.lua.org/)
 
-| `xeus-python` | `xeus`        | `xtl`        | `cppzmq` | `nlohmann_json` | `pybind11`   | `pybind11_json` | `pygments`     | `ptvsd` | `debugpy` | `IPython` |
-| ------------- | ------------- | ------------ | -------- | --------------- | ------------ | --------------- | -------------- | ------- | --------- | --------- |
-| master        | >=1.0.3,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.21,<8 |
-| 0.12.5        | >=1.0.3,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.21,<8 |
-| 0.12.4        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.21,<8 |
-| 0.12.3        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.21,<8 |
-| 0.12.2        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.21,<8 |
-| 0.12.1        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.21,<8 |
-| 0.12.0        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.21,<8 |
-| 0.11.3        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.20,<8 |
-| 0.11.2        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.20,<8 |
-| 0.11.1        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.20,<8 |
-| 0.11.0        | >=1.0.0,<0.26 | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=2.6.0,<3.0 | >=0.2.8,<0.3    | >=2.3.1,<3.0.0 |         | >=1.1.0   | >=7.20,<8 |
+| `xeus-lua`    | `xeus`        | `xwidgets`    | `xtl`        | `cppzmq` | `nlohmann_json` | `lua`        | 
+| ------------- | ------------- | ------------- | ------------ | -------- | --------------- | ------------ | 
+| master        | >=1.0.3,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.12.5        | >=1.0.3,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.12.4        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.12.3        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.12.2        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.12.1        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.12.0        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.11.3        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.11.2        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.11.1        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.11.0        | >=1.0.0,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
 
 ## Contributing
 

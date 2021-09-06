@@ -1,18 +1,18 @@
-.. Copyright (c) 2017, Martin Renou, Johan Mabille, Sylvain Corlay, and
+.. Copyright (c) 2021, Thorsten Beier
    Wolf Vollprecht
 
    Distributed under the terms of the BSD 3-Clause License.
 
    The full license is in the file LICENSE, distributed with this software.
 
-.. image:: xeus-python.svg
-   :alt: xeus-python
+.. image:: xeus-lua.svg
+   :alt: xeus-lua
 
 
 Introduction
 ------------
 
-``xeus-python`` is a Jupyter kernel for Python based on the native implementation of the Jupyter protocol 
+``xeus-lua`` is a Jupyter kernel for Python based on the native implementation of the Jupyter protocol 
 xeus_.
 
 Licensing

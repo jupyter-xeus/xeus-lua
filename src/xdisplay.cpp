@@ -45,6 +45,12 @@ void setup_display(
         }
     });
 
+    display_table.set_function("clear_output", [self](
+        const bool wait
+    ){
+        
+            self->clear_output(wait);
+    });
 
     detail_table.set_function("_update_display_data", [self](
         const std::string & data_str,
