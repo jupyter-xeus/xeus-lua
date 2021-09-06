@@ -133,9 +133,9 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
     endif ()
 
-    CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
+    CHECK_CXX_COMPILER_FLAG("-std=c++17" HAS_CPP17_FLAG)
 
-    if (HAS_CPP14_FLAG)
+    if (HAS_CPP17_FLAG)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
     else ()
         message(FATAL_ERROR "Unsupported compiler -- xeus requires C++14 support!")
@@ -253,9 +253,9 @@ macro(xlua_set_common_options target_name)
             target_compile_options(${target_name} PUBLIC -march=native)
         endif ()
 
-        # C++14 flag
-        CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
-        if (HAS_CPP14_FLAG)
+        # C++17 flag
+        CHECK_CXX_COMPILER_FLAG("-std=c++17" HAS_CPP17_FLAG)
+        if (HAS_CPP17_FLAG)
             target_compile_features(${target_name} PRIVATE cxx_std_14)
         else ()
             message(FATAL_ERROR "Unsupported compiler -- xeus-lua requires C++14 support!")
@@ -352,7 +352,7 @@ macro(xlua_create_target target_name linkage output_name)
 
     find_package(Threads) # TODO: add Threads as a dependence of xeus-static?
     target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${LUA_LIBRARY})
-
+    target_compile_features(${target_name} PRIVATE cxx_std_17)
 endmacro()
 
 # xeus-lua
@@ -383,7 +383,7 @@ endif ()
 if (XLUA_BUILD_XLUA_EXECUTABLE)
     add_executable(xlua ${XLUA_SRC})
     target_link_libraries(xlua PRIVATE ${LUA_LIBRARIES})
-    target_compile_features(xlua PRIVATE cxx_std_17)
+    #target_compile_features(xlua PRIVATE cxx_std_17)
     xlua_set_common_options(xlua)
     xlua_set_kernel_options(xlua)
 endif()
@@ -400,7 +400,7 @@ if(EMSCRIPTEN)
 
     add_executable(xeus_lua_kernel src/main_emscripten_kernel.cpp  ${XLUA_COMMON_SRC})
     target_link_libraries(xeus_lua_kernel  xeus-lua-static ${LUA_LIBRARY} )
-    target_compile_features(xeus_lua_kernel PRIVATE cxx_std_17)
+    #target_compile_features(xeus_lua_kernel PRIVATE cxx_std_17)
 endif()
 
 
