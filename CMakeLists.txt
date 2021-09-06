@@ -453,12 +453,6 @@ if (XLUA_BUILD_XLUA_EXECUTABLE)
             PATTERN "*.in" EXCLUDE)
 
 
-    # lua packages (json and ilua)
-    set(XLUA_PACKAGES_DIR "asset_dir/lua_packages"    CACHE STRING "Jupyter data directory")
-    install(DIRECTORY ${XLUA_PACKAGES_DIR}
-            DESTINATION ${XJUPYTER_DATA_DIR}/kernels/xlua
-            PATTERN "*.in" EXCLUDE)
-
     # Extra path for installing Jupyter kernelspec
     if (XEXTRA_JUPYTER_DATA_DIR)
         install(DIRECTORY ${XLUA_KERNELSPEC_DIR}
