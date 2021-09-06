@@ -256,9 +256,9 @@ macro(xlua_set_common_options target_name)
         # C++17 flag
         CHECK_CXX_COMPILER_FLAG("-std=c++17" HAS_CPP17_FLAG)
         if (HAS_CPP17_FLAG)
-            target_compile_features(${target_name} PRIVATE cxx_std_14)
+            target_compile_features(${target_name} PRIVATE cxx_std_17)
         else ()
-            message(FATAL_ERROR "Unsupported compiler -- xeus-lua requires C++14 support!")
+            message(FATAL_ERROR "Unsupported compiler -- xeus-lua requires C++17 support!")
         endif ()
     endif ()
 
