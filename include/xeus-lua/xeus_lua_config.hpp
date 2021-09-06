@@ -14,7 +14,7 @@
 // Project version
 #define XLUA_VERSION_MAJOR 0
 #define XLUA_VERSION_MINOR 1
-#define XLUA_VERSION_PATCH 10
+#define XLUA_VERSION_PATCH 11
 
 // Composing the version string from major, minor and patch
 #define XLUA_CONCATENATE(A, B) XLUA_CONCATENATE_IMPL(A, B)
