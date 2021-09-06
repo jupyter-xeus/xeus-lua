@@ -39,12 +39,12 @@ int print_cb(lua_State * L, interpreter * interpr) {
             return luaL_error(L, "'tostring' returned NULL value\n");
         }
         if (i > 1) {
-            interpr->publish_stream("stream", " "); 
+            interpr->publish_stream("stdout", " "); 
         }
-        interpr->publish_stream("stream", tostr);
+        interpr->publish_stream("stdout", tostr);
         lua_pop(L, 1);
     }
-    interpr->publish_stream("stream", "\n");
+    interpr->publish_stream("stdout", "\n");
     return 0;
 }
 int write_cb(lua_State * L, interpreter * interpr) {
@@ -57,7 +57,7 @@ int write_cb(lua_State * L, interpreter * interpr) {
         if (tostr == NULL) {
             return luaL_error(L, "'tostring' returned NULL value\n");
         }
-        interpr->publish_stream("stream", tostr);
+        interpr->publish_stream("stdout", tostr);
         lua_pop(L, 1);
     }
     return 0;

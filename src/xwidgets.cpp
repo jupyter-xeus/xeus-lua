@@ -724,7 +724,7 @@ local link_widgets = {
 
 
 local concat_tables = function(...)
-    ret = {}
+    local ret = {}
     tables = table.pack(...)
     for i=1,tables.n do
         t = tables[i]

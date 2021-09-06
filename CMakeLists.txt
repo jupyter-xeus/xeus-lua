@@ -64,8 +64,8 @@ OPTION(XLUA_USE_SHARED_XEUS "Link xlua  with the xeus shared library (instead of
 OPTION(XLUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (instead of the static library)" ON)
 
 # Test options
-OPTION(XLUA_BUILD_TESTS "xeus-lua test suite" OFF)
-OPTION(XLUA_DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
+# OPTION(XLUA_BUILD_TESTS "xeus-lua test suite" OFF)
+# OPTION(XLUA_DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 
 
 
@@ -405,16 +405,16 @@ endif()
 
 
 
-# Tests
-# =====
+# # Tests
+# # =====
 
-if(XLUA_DOWNLOAD_GTEST OR XLUA_GTEST_SRC_DIR)
-    set(XLUA_BUILD_TESTS ON)
-endif()
+# if(XLUA_DOWNLOAD_GTEST OR XLUA_GTEST_SRC_DIR)
+#     set(XLUA_BUILD_TESTS ON)
+# endif()
 
-if(XLUA_BUILD_TESTS)
-    add_subdirectory(test)
-endif()
+# if(XLUA_BUILD_TESTS)
+#     add_subdirectory(test)
+# endif()
 
 # Installation
 # ============

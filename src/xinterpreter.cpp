@@ -126,7 +126,8 @@ namespace xlua
         nl::json kernel_res;
 
 
-        kernel_res["payload"] = nl::json::object();
+        kernel_res["payload"] = nl::json::array();
+        kernel_res["user_expressions"] = nl::json::object();
         kernel_res["status"] = "ok";
 
        
@@ -172,36 +173,29 @@ namespace xlua
         result["status"] = "ok";
         result["matches"] = matches;
         result["cursor_start"] = cursor_start;
-        //result["cursor_end"] = 6;  
+        result["cursor_end"] = cursor_pos;  
 
         return result;
     }
 
-    nl::json interpreter::inspect_request_impl(const std::string& ,
-                                               int ,
-                                               int )
+    nl::json interpreter::inspect_request_impl(const std::string& /*code*/,
+                                               int /*cursor_pos*/,
+                                               int /*detail_level*/)
     {
-        nl::json result;
-        result["status"] = "ok";
-        result["found"] = true;
-        result["data"] = {{"text/plain", ""}};
-        result["metadata"] = {{"text/plain", ""}};
-        return result;    
+        nl::json jresult;
+        jresult["status"] = "ok";
+        jresult["found"] = false;
+        jresult["data"] = nl::json::object();
+        jresult["metadata"] = nl::json::object();
+        return jresult;
     }
 
-    nl::json interpreter::is_complete_request_impl(const std::string& code)
+    nl::json interpreter::is_complete_request_impl(const std::string& /*code*/)
     {
-        nl::json result;
-        sol::load_result code_result = lua.load(code);//, "[string]", sol::load_mode::text);
-        if (code_result.valid()) {
-            result["status"] = "complete";
-        }
-        else
-        {
-            result["indent"] = "    ";
-            result["status"] = "incomplete";
-        }
-        return result;
+        nl::json jresult;
+        jresult["status"] = "complete";
+        return jresult;
+
     }
 
     nl::json interpreter::kernel_info_request_impl()
