@@ -5,16 +5,12 @@ platform:
 
 image:
   - Visual Studio 2017
-  - Visual Studio 2015
-
 environment:
   matrix:
     - MINICONDA: C:\\xeus-conda
 
 init:
   - "ECHO %MINICONDA%"
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2015" set VCVARPATH="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
-  - if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2015" set VCARGUMENT=%PLATFORM%
   - if "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2017" set VCVARPATH="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - echo "%VCVARPATH% %VCARGUMENT%"
   - "%VCVARPATH% %VCARGUMENT%"
