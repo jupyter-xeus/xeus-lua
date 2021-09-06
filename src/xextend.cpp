@@ -28,7 +28,8 @@ void add_pprint_module(sol::state & lua){
     -- ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
     -- OTHER DEALINGS IN THE SOFTWARE.
     -- For more information, please refer to <http://unlicense.org/>
-
+    )"""" 
+    R""""(
     pprint = { VERSION = '0.1' }
 
     local depth = 1
@@ -87,7 +88,8 @@ void add_pprint_module(sol::state & lua){
             return s, "'"
         end
     end
-
+    )"""" 
+    R""""(
     local function is_plain_key(key)
         return type(key) == 'string' and key:match('^[%a_][%a%d_]*$')
     end
@@ -148,7 +150,8 @@ void add_pprint_module(sol::state & lua){
             end
         end
     end
-
+    )"""" 
+    R""""(
     -- makes 'foo2' < 'foo100000'. string.sub makes substring anyway, no need to use index based method
     local function str_natural_cmp(lhs, rhs)
         while #lhs > 0 and #rhs > 0 do
@@ -205,7 +208,8 @@ void add_pprint_module(sol::state & lua){
         end
         return option
     end
-
+    )"""" 
+    R""""(
     -- override defaults and take effects for all following calls
     function pprint.setup(option)
         pprint.defaults = make_option(option)
@@ -300,7 +304,8 @@ void add_pprint_module(sol::state & lua){
                 end
             end
         end
-
+        )"""" 
+        R""""(
         local function string_formatter(s, force_long_quote)
             local s, quote = escape(s)
             local quote_len = force_long_quote and 4 or 2
@@ -381,7 +386,8 @@ void add_pprint_module(sol::state & lua){
                     depth = depth-1
                 end
             end
-
+            )"""" 
+            R""""(
             -- hashmap part of the table, in contrast to array part
             local function is_hash_key(k)
                 if type(k) ~= 'number' then
@@ -486,7 +492,8 @@ void add_pprint_module(sol::state & lua){
 
         return table.concat(buf)
     end
-
+    )"""" 
+    R""""(
 
 
     -- pprint all the arguments
@@ -594,7 +601,8 @@ void add_json_module(sol::state & lua){
       return "null"
     end
 
-
+    )"""" 
+    R""""(
     local function encode_table(val, stack)
       local res = {}
       stack = stack or {}
@@ -640,7 +648,8 @@ void add_json_module(sol::state & lua){
     local function encode_string(val)
       return '"' .. val:gsub('[%z\1-\31\\"]', escape_char) .. '"'
     end
-
+    )"""" 
+    R""""(
 
     local function encode_number(val)
       -- Check for NaN, -inf and inf
