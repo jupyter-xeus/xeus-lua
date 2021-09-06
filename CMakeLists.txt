@@ -220,7 +220,6 @@ endif()
 
 set(XLUA_SRC
     src/main.cpp
-     ${XLUA_COMMON_SRC}
 )
 
 
@@ -303,7 +302,7 @@ macro(xlua_create_target target_name linkage output_name)
         message(FATAL_ERROR "Invalid library linkage: ${linkage}")
     endif ()
 
-    add_library(${target_name} ${linkage_upper} ${XEUS_LUA_SRC} ${XEUS_LUA_HEADERS})
+    add_library(${target_name} ${linkage_upper} ${XEUS_LUA_SRC} ${XLUA_COMMON_SRC} ${XEUS_LUA_HEADERS})
     xlua_set_common_options(${target_name})
 
     set_target_properties(${target_name} PROPERTIES
@@ -361,7 +360,7 @@ set(XEUS_LUA_TARGETS "")
 
 if (XLUA_BUILD_SHARED)
     # Build libraries
-    xlua_create_target(xeus-lua SHARED xeus-lua)
+    xlua_create_target(xeus-lua SHARED xeus-lua )
     list(APPEND XEUS_LUA_TARGETS xeus-lua)
 endif ()
 
@@ -394,11 +393,11 @@ endif()
 if(EMSCRIPTEN)
     message(STATUS ${LUA_LIBRARIES})
 
-    add_executable(xeus_lua src/main_emscripten.cpp ${XLUA_COMMON_SRC})
+    add_executable(xeus_lua src/main_emscripten.cpp )
     target_link_libraries(xeus_lua  xeus-lua-static ${LUA_LIBRARY} )
     target_compile_features(xeus_lua PRIVATE cxx_std_17)
 
-    add_executable(xeus_lua_kernel src/main_emscripten_kernel.cpp  ${XLUA_COMMON_SRC})
+    add_executable(xeus_lua_kernel src/main_emscripten_kernel.cpp )
     target_link_libraries(xeus_lua_kernel  xeus-lua-static ${LUA_LIBRARY} )
     target_compile_features(xeus_lua_kernel PRIVATE cxx_std_17)
 endif()

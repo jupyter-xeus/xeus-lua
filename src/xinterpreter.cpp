@@ -41,17 +41,17 @@ namespace xlua
 {
     
     // implemented in xextend.cpp
-    XEUS_LUA_API void extend(sol::state & lua);
+    void extend(sol::state & lua);
     // implemented in xcomplete.cpp
-    XEUS_LUA_API int complete(sol::state & lua, const std::string & start,int cursor_pos, nl::json & matches);
+    int complete(sol::state & lua, const std::string & start,int cursor_pos, nl::json & matches);
     // implemented in xio.cpp
-    XEUS_LUA_API void setup_io(sol::state & lua, interpreter & interp);
+    void setup_io(sol::state & lua, interpreter & interp);
     // implemented in xdisplay.cpp
-    XEUS_LUA_API void setup_display(sol::state & lua, interpreter & interp);
+    void setup_display(sol::state & lua, interpreter & interp);
 
     #ifdef XLUA_WITH_XWIDGETS
     // implemented in xwidgets.cpp
-    XEUS_LUA_API void register_xwidgets(sol::state & lua);
+    void register_xwidgets(sol::state & lua);
     #endif
 
     interpreter::interpreter()
