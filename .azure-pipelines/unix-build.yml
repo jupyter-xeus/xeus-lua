@@ -1,0 +1,45 @@
+parameters:
+  - name: 'platform'
+    type: string
+
+steps:
+  - script: |
+      conda config --set always_yes yes --set changeps1 no
+      conda update -q conda
+      conda env create --file environment-dev.yml
+    displayName: Install dependencies
+
+  - script: |
+      source activate xeus-lua
+      conda install gcc_linux-64=7.5.0 gcc_impl_linux-64=7.5.0 gxx_linux-64=7.5.0 gxx_impl_linux-64 -c conda-forge;
+    condition: eq('${{ parameters.platform }}', 'Linux')
+    displayName: Install conda-forge compilers
+
+  - script: |
+      source activate xeus-lua
+      mkdir build
+      cd build
+      if [[ $(xpyt_used_shared_xeus_python) == '0' ]]; then
+        CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXLUA_BUILD_SHARED=OFF -DXLUA_USE_SHARED_XEUS_LUA=OFF";
+      fi
+      if [[ $(xpyt_used_shared_xeus) == '0' ]]; then
+        CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DXLUA_USE_SHARED_XEUS=OFF";
+      fi
+      # The xeus conda package is built with CMAKE_CXX_STANDARD=17
+      CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_CXX_STANDARD=17";
+      cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_PREFIX_PATH=$CONDA_PREFIX -D CMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DXLUA_DOWNLOAD_GTEST=ON  -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX ${CMAKE_EXTRA_ARGS} $(Build.SourcesDirectory)
+    displayName: Configure xeus-lua
+    workingDirectory: $(Build.BinariesDirectory)
+
+  - script: |
+      source activate xeus-lua
+      make install -j2
+    displayName: Build xeus-lua
+    workingDirectory: $(Build.BinariesDirectory)/build
+
+
+  - script: |
+      source activate xeus-lua
+      pytest . -vvv
+    displayName: Test xeus-lua (Python)
+    workingDirectory: $(Build.sourcesDirectory)/test
