@@ -10,7 +10,7 @@ Usage
 =====
 
 Launch the Jupyter notebook with `jupyter notebook` or Jupyter lab with `jupyter lab` and launch
-a new Python notebook by selecting the **xpython** kernel.
+a new Python notebook by selecting the **xlua** kernel.
 
 Code execution and variable display
 -----------------------------------
@@ -36,11 +36,6 @@ Error handling
 .. image:: error.gif
    :alt: error_handling
 
-Inspect
--------
-
-.. image:: inspect.gif
-   :alt: inspect
 
 Code completion
 ---------------

@@ -12,7 +12,7 @@
 Introduction
 ------------
 
-``xeus-lua`` is a Jupyter kernel for Python based on the native implementation of the Jupyter protocol 
+``xeus-lua`` is a Jupyter kernel for Lua based on the native implementation of the Jupyter protocol 
 xeus_.
 
 Licensing
