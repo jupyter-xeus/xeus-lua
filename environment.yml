@@ -2,7 +2,7 @@ name: xeus-lua
 channels:
   - conda-forge
 dependencies:
-  - xeus-lua=0.1.0
+  - xeus-lua==0.1.14
   - notebook
   - ipywidgets>=7.6
   - jupyterlab=3

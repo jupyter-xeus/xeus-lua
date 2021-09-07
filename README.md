@@ -55,11 +55,11 @@ cmake .. -D CMAKE_PREFIX_PATH=$CONDA_PREFIX -D CMAKE_INSTALL_PREFIX=$CONDA_PREFI
 make && make install
 ```
 
-<!-- ## Trying it online
+## Trying it online
 
 To try out xeus-lua interactively in your web browser, just click on the binder link:
 
-[![Binder](binder-logo.svg)](https://mybinder.org/v2/gh/DerThorsten/xeus-lua/stable?urlpath=/lab/tree/notebooks/xeus-lua.ipynb) -->
+[![Binder](binder-logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-lua/main?urlpath=/lab/tree/examples/game_of_life.ipynb)
 
 ## Usage
 
