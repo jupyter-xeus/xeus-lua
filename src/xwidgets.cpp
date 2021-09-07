@@ -106,7 +106,7 @@ namespace xlua
 
 
 #define XLUA_REGISTER_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
-    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){ \
+    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::protected_function function){ \
         auto callback = [function](const auto& s) { \
             auto res = function.call(PROPERTY_TYPE(s.PROPERTY_NAME)); \
             if (!res.valid()) \
@@ -121,7 +121,7 @@ namespace xlua
     }; 
 
 #define XLUA_REGISTER_INDEX_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
-    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){ \
+    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::protected_function function){ \
         auto callback = [function](const auto& s) { \
             auto res = function.call(PROPERTY_TYPE(s.PROPERTY_NAME)+1); \
             if (!res.valid()) \
@@ -136,7 +136,7 @@ namespace xlua
     }; 
 
 #define XLUA_REGISTER_OPTIONAL_INDEX_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
-    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::unsafe_function function){ \
+    CLS_OBJ["register_observer"] = [](xwidgtes_type & widget, sol::protected_function function){ \
         auto callback = [function](const auto& s) { \
             auto res = function.call(xtl::xoptional<int>(s.PROPERTY_NAME).value()+1); \
             if (!res.valid()) \
@@ -243,7 +243,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, button_style);
 
             //XLUA_ADD_PROPERTY(xwidgtes_lua_type, button_style, std::string);
-            xwidgtes_lua_type["on_click"] = [](xwidgtes_type & widget, sol::unsafe_function function){
+            xwidgtes_lua_type["on_click"] = [](xwidgtes_type & widget, sol::protected_function function){
                 auto callback = [function]() {
                     auto res = function.call();
                     if (!res.valid())
@@ -294,7 +294,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
         xwidgtes_lua_type["display"] = &xwidgtes_type::display;
         xwidgtes_lua_type["capture"] = &xwidgtes_type::capture;
         xwidgtes_lua_type["release"] = &xwidgtes_type::release;
-        xwidgtes_lua_type["captured"] = [](xwidgtes_type & widget, sol::unsafe_function function){
+        xwidgtes_lua_type["captured"] = [](xwidgtes_type & widget, sol::protected_function function){
             widget.capture();
             auto res = function.call();
             if (!res.valid())
@@ -434,6 +434,17 @@ void register_xwidgets_impl(sol::state_view  & lua)
         });
     }
     {
+        using xwidgtes_type =  xw::label;
+        register_widget_impl<xwidgtes_type>(lua, "xlabel",[](auto && xwidgtes_lua_type){
+       
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, description);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, value);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, placeholder);
+
+            //XLUA_REGISTER_INDEX_OBSERVER(xwidgtes_lua_type, int, index);
+        });
+    }
+    {
         using xwidgtes_type =  xw::numeral<double>;
         register_widget_impl<xwidgtes_type>(lua, "xnumeral",[](auto && xwidgtes_lua_type){
 
@@ -544,7 +555,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
 
             XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, std::string, value);
 
-            xwidgtes_lua_type["on_submit"] = [](xwidgtes_type & widget, sol::unsafe_function function){
+            xwidgtes_lua_type["on_submit"] = [](xwidgtes_type & widget, sol::protected_function function){
                 auto callback = [function]() {
                     auto res = function.call();
                     if (!res.valid())
