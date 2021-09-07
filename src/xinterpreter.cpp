@@ -138,10 +138,10 @@ namespace xlua
         // check if printing the code would yield an error
         std::stringstream test_code;
         test_code<<"print("<<code<<")";
-        auto test_code_result = lua.script(test_code.str());
+        auto test_code_result = lua.safe_script(test_code.str());
         
         if(!test_code_result.valid()){
-            auto code_result= lua.script(code);
+            auto code_result= lua.safe_script(code);
             if (code_result.valid())
             {
                 kernel_res["status"] = "ok";
