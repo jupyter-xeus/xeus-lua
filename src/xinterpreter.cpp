@@ -58,6 +58,7 @@ namespace xlua
 
     int my_exception_handler (lua_State* L, sol::optional<const std::exception&> maybe_exception, sol::string_view description) {
         
+        std::cout<<"catching via my_exception_handler\n ";
         auto & interpreter = xeus::get_interpreter();
         std::stringstream ss;
         // L is the lua state, which you can wrap in a state_view if necessary
@@ -208,15 +209,18 @@ namespace xlua
             // auto test_code_result = lua.safe_script(test_code.str());
         }
         else{
-            auto code_result= lua.safe_script(code,  &sol::script_pass_on_error);
+            sol::protected_function_result code_result = lua.safe_script(code,  &sol::script_pass_on_error);
             if (code_result.valid())
             {
+
                 kernel_res["status"] = "ok";
                 kernel_res["user_expressions"] = nl::json::object();
             }
             else
             {
+                std::cout<<"catching via else\n ";
                 sol::error err = code_result;
+                sol::call_status status = code_result.status();
                 const auto error_str = err.what();
                 if (!silent)
                 {   
