@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-#include "xeus-lua/sol/sol.hpp"
+#include "sol/sol.hpp"
 #include "xeus-lua/xinterpreter.hpp"
 #include "nlohmann/json.hpp"
 namespace nl = nlohmann;
@@ -16,7 +16,7 @@ namespace xlua
 
 
 void setup_display(
-  sol::state & lua,
+  sol::state_view & lua,
   interpreter & interp
 )
 {

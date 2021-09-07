@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 
-#include "xeus-lua/sol/sol.hpp"
+#include "sol/sol.hpp"
 #include "xeus/xinterpreter.hpp"
 #include "xeus/xguid.hpp"
 
@@ -153,7 +153,7 @@ namespace xlua
 
 
 template<class xwidgtes_type, class extend_f>
-void register_widget_impl(sol::state & lua, const std::string widget_name, extend_f && extend)
+void register_widget_impl(sol::state_view  & lua, const std::string widget_name, extend_f && extend)
 {
     // get widgets table
     sol::table ilua_table = lua["ilua"];
@@ -188,7 +188,7 @@ std::string vector_cls_name(const std::string cls_name)
     return ss.str();
 }
 
-void register_widget_related_types(sol::state & lua)
+void register_widget_related_types(sol::state_view  & lua)
 {
     // get widgets table
     sol::table ilua_table = lua["ilua"];
@@ -224,7 +224,7 @@ void register_widget_related_types(sol::state & lua)
 }
 
 
-void register_xwidgets_impl(sol::state & lua)
+void register_xwidgets_impl(sol::state_view  & lua)
 {
 
     // get widgets table
@@ -682,7 +682,7 @@ void register_xwidgets_impl(sol::state & lua)
     }
 }
 
-void extend_xwidgets(sol::state & lua)
+void extend_xwidgets(sol::state_view  & lua)
 {
     const std::string extend = R""""(
 local atomic_widgets = {
@@ -790,7 +790,7 @@ end
 }
 
 
-void register_xwidgets(sol::state & lua)
+void register_xwidgets(sol::state_view  & lua)
 {
     register_widget_related_types(lua);
     register_xwidgets_impl(lua);

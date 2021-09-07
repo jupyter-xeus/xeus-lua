@@ -1,10 +1,10 @@
-#include "xeus-lua/sol/sol.hpp"
+#include "sol/sol.hpp"
 #include <iostream>
 
 namespace xlua
 {
 
-void add_pprint_module(sol::state & lua){
+void add_pprint_module(sol::state_view & lua){
 
     std::string script = R""""(
     -- Chen Tao - jagttt@gmail.com
@@ -541,7 +541,7 @@ void add_pprint_module(sol::state & lua){
     }
 }
 
-void add_json_module(sol::state & lua){
+void add_json_module(sol::state_view & lua){
 
     std::string script = R""""(
     --
@@ -940,7 +940,7 @@ void add_json_module(sol::state & lua){
     }
 }
 
-void add_ilua_module(sol::state & lua){
+void add_ilua_module(sol::state_view & lua){
 
     std::string script = R""""(
 
@@ -1020,7 +1020,7 @@ void add_ilua_module(sol::state & lua){
 }
 
 
-void extend(sol::state & lua)
+void extend(sol::state_view & lua)
 {
     add_pprint_module(lua);
     add_json_module(lua);

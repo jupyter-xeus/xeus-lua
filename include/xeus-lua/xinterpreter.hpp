@@ -11,10 +11,7 @@
 #ifndef XLUA_INTERPRETER_HPP
 #define XLUA_INTERPRETER_HPP
 
-#ifdef __GNUC__
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wattributes"
-#endif
+
 
 #include <string>
 #include <memory>
@@ -24,11 +21,12 @@
 #include "xeus_lua_config.hpp"
 #include "xeus/xinterpreter.hpp"
 
-#include "xeus-lua/sol/sol.hpp"
 
-
-//#include "xeus/xems_interpreter.hpp"
-
+extern "C" {
+# include "lua.h"
+# include "lauxlib.h"
+# include "lualib.h"
+}
 namespace nl = nlohmann;
 
 namespace xlua
@@ -68,7 +66,7 @@ namespace xlua
 
     private:
 
-        sol::state lua;
+        // sol::state lua;
         lua_State * L;
 
         // allow stdin for the current request
@@ -76,8 +74,5 @@ namespace xlua
     };
 }
 
-#ifdef __GNUC__
-    #pragma GCC diagnostic pop
-#endif
 
 #endif

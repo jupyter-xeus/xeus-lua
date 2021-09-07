@@ -1,6 +1,6 @@
 # ![xeus-lua](docs/source/xeus-lua.svg)
 
-[![Azure Pipelines](https://dev.azure.com/DerThorsten/xeus-lua/_apis/build/status/jupyter-xeus.xeus-lua?branchName=main)](https://dev.azure.com/DerThorsten/xeus-lua/_build/latest?definitionId=2&branchName=master)
+[![Azure Pipelines](https://dev.azure.com/derthorstenbeier/xeus-lua/_apis/build/status/DerThorsten.xeus-lua?branchName=main)](https://dev.azure.com/derthorstenbeier/xeus-lua/_build/latest?definitionId=11&branchName=main)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/vy6rhqdw24pjduip?svg=true)](https://ci.appveyor.com/project/DerThorsten/xeus-lua)
 [![Documentation Status](http://readthedocs.org/projects/xeus-lua/badge/?version=latest)](https://xeus-lua.readthedocs.io/en/latest/?badge=latest)
 <!-- [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DerThorsten/xeus-lua/main?urlpath=/lab/tree/notebooks/xeus-lua.ipynb) -->
@@ -104,13 +104,7 @@ http://xeus-lua.readthedocs.io
 ## What are the advantages of using xeus-lua over other lua kernels?
 
 
-- xeus-lua is a lot lighter than ipykernel, which makes it a lot easier to implement
-  new features on top of it.
-- xeus-lua already works with the **Jupyter Lab debugger**:
-  https://github.com/jupyterlab/debugger
-- xeus-based kernels are more versatile in that one can overload e.g. the concurrency
-  model. This is something that Kitware’s SlicerJupyter project takes advantage of to
-  integrate with the Qt event loop of their Qt-based desktop application.
+-  todo
 
 ## Dependencies
 
@@ -124,6 +118,7 @@ http://xeus-lua.readthedocs.io
 | `xeus-lua`    | `xeus`        | `xwidgets`    | `xtl`        | `cppzmq` | `nlohmann_json` | `lua`        | 
 | ------------- | ------------- | ------------- | ------------ | -------- | --------------- | ------------ | 
 | master        | >=1.0.3,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.1.13        | >=1.0.3,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
 
 ## Contributing
 

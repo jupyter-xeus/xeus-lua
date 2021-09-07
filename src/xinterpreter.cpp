@@ -31,7 +31,7 @@
 
 #include "xeus/xinterpreter.hpp"
 #include "xeus-lua/xinterpreter.hpp"
-#include "xeus-lua/sol/sol.hpp"
+#include "sol/sol.hpp"
 
 
 namespace nl = nlohmann;
@@ -41,23 +41,25 @@ namespace xlua
 {
     
     // implemented in xextend.cpp
-    void extend(sol::state & lua);
+    void extend(sol::state_view & lua);
     // implemented in xcomplete.cpp
-    int complete(sol::state & lua, const std::string & start,int cursor_pos, nl::json & matches);
+    int complete(sol::state_view & lua, const std::string & start,int cursor_pos, nl::json & matches);
     // implemented in xio.cpp
-    void setup_io(sol::state & lua, interpreter & interp);
+    void setup_io(sol::state_view & lua, interpreter & interp);
     // implemented in xdisplay.cpp
-    void setup_display(sol::state & lua, interpreter & interp);
+    void setup_display(sol::state_view & lua, interpreter & interp);
 
     #ifdef XLUA_WITH_XWIDGETS
     // implemented in xwidgets.cpp
-    void register_xwidgets(sol::state & lua);
+    void register_xwidgets(sol::state_view & lua);
     #endif
 
     interpreter::interpreter()
     : m_allow_stdin(true)
     {
-        L = lua;
+        //L = lua;
+        L = luaL_newstate();
+        sol::state_view lua(L);
 
         xeus::register_interpreter(this);
         //luaL_openlibs(L);
@@ -108,6 +110,7 @@ namespace xlua
 
     interpreter::~interpreter()
     {
+        lua_close(L);
     }
 
     void interpreter::configure_impl()
@@ -121,6 +124,7 @@ namespace xlua
                                                nl::json /*user_expressions*/,
                                                bool allow_stdin)
     {
+        sol::state_view lua(L);
         m_allow_stdin = allow_stdin;
         // reset  payload
         nl::json kernel_res;
@@ -165,6 +169,7 @@ namespace xlua
         const std::string& code,
         int cursor_pos)
     {
+        sol::state_view lua(L);
         nl::json matches = nl::json::array();
 
         int cursor_start =  complete(lua, code.c_str(), cursor_pos, matches);
