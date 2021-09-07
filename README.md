@@ -10,6 +10,12 @@
 `xeus-lua` is a Jupyter kernel for Lua based on the native implementation of the
 Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus).
 
+## Disclaimer
+
+This is still under development and in progress. 
+Things might change.
+The readme, conda integration and examples are still in development.
+
 ## Installation
 
 xeus-lua has **not yet** been packaged for the mamba (or conda) package manager, but will be soon.
