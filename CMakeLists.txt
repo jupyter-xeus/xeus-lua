@@ -63,9 +63,6 @@ OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (in
 OPTION(XLUA_USE_SHARED_XEUS "Link xlua  with the xeus shared library (instead of the static library)" ON)
 OPTION(XLUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (instead of the static library)" ON)
 
-# Test options
-# OPTION(XLUA_BUILD_TESTS "xeus-lua test suite" OFF)
-# OPTION(XLUA_DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 
 
 

@@ -105,12 +105,7 @@ void setup_io(
         _G["__custom_print"] = nil
 
         function print(...)
-            p =  ilua.config.printer
-            if p == "default" or p == "pretty" then
-                pprint.pprint(...)
-            else 
-                ilua.detail.__custom_print(...)
-            end
+           ilua.detail.__custom_print(...)
         end
     )"""");
 
