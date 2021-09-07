@@ -59,7 +59,7 @@ make && make install
 
 To try out xeus-lua interactively in your web browser, just click on the binder link:
 
-[![Binder](binder-logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-lua/main?urlpath=/lab/tree/examples/game_of_life.ipynb)
+[![Binder](binder-logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-lua/main?urlpath=/lab/tree/notebooks/game_of_life.ipynb)
 
 ## Usage
 

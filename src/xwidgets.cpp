@@ -81,6 +81,17 @@ namespace xlua
         })\
     )
 
+#define XLUA_ADD_DATA_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
+    CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
+        [](xwidgtes_type & widget){\
+            return PROPERTY_TYPE(widget.PROPERTY_NAME);\
+        }, \
+        [](xwidgtes_type & widget, const std::string & val){\
+            std::vector<char> data(val.begin(), val.end());\
+            widget.PROPERTY_NAME = data;\
+        })\
+    )
+
 #define XLUA_ADD_INDEX_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
     CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
         [](xwidgtes_type & widget){\
@@ -348,7 +359,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
         using xwidgtes_type =  xw::audio;
         register_widget_impl<xwidgtes_type>(lua, "xaudio",[](auto && xwidgtes_lua_type){
 
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
+            XLUA_ADD_DATA_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, autoplay);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, loop);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, controls);
@@ -426,7 +437,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
         using xwidgtes_type =  xw::image;
         register_widget_impl<xwidgtes_type>(lua, "ximage",[](auto && xwidgtes_lua_type){
 
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
+            XLUA_ADD_DATA_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, format);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, width);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, height);
@@ -627,7 +638,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
         using xwidgtes_type =  xw::video;
         register_widget_impl<xwidgtes_type>(lua, "xvideo",[](auto && xwidgtes_lua_type){
 
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
+            XLUA_ADD_DATA_PROPERTY(xwidgtes_lua_type, std::vector<char>,  value);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, format);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, width);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, std::string, height);
