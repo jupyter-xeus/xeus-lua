@@ -15,6 +15,7 @@ a new Python notebook by selecting the **xlua** kernel.
 Code execution and variable display
 -----------------------------------
 
+TODO
 .. image:: code_exec.gif
    :alt: basic_code_execution
 
