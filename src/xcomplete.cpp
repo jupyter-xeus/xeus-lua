@@ -29,7 +29,7 @@
 
 #include <string>
 
-#include "xeus-lua/sol/sol.hpp"
+#include "sol/sol.hpp"
 #include "nlohmann/json.hpp"
 
 namespace nl = nlohmann;
@@ -205,7 +205,7 @@ int complete_impl(lua_State * L, const char * code, int cursor_pos, nl::json & m
 
 
 int complete(
-    sol::state & lua, 
+    sol::state_view & lua, 
     const std::string & start,
     int cursor_pos,
     nl::json & matches

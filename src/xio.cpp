@@ -1,4 +1,4 @@
-#include "xeus-lua/sol/sol.hpp"
+#include "sol/sol.hpp"
 #include "xeus-lua/xinterpreter.hpp"
 #include "nlohmann/json.hpp"
 
@@ -75,7 +75,7 @@ int my_write_lua_cb(lua_State * L) {
 
 
 void setup_io(
-  sol::state & lua,
+  sol::state_view  & lua,
   interpreter & interp
 )
 {
