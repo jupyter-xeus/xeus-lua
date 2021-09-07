@@ -7,8 +7,6 @@ namespace xlua
 void add_ilua_module(sol::state_view & lua){
 
     std::string script = R""""(
-
-
     ilua = {
         display = { _version = "0.1.0" ,
             detail = {}
@@ -24,38 +22,6 @@ void add_ilua_module(sol::state_view & lua){
         }
     }
     local display = ilua.display
-
-
-    local function display_data(data,metadata,transient)
-        display.detail._display_data(
-            json.encode(data),
-            json.encode(metadata),
-            json.encode(transient)
-        )
-    end
-
-    local function display.mimetype(mimetype, data)
-        data = {
-            [mimetype] = data
-        }
-        display_data(data, {}, {})
-    end
-
-    local function display.plain_text(str)
-        display.mimetype("text/plain", str)
-    end
-
-    local function display.html(html)
-        display.mimetype("text/html", html)
-    end
-
-    local function display.json(j)
-        display.mimetype("application/json", j)
-    end
-
-    local function display.latex(j)
-        display.mimetype("text/latex", j)
-    end
 
 
     function display.display(...)
@@ -75,10 +41,10 @@ void add_ilua_module(sol::state_view & lua){
 
     
     )"""";
-    auto code_result = lua.script(script);
+    sol::protected_function_result code_result  = lua.safe_script(script, &sol::script_pass_on_error);
     if (!code_result.valid()) {
         sol::error err = code_result;
-        std::cerr << "failed to load string-based script into the program" << err.what() << std::endl;
+        std::cerr << "failed to load string-based script into the program for xextend" << err.what() << std::endl;
         throw std::runtime_error(err.what());
     }
 }
