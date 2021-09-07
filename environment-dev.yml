@@ -1,4 +1,4 @@
-name: xeus-python
+name: xeus-lua
 channels:
   - conda-forge
 dependencies:

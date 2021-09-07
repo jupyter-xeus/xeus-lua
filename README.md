@@ -49,11 +49,11 @@ cmake .. -D CMAKE_PREFIX_PATH=$CONDA_PREFIX -D CMAKE_INSTALL_PREFIX=$CONDA_PREFI
 make && make install
 ```
 
-## Trying it online
+<!-- ## Trying it online
 
 To try out xeus-lua interactively in your web browser, just click on the binder link:
 
-[![Binder](binder-logo.svg)](https://mybinder.org/v2/gh/DerThorsten/xeus-lua/stable?urlpath=/lab/tree/notebooks/xeus-lua.ipynb)
+[![Binder](binder-logo.svg)](https://mybinder.org/v2/gh/DerThorsten/xeus-lua/stable?urlpath=/lab/tree/notebooks/xeus-lua.ipynb) -->
 
 ## Usage
 
@@ -104,7 +104,6 @@ http://xeus-lua.readthedocs.io
 
 ## What are the advantages of using xeus-lua over other lua kernels?
 
-
 -  todo
 
 ## Dependencies
@@ -114,7 +113,7 @@ http://xeus-lua.readthedocs.io
 - [xeus](https://github.com/jupyter-xeus/xeus)
 - [xtl](https://github.com/xtensor-stack/xtl)
 - [xwidgets](https://github.com/jupyter-xeus/xwidgets)
-- [pybind11](https://www.lua.org/)
+- [lua](https://www.lua.org/)
 
 | `xeus-lua`    | `xeus`        | `xwidgets`    | `xtl`        | `cppzmq` | `nlohmann_json` | `lua`        | 
 | ------------- | ------------- | ------------- | ------------ | -------- | --------------- | ------------ | 
