@@ -6,6 +6,3 @@ dependencies:
   - notebook
   - ipywidgets>=7.6
   - jupyterlab=3
-  - itkwidgets
-  - matplotlib
-  - ipympl
