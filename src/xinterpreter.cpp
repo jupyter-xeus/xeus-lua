@@ -117,6 +117,16 @@ namespace xlua
     {
     }
 
+
+    bool is_simple_statement(const std::string& code)
+    {
+        // todo
+        return code.find(' ') == std::string::npos &&
+               code.find('\n') == std::string::npos &&
+               code.find('\t') == std::string::npos &&
+               code.find('.') == std::string::npos;
+    }
+
     nl::json interpreter::execute_request_impl(int /*execution_count*/,
                                                const std::string& code,
                                                bool silent,
@@ -135,12 +145,14 @@ namespace xlua
         kernel_res["status"] = "ok";
 
        
-        // check if printing the code would yield an error
-        std::stringstream test_code;
-        test_code<<"print("<<code<<")";
-        auto test_code_result = lua.safe_script(test_code.str());
-        
-        if(!test_code_result.valid()){
+        //const auto is_simple = is_simple_statement(code);
+        if(false)
+        {
+            // std::stringstream test_code;
+            // test_code<<"print("<<code<<")";
+            // auto test_code_result = lua.safe_script(test_code.str());
+        }
+        else{
             auto code_result= lua.safe_script(code);
             if (code_result.valid())
             {
