@@ -96,6 +96,8 @@ namespace xlua
     void setup_io(sol::state_view & lua, interpreter & interp);
     // implemented in xdisplay.cpp
     void setup_display(sol::state_view & lua, interpreter & interp);
+    // implemented in xjson.cpp
+    void setup_json(sol::state_view & lua, interpreter & interp);
 
     #ifdef XLUA_WITH_XWIDGETS
     // implemented in xwidgets.cpp
@@ -143,8 +145,13 @@ namespace xlua
         // io.read / io.write / io.flush print 
         setup_io(lua, *this);
 
+        // json helper functions
+        setup_json(lua, *this);
+        
         // add functions to display data
         setup_display(lua, *this);
+
+
 
         // add package path only do this for emscripten
         #ifdef __EMSCRIPTEN__

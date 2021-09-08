@@ -17,29 +17,11 @@ void add_ilua_module(sol::state_view & lua){
         config = {
             printer = "default"
         },
-        detail = {
-
+        detail = {},
+        json = {
+            detail = {}
         }
     }
-    local display = ilua.display
-
-
-    function display.display(...)
-        args = table.pack(...)
-        for i=1,args.n do
-            local arg = args[i]
-            arg:display()
-        end
-    end
-
-    function display.with_output(output_widget, f)
-        output_widget:capture()
-        f()
-        output:release()
-    end
-    return display
-
-    
     )"""";
     sol::protected_function_result code_result  = lua.safe_script(script, &sol::script_pass_on_error);
     if (!code_result.valid()) {

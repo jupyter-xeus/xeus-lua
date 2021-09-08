@@ -1,6 +1,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "sol/sol.hpp"
 #include "xeus-lua/xinterpreter.hpp"
@@ -69,6 +70,55 @@ void setup_display(
             self->publish_execution_error("json::parse_error",ex.what(),std::vector<std::string>());
         }
     });
+
+    std::string script = R""""(
+
+    local display = ilua.display
+
+
+    function display.display(...)
+        args = table.pack(...)
+        for i=1,args.n do
+            local arg = args[i]
+            arg:display()
+        end
+    end
+
+
+    local function display_mimetype(mimetype, encoded_str)
+        local data_json_str = string.format('{"%s" : %s}', mimetype, encoded_str)
+        return ilua.display.detail._display_data(data_json_str,"{}","{}")
+    end
+    function  ilua.display.plain_text(data)
+        local encoded = ilua.json.detail.string_encoder(data)
+        display_mimetype("text/plain", encoded)
+    end
+    function  ilua.display.latex(data)
+        local encoded = ilua.json.detail.string_encoder(data)
+        display_mimetype("text/latex", encoded)
+    end
+    function  ilua.display.html(data)
+        local encoded = ilua.json.detail.string_encoder(data)
+        display_mimetype("text/html", encoded)
+    end
+    function  ilua.display.json(jsondata)
+        local data = {
+            ["application/json"] = jsondata
+        }
+        local encoded = ilua.json.encode(data)
+        print(encoded)
+        return ilua.display.detail._display_data(encoded,"{}","{}")
+    end
+
+    
+    )"""";
+    sol::protected_function_result code_result  = lua.safe_script(script, &sol::script_pass_on_error);
+    if (!code_result.valid()) {
+        sol::error err = code_result;
+        std::cerr << "failed to load string-based script into the program for xdisplay" << err.what() << std::endl;
+        throw std::runtime_error(err.what());
+    }
+
 }
 
 

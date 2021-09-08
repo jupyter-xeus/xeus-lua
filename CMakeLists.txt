@@ -206,6 +206,7 @@ set(XLUA_COMMON_SRC
     src/xcomplete.cpp
     src/xio.cpp
     src/xdisplay.cpp
+    src/xjson.cpp
 )
 
 if(XLUA_WITH_XWIDGETS)
