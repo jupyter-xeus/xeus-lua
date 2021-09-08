@@ -38,8 +38,8 @@ steps:
     workingDirectory: $(Build.BinariesDirectory)/build
 
 
-  - script: |
-      source activate xeus-lua
-      pytest . -vvv
-    displayName: Test xeus-lua (Python)
-    workingDirectory: $(Build.sourcesDirectory)/test
+  # - script: |
+  #     source activate xeus-lua
+  #     pytest . -vvv
+  #   displayName: Test xeus-lua (Python)
+  #   workingDirectory: $(Build.sourcesDirectory)/test
