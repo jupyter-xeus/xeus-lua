@@ -15,7 +15,8 @@ void add_ilua_module(sol::state_view & lua){
             detail = {}
         },
         config = {
-            printer = "default"
+            printer = "pprint",
+            auto_print = true
         },
         detail = {},
         json = {
@@ -30,6 +31,7 @@ void add_ilua_module(sol::state_view & lua){
         throw std::runtime_error(err.what());
     }
 }
+
 
 
 void extend(sol::state_view & lua)

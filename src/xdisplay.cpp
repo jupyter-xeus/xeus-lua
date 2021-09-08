@@ -106,7 +106,6 @@ void setup_display(
             ["application/json"] = jsondata
         }
         local encoded = ilua.json.encode(data)
-        print(encoded)
         return ilua.display.detail._display_data(encoded,"{}","{}")
     end
 

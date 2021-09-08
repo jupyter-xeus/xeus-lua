@@ -147,7 +147,7 @@ namespace xlua
 
         // json helper functions
         setup_json(lua, *this);
-        
+
         // add functions to display data
         setup_display(lua, *this);
 
@@ -206,15 +206,23 @@ namespace xlua
         kernel_res["user_expressions"] = nl::json::object();
         kernel_res["status"] = "ok";
 
+
+        sol::table ilua_table = lua["ilua"];
+        sol::table config_table = ilua_table["config"];
+
+        bool try_print = config_table["try_print"];
        
-        //const auto is_simple = is_simple_statement(code);
-        if(false)
+        bool need_eval = true;
+
+        if(try_print)
         {
-            // std::stringstream test_code;
-            // test_code<<"print("<<code<<")";
-            // auto test_code_result = lua.safe_script(test_code.str());
+            std::stringstream test_code;
+            test_code<<"print("<<code<<")";
+            auto test_code_result = lua.safe_script(test_code.str(), &sol::script_pass_on_error);
+            need_eval = !test_code_result.valid();
         }
-        else{
+            
+        if (need_eval){
             sol::protected_function_result code_result = lua.safe_script(code,  &sol::script_pass_on_error);
             if (code_result.valid())
             {
