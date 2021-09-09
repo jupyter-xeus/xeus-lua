@@ -76,7 +76,7 @@ However, if Jupyter is installed in a different location, it will not pick up th
 
 .. code::
 
-   jupyter kernelspec install PREFIX/share/jupyter/kernels/xpython --sys-prefix
+   jupyter kernelspec install PREFIX/share/jupyter/kernels/xlua --sys-prefix
 
 For more information on the ``jupyter kernelspec`` command, please consult the ``jupyter_client`` documentation.
 

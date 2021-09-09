@@ -26,7 +26,7 @@ install:
   - conda install xeus nlohmann_json cppzmq xtl lua xwidgets=0.25.1 gtest=1.8.0 -c conda-forge
   # Build dependencies
   - conda install cmake -c conda-forge
-  # Build and install xeus-python
+  # Build and install xeus-lua
   - mkdir build
   - cd build
   - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\Library -D XEXTRA_JUPYTER_DATA_DIR=%MINICONDA%\\share\\jupyter -D XLUA_WITH_XWIDGETS=ON -D CMAKE_BUILD_TYPE=Release -D XEUS_PYTHONHOME_RELPATH=..\\ ..
@@ -38,5 +38,5 @@ install:
 
 # build_script:
 #   # - cd test
-#   # - test_xeus_python
+#   # - test_xeus_lua
 #   - cd..  && cd test && pytest . -vvv
