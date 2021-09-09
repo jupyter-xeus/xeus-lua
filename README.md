@@ -2,24 +2,17 @@
 
 [![Azure Pipelines](https://dev.azure.com/derthorstenbeier/xeus-lua/_apis/build/status/jupyter-xeus.xeus-lua?branchName=main)](https://dev.azure.com/derthorstenbeier/xeus-lua/_build/latest?definitionId=12&branchName=main)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/de8van3pfjrr4b0e?svg=true)](https://ci.appveyor.com/project/DerThorsten/xeus-lua-17on4)
-
 [![Documentation Status](http://readthedocs.org/projects/xeus-lua/badge/?version=latest)](https://xeus-lua.readthedocs.io/en/latest/?badge=latest)
-<!-- [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/DerThorsten/xeus-lua/main?urlpath=/lab/tree/notebooks/xeus-lua.ipynb) -->
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-lua/main?urlpath=/lab/tree/notebooks/game_of_life.ipynb)
 [![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 `xeus-lua` is a Jupyter kernel for Lua based on the native implementation of the
 Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus).
 
-## Disclaimer
-
-This is still under development and in progress. 
-Things might change.
-The readme, conda integration and examples are still in development.
 
 ## Installation
 
-xeus-lua has **not yet** been packaged for the mamba (or conda) package manager, but will be soon.
-
+xeus-lua has  been packaged for the mamba (or conda) package manager.
 To ensure that the installation works, it is preferable to install `xeus-lua` in a
 fresh environment. It is also needed to use a
 [miniforge](https://github.com/conda-forge/miniforge#mambaforge) or
@@ -36,7 +29,11 @@ source activate xeus-lua
 
 ### Installing from conda-forge
 
-not yet
+Then you can install in this environment `xeus-lua` and its dependencies
+
+```bash
+mamba install xeus-lua jupyterlab -c conda-forge
+```
 
 ### Installing from source
 
@@ -68,35 +65,40 @@ and launch a new Python notebook by selecting the **xlua** kernel.
 
 **Code execution and variable display**:
 
-TODO
+![Basic code execution](docs/source/execute.gif)
 
 **Output streams**:
 
-TODO
+![Output streams](docs/source/streams.gif)
+
 
 **Input streams**:
 
-TODO
+![Input streams](docs/source/input.gif)
 
 **Error handling**:
 
-TODO
+![Error handling](docs/source/error.gif)
 
-**Inspect**:
-
-TODO
 
 **Code completion**:
 
-TODO
+![Code completion](docs/source/completion.gif)
 
-**Rich display**:
 
-TODO
+**Display Data**:
+
+![Code completion](docs/source/display.gif)
 
 **And of course widgets**:
 
-TODO
+![Code completion](docs/source/widgets.gif)
+
+
+**Binary Buffers for Widgets**:
+![Code completion](docs/source/buffers.gif)
+
+
 
 ## Documentation
 
@@ -104,13 +106,20 @@ To get started with using `xeus-lua`, check out the full documentation (once its
 
 http://xeus-lua.readthedocs.io
 
-## Why a lua kernel in 2021?
-
-- 
-
 ## What are the advantages of using xeus-lua over other lua kernels?
 
--  todo
+There are several lua kernels available:
+ 
+  * [lupyter](https://github.com/tomstitt/lupyter) A python based implementation of a lua
+    jupyter kernel. The heavy lifiting is done in a C-extension.
+  * [ILua](https://github.com/guysv/ilua): A feature rich implementation. Ilua
+    is implemented in python and does the communication with Lua via IPC.
+  * [IPyLua](https://github.com/pakozm/IPyLua): IPyLua is a pure Lua implementation.
+
+While these implemetentations are feature rich and work very well, none of  the above supports interactive widgets.
+Since this implementation is based on [xeus](https://github.com/jupyter-xeus/xeus), we can reuse components from
+the xeus ecosystem like [xwidgets](https://github.com/jupyter-xeus/xwidgets).
+
 
 ## Dependencies
 

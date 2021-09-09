@@ -16,7 +16,7 @@ Code execution and variable display
 -----------------------------------
 
 TODO
-.. image:: code_exec.gif
+.. image:: execute.gif
    :alt: basic_code_execution
 
 Output streams
@@ -41,14 +41,14 @@ Error handling
 Code completion
 ---------------
 
-.. image:: code_completion.gif
+.. image:: completion.gif
    :alt: code_completion
 
-Rich display
+Display Data
 ------------
 
-.. image:: rich_disp.gif
-   :alt: rich_display
+.. image:: display.gif
+   :alt: display
 
 And of course widgets
 ---------------------
@@ -56,6 +56,6 @@ And of course widgets
 .. image:: widgets.gif
    :alt: widgets
 
-.. image:: binary.gif
+.. image:: buffers.gif
    :alt: widgets_binary
 

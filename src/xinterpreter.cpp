@@ -210,11 +210,11 @@ namespace xlua
         sol::table ilua_table = lua["ilua"];
         sol::table config_table = ilua_table["config"];
 
-        bool try_print = config_table["try_print"];
+        bool auto_print = config_table["auto_print"];
        
         bool need_eval = true;
 
-        if(try_print)
+        if(auto_print)
         {
             std::stringstream test_code;
             test_code<<"print("<<code<<")";
