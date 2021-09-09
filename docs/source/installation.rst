@@ -24,52 +24,31 @@ Installation
 With mamba (or conda)
 ---------------------
 
-`xeus-python` has been packaged for the mamba (or conda) package manager.
+`xeus-lua` has been packaged for the mamba (or conda) package manager.
 
-To ensure that the installation works, it is preferable to install `xeus-python` in a fresh environment.
+To ensure that the installation works, it is preferable to install `xeus-lua` in a fresh environment.
 It is also needed to use a miniforge_ or miniconda_ installation because with the full anaconda_ you may have a conflict with
 the `zeromq` library which is already installed in the anaconda distribution.
 
 
-The safest usage is to create an environment named `xeus-python`
+The safest usage is to create an environment named `xeus-lua`
 
 .. code::
 
-    mamba create -n xeus-python
-    source activate xeus-python
+    mamba create -n xeus-lua
+    source activate xeus-lua
 
-Then you can install in this freshly created environment `xeus-python` and its dependencies
-
-.. code::
-
-    mamba install xeus-python notebook -c conda-forge
-
-or, if you prefer to use JupyterLab_
+Then you can install in this freshly created environment `xeus-lua` and its dependencies
 
 .. code::
 
-    mamba install xeus-python jupyterlab -c conda-forge
+    mamba install xeus-lua jupyterlab -c conda-forge
 
-From PyPI
----------
-
-Depending on the platform, PyPI wheels may be available for xeus-python.
-
-.. code::
-
-    pip install xeus-python notebook
-
-However, the wheels uploaded on PyPI are **experimental**.
-
-In general we strongly recommend using a package manager instead. We maintain the conda-forge package,
-and nothing prevents you from creating a package your favorite Linux distribution or FreeBSD.
-
-The ongoing effort to package xeus-python for pip takes place in the `xeus-python-wheel`_ repository.
 
 From Source
 -----------
 
-You can install ``xeus-python`` from source with cmake. This requires that you have all the dependencies installed in the same prefix.
+You can install ``xeus-lua`` from source with cmake. This requires that you have all the dependencies installed in the same prefix.
 
 .. code::
 
@@ -91,9 +70,9 @@ On Windows platforms, from the source directory:
 Installing the Kernel Spec
 ==========================
 
-When installing xeus-python in a given installation prefix, the corresponding Jupyter kernelspecs are installed in the same environment and are automatically picked up by Jupyter if it is installed in the same prefix. 
+When installing xeus-lua in a given installation prefix, the corresponding Jupyter kernelspecs are installed in the same environment and are automatically picked up by Jupyter if it is installed in the same prefix. 
 
-However, if Jupyter is installed in a different location, it will not pick up the new kernel. The xeus-python can be registered with the following command:
+However, if Jupyter is installed in a different location, it will not pick up the new kernel. The xeus-lua can be registered with the following command:
 
 .. code::
 
@@ -105,4 +84,3 @@ For more information on the ``jupyter kernelspec`` command, please consult the `
 .. _miniconda: https://conda.io/miniconda.html
 .. _anaconda: https://www.anaconda.com
 .. _JupyterLab: https://jupyterlab.readthedocs.io
-.. _xeus-python-wheel: https://github.com/jupyter-xeus/xeus-python-wheel
