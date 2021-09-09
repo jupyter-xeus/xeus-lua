@@ -102,7 +102,7 @@ and launch a new Python notebook by selecting the **xlua** kernel.
 
 ## Documentation
 
-To get started with using `xeus-lua`, check out the full documentation (once its available :-) )
+To get started with using `xeus-lua`, check out the full documentation 
 
 http://xeus-lua.readthedocs.io
 
