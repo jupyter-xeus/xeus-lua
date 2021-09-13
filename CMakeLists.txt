@@ -41,10 +41,6 @@ if (NOT DEFINED XLUA_LUA_EXTRA_PACKAGE_PATH)
     set(XLUA_LUA_EXTRA_PACKAGE_PATH "${CMAKE_INSTALL_PREFIX}/share/jupyter/kernels/xlua/lua_packages")
 endif ()
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json"
-)
 
 # Build options
 # =============
@@ -87,7 +83,6 @@ set(xtl_REQUIRED_VERSION 0.6.23)
 set(xeus_REQUIRED_VERSION 0.25.0)
 set(xwidgets_REQUIRED_VERSION 0.25.0)
 set(xproperty_REQUIRED_VERSION 0.11.0)
-
 set(Lua_REQUIRED_VERSION 5.3.4)
 
 if(XLUA_WITH_XWIDGETS)
@@ -106,6 +101,12 @@ endif ()
 if (NOT TARGET Lua) # not sure about these lines
     find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
 endif ()
+
+
+configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json"
+)
 
 
 # Flags
