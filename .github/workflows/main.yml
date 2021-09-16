@@ -75,17 +75,17 @@ jobs:
       - name: install cxx compiler
         shell: powershell
         run: |
-          .\micromamba.exe install cxx-compiler ninja -c conda-forge -y
+          .\micromamba.exe install cxx-compiler -c conda-forge -y
 
       - name: cmake configure
         shell: powershell
         run: |
           mkdir -p bld
           cd bld
-          cmake .. -G"Ninja" -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
+          cmake .. -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
 
       - name: build
         shell: powershell
         run: |
           cd bld
-          cmake --build . --target all
+          cmake --build . --target ALL_BUILD
