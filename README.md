@@ -1,7 +1,6 @@
 # ![xeus-lua](docs/source/xeus-lua.svg)
 
-[![Azure Pipelines](https://dev.azure.com/derthorstenbeier/xeus-lua/_apis/build/status/jupyter-xeus.xeus-lua?branchName=main)](https://dev.azure.com/derthorstenbeier/xeus-lua/_build/latest?definitionId=12&branchName=main)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/de8van3pfjrr4b0e?svg=true)](https://ci.appveyor.com/project/DerThorsten/xeus-lua-17on4)
+[![Build Status](https://github.com/jupyter-xeus/xeus-lua/actions/workflows/main.yml/badge.svg)](https://github.com/jupyter-xeus/xeus-lua/actions/workflows/main.yml)
 [![Documentation Status](http://readthedocs.org/projects/xeus-lua/badge/?version=latest)](https://xeus-lua.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-lua/main?urlpath=/lab/tree/notebooks/game_of_life.ipynb)
 [![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

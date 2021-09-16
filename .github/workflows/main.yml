@@ -1,0 +1,91 @@
+name: CI
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  unix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install mamba
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: environment-dev.yml
+          environment-name: xeus-lua
+
+      - name: install cxx compiler
+        shell: bash -l {0}
+        run: |
+          $HOME/micromamba-bin/micromamba install cxx-compiler -c conda-forge -y
+
+      - name: cmake configure
+        shell: bash -l {0}
+        run: |
+          mkdir -p bld
+          cd bld
+          cmake .. \
+           -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
+           -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX 
+
+      - name: build
+        shell: bash -l {0}
+        run: |
+          cd bld
+          make -j8
+
+      - name: install
+        shell: bash -l {0}
+        run: |
+          cd bld
+          make install
+
+      # - name: test
+      #   shell: bash -l {0}
+      #   run: |
+      #     cd test
+      #     pytest .
+
+  win:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install mamba
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: environment-dev.yml
+          environment-name: xeus-lua
+
+      - name: install cxx compiler
+        shell: powershell
+        run: |
+          .\micromamba.exe install cxx-compiler -c conda-forge -y
+
+      - name: cmake configure
+        shell: powershell
+        run: |
+          mkdir -p bld
+          cd bld
+          cmake .. -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
+
+      - name: build
+        shell: powershell
+        run: |
+          cd bld
+          cmake --build . --target ALL_BUILD
