@@ -3,14 +3,18 @@ channels:
   - conda-forge
 dependencies:
   # Build dependencies
-  - make
   - cmake
+  - ninja # [win]
   # Host dependencies
-  - xeus
+  - xeus>=2.0.0
   - nlohmann_json
   - cppzmq
-  - xtl
+  - xtl>=0.7, <0.8
+  - lua>=5.2.0
+  - openlibm # [linux]
+  - xwidgets>=0.25.1
   # Test dependencies
   - pytest
-  - jupyter_kernel_test
   - nbval
+  - ipympl
+  - jupyter_kernel_test

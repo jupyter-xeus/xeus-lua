@@ -1,11 +1,13 @@
 {
-  "display_name": "lua 5.4.0 (xlua)",
+  "display_name": "Lua @LUA_VERSION_STRING@ (XLua)",
   "argv": [
-      "@XEUS_LUA_KERNELSPEC_PATH@xlua",
+      "@XLUA_KERNELSPEC_PATH@xlua",
       "-f",
       "{connection_file}"
   ],
   "language": "lua",
-  "metadata": {"debugger": false
+  "metadata": { 
+    "debugger": false,
+    "lua_extra_package_path": "@XLUA_LUA_EXTRA_PACKAGE_PATH@"
   }
 }

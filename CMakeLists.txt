@@ -57,17 +57,44 @@ OPTION(XEUS_LUA_USE_SHARED_XEUS "Link xlua  with the xeus shared library (instea
 OPTION(XEUS_LUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (instead of the static library)" ON)
 
 
+if(EMSCRIPTEN)
+    message("Build with emscripten")
+    SET(XLUA_DISABLE_ARCH_NATIVE ON)
+    SET(XLUA_DISABLE_TUNE_GENERIC ON)
+    SET(XLUA_BUILD_STATIC ON)
+    SET(XLUA_BUILD_SHARED OFF)
+    SET(XLUA_BUILD_XLUA_EXECUTABLE OFF)
+    SET(XLUA_USE_SHARED_XEUS OFF)
+    SET(XLUA_USE_SHARED_XEUS_LUA OFF)
+    SET(XLUA_BUILD_TESTS OFF)
+    SET(XLUA_DOWNLOAD_GTEST OFF)
+endif()
+
+
 # Dependencies
 # ============
 
 set(xtl_REQUIRED_VERSION 0.6.23)
 set(xeus_REQUIRED_VERSION 0.25.0)
 
+set(xwidgets_REQUIRED_VERSION 0.25.0)
+set(xproperty_REQUIRED_VERSION 0.11.0)
+set(Lua_REQUIRED_VERSION 5.3.4)
+
 if (NOT TARGET xtl)
     find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
 endif ()
 if (NOT TARGET xeus AND NOT TARGET xeus-static)
     find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
+endif ()
+if (NOT TARGET xtl)
+    find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
+endif ()
+if (NOT TARGET xeus AND NOT TARGET xeus-static)
+    find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
+endif ()
+if (NOT TARGET Lua) # not sure about these lines
+    find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
 endif ()
 
 
@@ -104,6 +131,58 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
 endif ()
 
 
+if(XLUA_WITH_XWIDGETS)
+    add_compile_definitions(XLUA_WITH_XWIDGETS)
+endif()
+
+if(EMSCRIPTEN)
+
+    add_compile_definitions(EMSCRIPTEN)
+    add_compile_definitions(EMSCRIPTEN_ZMQ_REPLACEMENT)
+
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} --bind --std=c++17")
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -Wno-unused-parameter -Wno-deprecated -Wno-unused-command-line-argument")
+    #set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -lwebsocket.js")
+    # module / import 
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s MODULARIZE=1 -s EXPORT_NAME=\"createXeusModule\" -s EXPORT_ES6=0 -s USE_ES6_IMPORT_META=0")
+    # safty
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES}  -s  DEMANGLE_SUPPORT=1 -s SAFE_HEAP=0  -s ASSERTIONS=2   -s STACK_OVERFLOW_CHECK=1 ")
+    # web
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s ENVIRONMENT=web,worker")
+    # mem
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s TOTAL_MEMORY=512MB")
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s EXIT_RUNTIME=1")
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s WASM=1")
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s ERROR_ON_UNDEFINED_SYMBOLS=1")
+
+    # threads
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s USE_PTHREADS=1 -pthread  -mbulk-memory  -matomics")
+
+    # fetch related
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES}")
+
+    # exceptions    
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s DISABLE_EXCEPTION_CATCHING=0 ")
+
+    # async
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s ASYNCIFY=1 -s 'ASYNCIFY_IMPORTS=[\"async_get_input_function\"]'")
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s 'ASYNCIFY_STACK_SIZE=20480'")
+
+    # ENV (https://github.com/emscripten-core/emscripten/commit/6d9681ad04f60b41ef6345ab06c29bbc9eeb84e0)
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s \"EXTRA_EXPORTED_RUNTIME_METHODS=[ENV']\"")
+
+    # filesystem
+    file(COPY asset_dir DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} --embed-file asset_dir")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EMSCRIPTEN_FEATURES}")
+    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}  ${EMSCRIPTEN_FEATURES} ---proxy-to-worker")
+endif()
+
+
+
+
 # Source files
 # ============
 
@@ -114,7 +193,20 @@ set(XEUS_LUA_HEADERS
 
 set(XEUS_LUA_SRC
     src/xinterpreter.cpp 
+    src/xextend.cpp
+    src/xcomplete.cpp
+    src/xio.cpp
+    src/xdisplay.cpp
+    src/xjson.cpp
 )
+
+if(XLUA_WITH_XWIDGETS)
+    set(XEUS_LUA_SRC
+        ${XEUS_LUA_SRC}
+        src/xwidgets.cpp
+    )
+endif()
+
 
 set(XEUS_LUA_MAIN_SRC
     src/main.cpp
@@ -186,7 +278,7 @@ macro(xeus_lua_set_kernel_options target_name)
         target_link_libraries(${target_name} PRIVATE xeus-lua-static)
     endif()
     find_package(Threads) 
-    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARY})
 endmacro()
 
 # Common macro for shared and static library xeus-wren
@@ -200,6 +292,7 @@ macro(xeus_lua_create_target target_name linkage output_name)
     add_library(${target_name} ${linkage_upper} ${XEUS_LUA_SRC} ${XEUS_LUA_HEADERS})
     xeus_lua_set_common_options(${target_name})
 
+    message(STATUS ${target_name} " XEUS_LUA_HEADERS "  "${XEUS_LUA_HEADERS}" VERSION ${${PROJECT_NAME}_VERSION})
     set_target_properties(${target_name} PROPERTIES
                           PUBLIC_HEADER "${XEUS_LUA_HEADERS}"
                           PREFIX ""

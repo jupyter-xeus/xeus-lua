@@ -1,19 +1,17 @@
 /***************************************************************************
-* Copyright (c) 2021,                                          
-*                                                                          
-* Distributed under the terms of the BSD 3-Clause License.                 
-*                                                                          
-* The full license is in the file LICENSE, distributed with this software. 
+* Copyright (c) 2018, Martin Renou, Johan Mabille, Sylvain Corlay, and     *
+* Wolf Vollprecht                                                          *
+* Copyright (c) 2018, QuantStack
+*                                                                          *
+* Distributed under the terms of the BSD 3-Clause License.                 *
+*                                                                          *
+* The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+#ifndef XLUA_INTERPRETER_HPP
+#define XLUA_INTERPRETER_HPP
 
-#ifndef XEUS_LUA_INTERPRETER_HPP
-#define XEUS_LUA_INTERPRETER_HPP
 
-#ifdef __GNUC__
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wattributes"
-#endif
 
 #include <string>
 #include <memory>
@@ -24,17 +22,22 @@
 #include "xeus/xinterpreter.hpp"
 
 
+extern "C" {
+# include "lua.h"
+# include "lauxlib.h"
+# include "lualib.h"
+}
 namespace nl = nlohmann;
 
-namespace xeus_lua
+namespace xlua
 {
     class XEUS_LUA_API interpreter : public xeus::xinterpreter
     {
     public:
 
         interpreter();
-        virtual ~interpreter() = default;
-
+        virtual ~interpreter();
+        bool allow_stdin()const;
     protected:
 
         void configure_impl() override;
@@ -58,11 +61,18 @@ namespace xeus_lua
 
         void shutdown_request_impl() override;
 
+        void redirect_output();
+
+
+    private:
+
+        // sol::state lua;
+        lua_State * L;
+
+        // allow stdin for the current request
+        bool m_allow_stdin;
     };
 }
 
-#ifdef __GNUC__
-    #pragma GCC diagnostic pop
-#endif
 
 #endif

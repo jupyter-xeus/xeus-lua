@@ -1,26 +1,40 @@
-..  Copyright (c) 2021,    
+.. Copyright (c) 2021, Thorsten Beier
+   Wolf Vollprecht
 
-   Distributed under the terms of the BSD 3-Clause License.  
+   Distributed under the terms of the BSD 3-Clause License.
 
    The full license is in the file LICENSE, distributed with this software.
 
-.. image:: xeus-python.svg
-   :alt: xeus-python
+.. image:: xeus-lua.svg
+   :alt: xeus-lua
 
 
 Introduction
 ------------
 
-``xeus-lua`` is a Jupyter kernel for lua based on the native implementation of the Jupyter protocol 
+``xeus-lua`` is a Jupyter kernel for Lua based on the native implementation of the Jupyter protocol 
 xeus_.
 
 Licensing
 ---------
 
-Distributed under the terms of the BSD 3-Clause License.  
+We use a shared copyright model that enables all contributors to maintain the
+copyright on their contributions.
 
-The full license is in the file LICENSE, distributed with this software.
+This software is licensed under the BSD-3-Clause license. See the LICENSE file for details.
 
+
+.. toctree::
+   :caption: INSTALLATION
+   :maxdepth: 2
+
+   installation
+
+.. toctree::
+   :caption: USAGE
+   :maxdepth: 2
+
+   usage
 
 .. toctree::
    :caption: DEVELOPER ZONE
@@ -28,4 +42,4 @@ The full license is in the file LICENSE, distributed with this software.
 
    dev-build-options
 
-.. _xeus: https://github.com/DerThorsten/xeus-lua
+.. _xeus: https://github.com/jupyter-xeus/xeus

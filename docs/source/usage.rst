@@ -1,20 +1,21 @@
-.. Copyright (c) 2017, Martin Renou, Johan Mabille, Sylvain Corlay, and
+.. Copyright (c) 2021, Thorsten Beier
    Wolf Vollprecht
 
    Distributed under the terms of the BSD 3-Clause License.
 
    The full license is in the file LICENSE, distributed with this software.
 
+
 Usage
 =====
 
 Launch the Jupyter notebook with `jupyter notebook` or Jupyter lab with `jupyter lab` and launch
-a new Python notebook by selecting the **xpython** kernel.
+a new Python notebook by selecting the **xlua** kernel.
 
 Code execution and variable display
 -----------------------------------
 
-.. image:: code_exec.gif
+.. image:: execute.gif
    :alt: basic_code_execution
 
 Output streams
@@ -35,23 +36,18 @@ Error handling
 .. image:: error.gif
    :alt: error_handling
 
-Inspect
--------
-
-.. image:: inspect.gif
-   :alt: inspect
 
 Code completion
 ---------------
 
-.. image:: code_completion.gif
+.. image:: completion.gif
    :alt: code_completion
 
-Rich display
+Display Data
 ------------
 
-.. image:: rich_disp.gif
-   :alt: rich_display
+.. image:: display.gif
+   :alt: display
 
 And of course widgets
 ---------------------
@@ -59,6 +55,6 @@ And of course widgets
 .. image:: widgets.gif
    :alt: widgets
 
-.. image:: binary.gif
+.. image:: buffers.gif
    :alt: widgets_binary
 
