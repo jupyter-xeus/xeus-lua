@@ -74,14 +74,14 @@ jobs:
           environment-name: xeus-lua
 
       - name: install cxx compiler
-        shell: cmd
+        shell: powershell
         run: |
           .\micromamba.exe install  ninja cxx-compiler -c conda-forge -y
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v3
 
       - name: cmake configure
-        shell: cmd
+        shell: powershell
         run: |
           mkdir -p bld
           cd bld
