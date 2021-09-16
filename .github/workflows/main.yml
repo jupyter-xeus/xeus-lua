@@ -81,7 +81,7 @@ jobs:
       #   uses: mxschmitt/action-tmate@v3
 
       - name: cmake configure
-        shell: bash
+        shell: cmd
         run: |
           mkdir -p bld
           cd bld
