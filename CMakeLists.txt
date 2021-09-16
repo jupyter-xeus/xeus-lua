@@ -278,7 +278,7 @@ macro(xeus_lua_set_kernel_options target_name)
         target_link_libraries(${target_name} PRIVATE xeus-lua-static)
     endif()
     find_package(Threads) 
-    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARY})
+    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
 endmacro()
 
 # Common macro for shared and static library xeus-wren
