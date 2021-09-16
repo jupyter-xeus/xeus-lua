@@ -10,6 +10,7 @@ dependencies:
   - cppzmq
   - xtl>=0.7, <0.8
   - lua>=5.2.0
+  - openlibm # [linux]
   - xwidgets>=0.25.1
   # Test dependencies
   - pytest
