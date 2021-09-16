@@ -77,6 +77,8 @@ jobs:
         shell: powershell
         run: |
           .\micromamba.exe install   cxx-compiler -c conda-forge -y
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: cmake configure
         shell: cmd
