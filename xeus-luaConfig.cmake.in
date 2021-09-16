@@ -7,13 +7,13 @@
 # The full license is in the file LICENSE, distributed with this software. #
 ############################################################################
 
-# xeus-lua cmake module
+# xeus-wren cmake module
 # This module sets the following variables in your project::
 #
-#   xeus-lua_FOUND - true if xeus-lua found on the system
-#   xeus-lua_INCLUDE_DIRS - the directory containing xeus-lua headers
-#   xeus-lua_LIBRARY - the library for dynamic linking
-#   xeus-lua_STATIC_LIBRARY - the library for static linking
+#   xeus-wren_FOUND - true if xeus-wren found on the system
+#   xeus-wren_INCLUDE_DIRS - the directory containing xeus-wren headers
+#   xeus-wren_LIBRARY - the library for dynamic linking
+#   xeus-wren_STATIC_LIBRARY - the library for static linking
 
 @PACKAGE_INIT@
 
@@ -25,21 +25,21 @@ include(CMakeFindDependencyMacro)
 find_dependency(xtl @xtl_REQUIRED_VERSION@)
 find_dependency(xeus @xeus_REQUIRED_VERSION@)
 find_dependency(cppzmq @cppzmq_REQUIRED_VERSION@)
-find_dependency(pybind11 @lua_REQUIRED_VERSION@)
 
-if (NOT TARGET xeus-lua AND NOT TARGET xeus-lua-static)
+
+if (NOT TARGET xeus-wren AND NOT TARGET xeus-wren-static)
     include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 
-    if (TARGET xeus-lua AND TARGET xeus-lua-static)
-        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-lua INTERFACE_INCLUDE_DIRECTORIES)
-        get_target_property(@PROJECT_NAME@_LIBRARY xeus-lua LOCATION)
-        get_target_property(@PROJECT_NAME@_STATIC_LIBRARY xeus-lua-static LOCATION)
-    elseif (TARGET xeus-lua)
-        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-lua INTERFACE_INCLUDE_DIRECTORIES)
-        get_target_property(@PROJECT_NAME@_LIBRARY xeus-lua LOCATION)
-    elseif (TARGET xeus-lua-static)
-        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-lua-static INTERFACE_INCLUDE_DIRECTORIES)
-        get_target_property(@PROJECT_NAME@_STATIC_LIBRARY xeus-lua-static LOCATION)
+    if (TARGET xeus-wren AND TARGET xeus-wren-static)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-wren INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_LIBRARY xeus-wren LOCATION)
+        get_target_property(@PROJECT_NAME@_STATIC_LIBRARY xeus-wren-static LOCATION)
+    elseif (TARGET xeus-wren)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-wren INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_LIBRARY xeus-wren LOCATION)
+    elseif (TARGET xeus-wren-static)
+        get_target_property(@PROJECT_NAME@_INCLUDE_DIR xeus-wren-static INTERFACE_INCLUDE_DIRECTORIES)
+        get_target_property(@PROJECT_NAME@_STATIC_LIBRARY xeus-wren-static LOCATION)
         set(@PROJECT_NAME@_LIBRARY ${@PROJECT_NAME@_STATIC_LIBRARY})
     endif ()
 endif ()

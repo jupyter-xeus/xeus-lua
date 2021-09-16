@@ -1,31 +1,29 @@
 /***************************************************************************
-* Copyright (c) 2018, Martin Renou, Johan Mabille, Sylvain Corlay, and     *
-* Wolf Vollprecht                                                          *
-* Copyright (c) 2018, QuantStack                                           *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
+* Copyright (c) 2021,                                          
+*                                                                          
+* Distributed under the terms of the BSD 3-Clause License.                 
+*                                                                          
+* The full license is in the file LICENSE, distributed with this software. 
 ****************************************************************************/
+
+
 
 #include <cstdlib>
 #include <iostream>
 #include <string>
 #include <utility>
-#include <signal.h>
 
 #ifdef __GNUC__
 #include <stdio.h>
 #include <execinfo.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #endif
 
-#include "xeus/xeus_context.hpp"
 #include "xeus/xkernel.hpp"
 #include "xeus/xkernel_configuration.hpp"
-#include "xeus/xserver.hpp"
-#include "xeus/xserver_shell_main.hpp"
+#include "xeus/xserver_zmq.hpp"
 
 
 #include "xeus-lua/xinterpreter.hpp"
@@ -46,11 +44,6 @@ void handler(int sig)
     exit(1);
 }
 #endif
-
-void stop_handler(int /*sig*/)
-{
-    exit(0);
-}
 
 bool should_print_version(int argc, char* argv[])
 {
@@ -89,7 +82,7 @@ int main(int argc, char* argv[])
 {
     if (should_print_version(argc, argv))
     {
-        std::clog << "xlua " << XLUA_VERSION << std::endl;
+        std::clog << "xlua " << XEUS_LUA_VERSION  << std::endl;
         return 0;
     }
 
@@ -107,29 +100,16 @@ int main(int argc, char* argv[])
 #ifdef __GNUC__
     std::clog << "registering handler for SIGSEGV" << std::endl;
     signal(SIGSEGV, handler);
-
-    // Registering SIGINT and SIGKILL handlers
-    signal(SIGKILL, stop_handler);
 #endif
-    signal(SIGINT, stop_handler);
 
-
-
-    using context_type = xeus::xcontext_impl<zmq::context_t>;
-    using context_ptr = std::unique_ptr<context_type>;
-    context_ptr context = context_ptr(new context_type());
+    auto context = xeus::make_context<zmq::context_t>();
 
     // Instantiating the xeus xinterpreter
-    using interpreter_ptr = std::unique_ptr<xlua::interpreter>;
-    interpreter_ptr interpreter = interpreter_ptr(new xlua::interpreter());
+    using interpreter_ptr = std::unique_ptr<xeus_lua::interpreter>;
+    interpreter_ptr interpreter = interpreter_ptr(new xeus_lua::interpreter());
 
-    using history_manager_ptr = std::unique_ptr<xeus::xhistory_manager>;
-    history_manager_ptr hist = xeus::make_in_memory_history_manager();
 
     std::string connection_filename = extract_filename(argc, argv);
-
-
-    nl::json debugger_config;
 
     if (!connection_filename.empty())
     {
@@ -139,15 +119,10 @@ int main(int argc, char* argv[])
                              xeus::get_user_name(),
                              std::move(context),
                              std::move(interpreter),
-                             xeus::make_xserver_shell_main,
-                             std::move(hist),
-                             xeus::make_console_logger(xeus::xlogger::msg_type,
-                                                       xeus::make_file_logger(xeus::xlogger::content, "xeus.log")),
-                             xeus::make_null_debugger,
-                             debugger_config);
+                             xeus::make_xserver_zmq);
 
         std::cout <<
-            "Starting xeus-lua kernel...\n\n"
+            "Starting xeus-wren kernel...\n\n"
             "If you want to connect to this kernel from an other client, you can use"
             " the " + connection_filename + " file."
             << std::endl;
@@ -159,15 +134,11 @@ int main(int argc, char* argv[])
         xeus::xkernel kernel(xeus::get_user_name(),
                              std::move(context),
                              std::move(interpreter),
-                             xeus::make_xserver_shell_main,
-                             std::move(hist),
-                             nullptr,
-                             xeus::make_null_debugger,
-                             debugger_config);
+                             xeus::make_xserver_zmq);
 
         const auto& config = kernel.get_config();
         std::cout <<
-            "Starting xeus-lua kernel...\n\n"
+            "Starting xlua kernel...\n\n"
             "If you want to connect to this kernel from an other client, just copy"
             " and paste the following content inside of a `kernel.json` file. And then run for example:\n\n"
             "# jupyter console --existing kernel.json\n\n"
