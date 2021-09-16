@@ -91,4 +91,4 @@ jobs:
         shell: powershell
         run: |
           cd bld
-          cmake --build . --target all
+          cmake --build . --target ALL_BUILD
