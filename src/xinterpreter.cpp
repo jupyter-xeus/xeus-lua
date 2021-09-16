@@ -8,10 +8,6 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-// https://github.com/pakozm/IPyLua/blob/master/IPyLua/rlcompleter.lua
-// a lot is copied from https://raw.githubusercontent.com/tomstitt/lupyter/main/lupyter/lua_runtime/lua_runtime.c
-
-
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -27,7 +23,6 @@
 
 
 #include "nlohmann/json.hpp"
-
 
 #include "xeus/xinterpreter.hpp"
 #include "xeus-lua/xinterpreter.hpp"
