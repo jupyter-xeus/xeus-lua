@@ -66,8 +66,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
 
       - name: install mamba
         uses: mamba-org/provision-with-micromamba@main
@@ -86,6 +84,9 @@ jobs:
           mkdir -p bld
           cd bld
           cmake ..  -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: build
         shell: powershell
