@@ -278,6 +278,7 @@ macro(xeus_lua_set_kernel_options target_name)
         target_link_libraries(${target_name} PRIVATE xeus-lua-static)
     endif()
     find_package(Threads) 
+    message(STATUS ${LUA_LIBRARIES})
     target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
 endmacro()
 
@@ -292,7 +293,6 @@ macro(xeus_lua_create_target target_name linkage output_name)
     add_library(${target_name} ${linkage_upper} ${XEUS_LUA_SRC} ${XEUS_LUA_HEADERS})
     xeus_lua_set_common_options(${target_name})
 
-    message(STATUS ${target_name} " XEUS_LUA_HEADERS "  "${XEUS_LUA_HEADERS}" VERSION ${${PROJECT_NAME}_VERSION})
     set_target_properties(${target_name} PROPERTIES
                           PUBLIC_HEADER "${XEUS_LUA_HEADERS}"
                           PREFIX ""
@@ -323,8 +323,8 @@ macro(xeus_lua_create_target target_name linkage output_name)
     endif ()
 
     find_package(Threads) # TODO: add Threads as a dependence of xeus-static?
-    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT} )
-
+    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
+    
 endmacro()
 
 # xeus-lua
