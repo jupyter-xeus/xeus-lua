@@ -81,7 +81,7 @@ jobs:
           .\micromamba.exe install cxx-compiler -c conda-forge -y
 
       - name: cmake configure
-        shell: powershell
+        shell: cmd.exe
         run: |
           mkdir -p bld
           cd bld
