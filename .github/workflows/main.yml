@@ -9,7 +9,9 @@ on:
 
 jobs:
   unix:
+    
     runs-on: ${{ matrix.os }}
+     
     strategy:
       fail-fast: false
       matrix:
@@ -57,15 +59,16 @@ jobs:
       #     pytest .
 
   win:
+    
     runs-on: ${{ matrix.os }}
+     
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2022, windows-latest]
+        os: [ windows-latest]
 
     steps:
       - uses: actions/checkout@v2
-
 
       - name: install mamba
         uses: mamba-org/provision-with-micromamba@main
@@ -73,25 +76,20 @@ jobs:
           environment-file: environment-dev.yml
           environment-name: xeus-lua
 
-      # - name: install cxx compiler
-      #   shell: cli
-      #   run: |
-      #     .\micromamba.exe install  ninja cxx-compiler -c conda-forge -y
-      # # - name: Setup tmate session
-      # #   uses: mxschmitt/action-tmate@v3
+      - name: install cxx compiler
+        shell: powershell
+        run: |
+          .\micromamba.exe install cxx-compiler -c conda-forge -y
 
       - name: cmake configure
-        shell: cli
+        shell: powershell
         run: |
           mkdir -p bld
           cd bld
-          cmake .. -G"Ninja" -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Release -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
-
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
+          cmake .. -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
 
       - name: build
         shell: powershell
         run: |
           cd bld
-          cmake --build . --target all
+          cmake --build . --target ALL_BUILD

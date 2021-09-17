@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 {
     if (should_print_version(argc, argv))
     {
-        std::clog << "xlua " << XLUA_VERSION << std::endl;
+        std::clog << "xlua " << XEUS_LUA_VERSION << std::endl;
         return 0;
     }
 
