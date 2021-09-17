@@ -4,7 +4,6 @@ channels:
 dependencies:
   # Build dependencies
   - cmake
-  - ninja # [win]
   # Host dependencies
   - xeus>=2.0.0
   - nlohmann_json
