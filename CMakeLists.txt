@@ -59,15 +59,15 @@ OPTION(XEUS_LUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (in
 
 if(EMSCRIPTEN)
     message("Build with emscripten")
-    SET(XLUA_DISABLE_ARCH_NATIVE ON)
-    SET(XLUA_DISABLE_TUNE_GENERIC ON)
-    SET(XLUA_BUILD_STATIC ON)
-    SET(XLUA_BUILD_SHARED OFF)
-    SET(XLUA_BUILD_XLUA_EXECUTABLE OFF)
-    SET(XLUA_USE_SHARED_XEUS OFF)
-    SET(XLUA_USE_SHARED_XEUS_LUA OFF)
-    SET(XLUA_BUILD_TESTS OFF)
-    SET(XLUA_DOWNLOAD_GTEST OFF)
+    SET(XEUS_LUA_DISABLE_ARCH_NATIVE ON)
+    SET(XEUS_LUA_DISABLE_TUNE_GENERIC ON)
+    SET(XEUS_LUA_BUILD_STATIC ON)
+    SET(XEUS_LUA_BUILD_SHARED OFF)
+    SET(XEUS_LUA_BUILD_XLUA_EXECUTABLE OFF)
+    SET(XEUS_LUA_USE_SHARED_XEUS OFF)
+    SET(XEUS_LUA_USE_SHARED_XEUS_LUA OFF)
+    SET(XEUS_LUA_BUILD_TESTS OFF)
+    SET(XEUS_LUA_DOWNLOAD_GTEST OFF)
 endif()
 
 
@@ -247,7 +247,7 @@ macro(xeus_lua_set_common_options target_name)
         if (HAS_CPP_17_FLAG)
             target_compile_features(${target_name} PRIVATE cxx_std_17)
         else ()
-            message(FATAL_ERROR "Unsupported compiler -- xeus-wren requires C++{cookiecutter.cpp_standart} support!")
+            message(FATAL_ERROR "Unsupported compiler -- xeus-lua requires C++{cookiecutter.cpp_standart} support!")
         endif ()
     endif ()
 
@@ -278,11 +278,10 @@ macro(xeus_lua_set_kernel_options target_name)
         target_link_libraries(${target_name} PRIVATE xeus-lua-static)
     endif()
     find_package(Threads) 
-    message(STATUS ${LUA_LIBRARIES})
     target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
 endmacro()
 
-# Common macro for shared and static library xeus-wren
+# Common macro for shared and static library xeus-lua
 macro(xeus_lua_create_target target_name linkage output_name)
     string(TOUPPER "${linkage}" linkage_upper)
 
@@ -364,7 +363,7 @@ endif()
 
 include(CMakePackageConfigHelpers)
 
-set(XEUS_LUA_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE STRING "install path for xeus-wrenConfig.cmake")
+set(XEUS_LUA_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE STRING "install path for xeus-luaConfig.cmake")
 
 # Install xeus-lua and xeus-lua-static
 if (XEUS_LUA_BUILD_SHARED)
@@ -373,7 +372,7 @@ if (XEUS_LUA_BUILD_SHARED)
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xeus-wren)
+            PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xeus-lua)
 
     # Makes the project importable from the build directory
     export(EXPORT ${PROJECT_NAME}-targets
@@ -385,7 +384,7 @@ if (XEUS_LUA_BUILD_EXECUTABLE)
     install(TARGETS xlua
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-    # Configuration and data directories for jupyter and xeus-wren
+    # Configuration and data directories for jupyter and xeus-lua
     set(XJUPYTER_DATA_DIR "share/jupyter"    CACHE STRING "Jupyter data directory")
 
     # Install xlua Jupyter kernelspec
@@ -403,7 +402,7 @@ if (XEUS_LUA_BUILD_EXECUTABLE)
     endif ()
 endif ()
 
-# Configure 'xeus-wrenConfig.cmake' for a build tree
+# Configure 'xeus-luaConfig.cmake' for a build tree
 set(XEUS_LUA_CONFIG_CODE "####### Expanded from \@XEUS_LUA_CONFIG_CODE\@ #######\n")
 set(XEUS_LUA_CONFIG_CODE "${XEUS_LUA_CONFIG_CODE}set(CMAKE_MODULE_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/cmake;\${CMAKE_MODULE_PATH}\")\n")
 set(XEUS_LUA_CONFIG_CODE "${XEUS_LUA_CONFIG_CODE}##################################################")
