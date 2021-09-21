@@ -1,4 +1,6 @@
-/* Copyright (c) 2016, Johan Mabille and Sylvain Corlay                     *
+/***************************************************************************
+* Copyright (c) 2021, Thorsten Beier                                       *                                                       *
+* Copyright (c) 2021, QuantStack                                           *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
 *                                                                          *
