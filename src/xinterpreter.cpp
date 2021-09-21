@@ -173,16 +173,6 @@ namespace xlua
     {
     }
 
-
-    bool is_simple_statement(const std::string& code)
-    {
-        // todo
-        return code.find(' ') == std::string::npos &&
-               code.find('\n') == std::string::npos &&
-               code.find('\t') == std::string::npos &&
-               code.find('.') == std::string::npos;
-    }
-
     nl::json interpreter::execute_request_impl(int /*execution_count*/,
                                                const std::string& code,
                                                bool silent,
