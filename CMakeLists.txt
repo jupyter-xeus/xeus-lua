@@ -49,7 +49,7 @@ configure_file (
 OPTION(XEUS_LUA_DISABLE_ARCH_NATIVE "disable -march=native flag" OFF)
 OPTION(XEUS_LUA_DISABLE_TUNE_GENERIC "disable -mtune=generic flag" OFF)
 
-option(XEUS_LUA_BUILD_STATIC "Build xeus-lua static library" ON)
+option(XEUS_LUA_BUILD_STATIC "Build xeus-lua static library" OFF)
 OPTION(XEUS_LUA_BUILD_SHARED "Split xlua build into executable and library" ON)
 OPTION(XEUS_LUA_BUILD_EXECUTABLE "Build the xlua executable" ON)
 
