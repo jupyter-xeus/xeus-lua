@@ -55,9 +55,12 @@ OPTION(XEUS_LUA_BUILD_EXECUTABLE "Build the xlua executable" ON)
 
 OPTION(XEUS_LUA_USE_SHARED_XEUS "Link xlua  with the xeus shared library (instead of the static library)" ON)
 OPTION(XEUS_LUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (instead of the static library)" ON)
+option(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
+OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (instead of the static library)" ON)
+OPTION(XEUS_LUA_EMSCRIPTEN_WASM_BUILD "Build for wasm with emscripten" OFF)
 
-
-if(EMSCRIPTEN)
+if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+    add_compile_definitions(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     message("Build with emscripten")
     SET(XEUS_LUA_DISABLE_ARCH_NATIVE ON)
     SET(XEUS_LUA_DISABLE_TUNE_GENERIC ON)
@@ -67,7 +70,6 @@ if(EMSCRIPTEN)
     SET(XEUS_LUA_USE_SHARED_XEUS OFF)
     SET(XEUS_LUA_USE_SHARED_XEUS_LUA OFF)
     SET(XEUS_LUA_BUILD_TESTS OFF)
-    SET(XEUS_LUA_DOWNLOAD_GTEST OFF)
 endif()
 
 
@@ -109,7 +111,7 @@ if (MSVC)
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    if(NOT EMSCRIPTEN)    
+    if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)    
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder")
     endif()
     if (XEUS_LUA_DISABLE_ARCH_NATIVE AND NOT XEUS_LUA_DISABLE_TUNE_GENERIC)
@@ -135,7 +137,15 @@ if(XLUA_WITH_XWIDGETS)
     add_compile_definitions(XLUA_WITH_XWIDGETS)
 endif()
 
-if(EMSCRIPTEN)
+if(XLUA_WITH_XWIDGETS)
+    if (NOT TARGET xwidgets)
+        find_package(xwidgets ${xwidgets_REQUIRED_VERSION} REQUIRED)
+        find_package(xproperty ${xproperty_REQUIRED_VERSION} REQUIRED)
+
+    endif ()
+endif()
+
+if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
 
     add_compile_definitions(EMSCRIPTEN)
     add_compile_definitions(EMSCRIPTEN_ZMQ_REPLACEMENT)
@@ -242,12 +252,12 @@ macro(xeus_lua_set_common_options target_name)
             target_compile_options(${target_name} PUBLIC -march=native)
         endif ()
 
-        # C++{cookiecutter.cpp_standart} flag
+        # 17 flag
         CHECK_CXX_COMPILER_FLAG("-std=c++17" HAS_CPP_17_FLAG)
         if (HAS_CPP_17_FLAG)
             target_compile_features(${target_name} PRIVATE cxx_std_17)
         else ()
-            message(FATAL_ERROR "Unsupported compiler -- xeus-lua requires C++{cookiecutter.cpp_standart} support!")
+            message(FATAL_ERROR "Unsupported compiler -- xeus-lua requires 17 support!")
         endif ()
     endif ()
 
@@ -305,6 +315,7 @@ macro(xeus_lua_create_target target_name linkage output_name)
 
     target_include_directories(${target_name}
                                PUBLIC
+                               ${LUA_INCLUDE_DIR}
                                $<BUILD_INTERFACE:${XEUS_LUA_INCLUDE_DIR}>
                                $<INSTALL_INTERFACE:include>)
 
@@ -314,7 +325,19 @@ macro(xeus_lua_create_target target_name linkage output_name)
         set(XEUS_LUA_XEUS_TARGET xeus-static)
     endif ()
 
-    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl )
+    if(XLUA_WITH_XWIDGETS)
+        if (XLUA_USE_SHARED_XWIDGETS)
+            set(XLUA_XWIDGETS_TARGET xwidgets)
+        else ()
+            set(XLUA_XWIDGETS_TARGET xwidgets-static)
+        endif ()
+        set(XLUA_XPROPERTY_TARGET xproperty)
+    else()
+        set(XLUA_XPROPERTY_TARGET "")
+        set(XLUA_XWIDGETS_TARGET "")
+    endif()
+
+    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl  ${XLUA_XWIDGETS_TARGET} ${XLUA_XPROPERTY_TARGET})
     if (WIN32 OR CYGWIN)
         # 
     elseif (APPLE)
@@ -355,6 +378,16 @@ if (XEUS_LUA_BUILD_EXECUTABLE)
     target_compile_features(xlua PRIVATE cxx_std_17)
     xeus_lua_set_common_options(xlua)
     xeus_lua_set_kernel_options(xlua)
+endif()
+
+
+if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+    message(STATUS ${LUA_LIBRARIES})
+
+    add_executable(xeus_lua src/main_emscripten.cpp )
+    target_link_libraries(xeus_lua  xeus-lua-static)# ${LUA_LIBRARY} )
+    target_compile_features(xeus_lua PRIVATE cxx_std_17)
+
 endif()
 
 

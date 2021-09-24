@@ -18,7 +18,7 @@ namespace nl = nlohmann;
 
 
 
-#ifdef __EMSCRIPTEN__
+#ifdef XEUS_LUA_EMSCRIPTEN_WASM_BUILD
 
 EM_JS(char *, async_get_input_function, (const char* str), {
   return Asyncify.handleAsync(function () {
