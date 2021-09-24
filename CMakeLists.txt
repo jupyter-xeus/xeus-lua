@@ -174,7 +174,7 @@ if(EMSCRIPTEN)
     # filesystem
     #file(COPY asset_dir DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-    set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} --embed-file asset_dir")
+    #set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} --embed-file asset_dir")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EMSCRIPTEN_FEATURES}")
     set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}  ${EMSCRIPTEN_FEATURES} ---proxy-to-worker")
