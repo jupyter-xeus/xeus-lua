@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - cf-staging
 dependencies:
-  - xeus-lua>=0.5.2
+  - xeus-lua==0.5.2
   - notebook
   - openlibm
   - ipywidgets>=7.6
