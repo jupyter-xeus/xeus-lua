@@ -14,6 +14,10 @@
 
 #include "xeus/xinput.hpp"
 
+#ifdef XEUS_LUA_EMSCRIPTEN_WASM_BUILD
+#include <emscripten.h>
+#endif
+
 namespace nl = nlohmann;
 
 

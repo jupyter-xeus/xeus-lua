@@ -60,13 +60,14 @@ OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (in
 OPTION(XEUS_LUA_EMSCRIPTEN_WASM_BUILD "Build for wasm with emscripten" OFF)
 
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+    set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_emscripten;${CMAKE_MODULE_PATH}")
     add_compile_definitions(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     message("Build with emscripten")
     SET(XEUS_LUA_DISABLE_ARCH_NATIVE ON)
     SET(XEUS_LUA_DISABLE_TUNE_GENERIC ON)
     SET(XEUS_LUA_BUILD_STATIC ON)
     SET(XEUS_LUA_BUILD_SHARED OFF)
-    SET(XEUS_LUA_BUILD_XLUA_EXECUTABLE OFF)
+    SET(XEUS_LUA_BUILD_EXECUTABLE OFF)
     SET(XEUS_LUA_USE_SHARED_XEUS OFF)
     SET(XEUS_LUA_USE_SHARED_XEUS_LUA OFF)
     SET(XEUS_LUA_BUILD_TESTS OFF)
@@ -384,7 +385,7 @@ endif()
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     message(STATUS ${LUA_LIBRARIES})
 
-    add_executable(xeus_lua src/main_emscripten.cpp )
+    add_executable(xeus_lua src/main_emscripten_kernel.cpp )
     target_link_libraries(xeus_lua  xeus-lua-static)# ${LUA_LIBRARY} )
     target_compile_features(xeus_lua PRIVATE cxx_std_17)
 
@@ -413,7 +414,7 @@ if (XEUS_LUA_BUILD_SHARED)
 endif ()
 
 # Install xlua
-if (XEUS_LUA_BUILD_EXECUTABLE)
+if (XEUS_LUA_BUILD_XLUA_EXECUTABLE)
     install(TARGETS xlua
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
