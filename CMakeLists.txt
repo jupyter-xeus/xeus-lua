@@ -55,7 +55,7 @@ OPTION(XEUS_LUA_BUILD_EXECUTABLE "Build the xlua executable" ON)
 
 OPTION(XEUS_LUA_USE_SHARED_XEUS "Link xlua  with the xeus shared library (instead of the static library)" ON)
 OPTION(XEUS_LUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (instead of the static library)" ON)
-option(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
+OPTION(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
 OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (instead of the static library)" ON)
 OPTION(XEUS_LUA_EMSCRIPTEN_WASM_BUILD "Build for wasm with emscripten" OFF)
 
@@ -262,8 +262,12 @@ macro(xeus_lua_set_kernel_options target_name)
     else ()
         target_link_libraries(${target_name} PRIVATE xeus-lua-static)
     endif()
-    find_package(Threads) 
-    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
+    if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+        find_package(Threads) 
+        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
+    else()
+        target_link_libraries(${target_name} PRIVATE  ${LUA_LIBRARIES})
+    endif()
 endmacro()
 
 # Common macro for shared and static library xeus-lua
@@ -318,9 +322,12 @@ macro(xeus_lua_create_target target_name linkage output_name)
     elseif (APPLE)
         target_link_libraries(${target_name} PRIVATE "-undefined dynamic_lookup")
     endif ()
-
-    find_package(Threads) # TODO: add Threads as a dependence of xeus-static?
-    target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
+    if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+        find_package(Threads) # TODO: add Threads as a dependence of xeus-static?
+        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
+    else()
+        target_link_libraries(${target_name} PRIVATE  ${LUA_LIBRARIES})
+    endif()
     
 endmacro()
 
