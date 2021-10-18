@@ -366,9 +366,9 @@ endif()
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     message(STATUS ${LUA_LIBRARIES})
 
-    add_executable(xeus_lua src/main_emscripten_kernel.cpp )
-    target_link_libraries(xeus_lua  xeus-lua-static)# ${LUA_LIBRARY} )
-    target_compile_features(xeus_lua PRIVATE cxx_std_17)
+    add_executable(xeus_kernel src/main_emscripten_kernel.cpp )
+    target_link_libraries(xeus_kernel  xeus-lua-static)# ${LUA_LIBRARY} )
+    target_compile_features(xeus_kernel PRIVATE cxx_std_17)
 
 endif()
 
