@@ -34,6 +34,8 @@ namespace sol {
 namespace xlua
 {
 
+using coord_t = std::array<double, 2>;
+
 #define XLUA_ADD_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
     CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
         [](xwidgets_type & widget){\
@@ -78,6 +80,9 @@ void setup_xcanvas(
         },
         [](xwidgets_type & self,  double x, double y, double width, double height){
             self.fill_rect(x, y, width, height);
+        },
+        [](xwidgets_type & self, coord_t coord, coord_t size){
+            self.fill_rect(coord[0], coord[1], size[0], size[1]);
         }
     );
     canvas_lua_type["stroke_rect"] = sol::overload(
@@ -86,6 +91,9 @@ void setup_xcanvas(
         },
         [](xwidgets_type & self,  double x, double y, double width, double height){
             self.stroke_rect(x, y, width, height);
+        },
+        [](xwidgets_type & self, coord_t coord, coord_t size){
+            self.stroke_rect(coord[0], coord[1], size[0], size[1]);
         }
     );
     canvas_lua_type["clear_rect"] = sol::overload(
@@ -94,39 +102,114 @@ void setup_xcanvas(
         },
         [](xwidgets_type & self,  double x, double y, double width, double height){
             self.clear_rect(x, y, width, height);
+        },
+        [](xwidgets_type & self, coord_t coord, coord_t size){
+            self.clear_rect(coord[0], coord[1], size[0], size[1]);
         }
     );
 
     // Arc methods
-    canvas_lua_type["fill_arc"] = &xwidgets_type::fill_arc;
-    canvas_lua_type["fill_circle"] = &xwidgets_type::fill_circle;
-    canvas_lua_type["stroke_arc"] = &xwidgets_type::stroke_arc;
-    canvas_lua_type["stroke_circle"] = &xwidgets_type::stroke_circle;
-
+    canvas_lua_type["fill_arc"] = sol::overload(
+        &xwidgets_type::fill_arc,
+        [](xwidgets_type & self, coord_t coord, double radius, double start_angle, double end_angle, bool anticlockwise){
+            self.fill_arc(coord[0], coord[1], radius, start_angle, end_angle, anticlockwise);
+        }
+    );
+    canvas_lua_type["fill_circle"] = sol::overload(
+        &xwidgets_type::fill_circle,
+        [](xwidgets_type & self, coord_t coord, double r){
+            self.fill_circle(coord[0], coord[1], r);
+        }
+    );
+    canvas_lua_type["stroke_arc"] = sol::overload(
+        &xwidgets_type::stroke_arc,
+        [](xwidgets_type & self, coord_t coord, double radius, double start_angle, double end_angle, bool anticlockwise){
+            self.stroke_arc(coord[0], coord[1], radius, start_angle, end_angle, anticlockwise);
+        }
+    );
+    canvas_lua_type["stroke_circle"] = sol::overload(
+        &xwidgets_type::stroke_circle,
+        [](xwidgets_type & self, coord_t coord, double r){
+            self.stroke_circle(coord[0], coord[1], r);
+        }
+    );
     // Line methods
-    canvas_lua_type["stroke_line"] = &xwidgets_type::stroke_line;
+    canvas_lua_type["stroke_line"] = sol::overload(
+        &xwidgets_type::stroke_line,
+        [](xwidgets_type & self, coord_t a, coord_t b){
+            self.stroke_line(a[0], a[1], b[0], b[1]);
+        }
+    );
 
     // Path methods
     canvas_lua_type["begin_path"] = &xwidgets_type::begin_path;
     canvas_lua_type["close_path"] = &xwidgets_type::close_path;
     canvas_lua_type["stroke"] = &xwidgets_type::stroke;
     canvas_lua_type["fill"] = &xwidgets_type::fill;
-    canvas_lua_type["move_to"] = &xwidgets_type::move_to;
-    canvas_lua_type["line_to"] = &xwidgets_type::line_to;
-    canvas_lua_type["rect"] = &xwidgets_type::rect;
-    canvas_lua_type["arc"] = &xwidgets_type::arc;
-    canvas_lua_type["ellipse"] = &xwidgets_type::ellipse;
-    canvas_lua_type["arc_to"] = &xwidgets_type::arc_to;
-    canvas_lua_type["quadratic_curve_to"] = &xwidgets_type::quadratic_curve_to;
-    canvas_lua_type["bezier_curve_to"] = &xwidgets_type::bezier_curve_to;
+    canvas_lua_type["move_to"] = sol::overload(
+        &xwidgets_type::move_to,
+        [](xwidgets_type & self, std::array<double, 2> coord){
+            self.move_to(coord[0], coord[1]);
+        }
+    );
+    canvas_lua_type["line_to"] = sol::overload(
+        &xwidgets_type::line_to,
+        [](xwidgets_type & self, std::array<double, 2> coord){
+            self.line_to(coord[0], coord[1]);
+        }
+    );
+    canvas_lua_type["rect"] = sol::overload(
+        &xwidgets_type::rect,
+        [](xwidgets_type & self, coord_t coord, coord_t size){
+            self.rect(coord[0], coord[1], size[0], size[1]);
+        }
+    );
+    canvas_lua_type["arc"] = sol::overload(
+        &xwidgets_type::arc,
+        [](xwidgets_type & self, coord_t coord, double radius, double start_angle, double end_angle, bool anticlockwise){
+            self.arc(coord[0], coord[1], radius, start_angle, end_angle, anticlockwise);
+        }
+    );
+    canvas_lua_type["ellipse"] = sol::overload(
+        &xwidgets_type::ellipse,
+        [](xwidgets_type & self, coord_t coord, coord_t radius, double rotation, double start_angle, double end_angle, bool anticlockwise){
+            self.ellipse(coord[0], coord[1], radius[0], radius[1], rotation, start_angle, end_angle, anticlockwise);
+        }
+
+    );
+    canvas_lua_type["arc_to"] = sol::overload(
+        &xwidgets_type::arc_to,
+        [](xwidgets_type & self, coord_t a, coord_t b, double radius){
+            self.arc_to(a[0], a[1], b[0], b[1], radius);
+        }
+    );
+    canvas_lua_type["quadratic_curve_to"] = sol::overload(
+        &xwidgets_type::quadratic_curve_to,
+        [](xwidgets_type & self, coord_t a, coord_t b){
+            self.quadratic_curve_to(a[0], a[1], b[0], b[1]);
+        }
+    );
+    canvas_lua_type["bezier_curve_to"] = sol::overload(
+        &xwidgets_type::bezier_curve_to,
+        [](xwidgets_type & self, coord_t a, coord_t b, coord_t c){
+            self.bezier_curve_to(a[0], a[1], b[0], b[1],  c[0], c[1]);
+        }
+    );
 
     // Clip methods
-    canvas_lua_type["clip"] = &xwidgets_type::clip;
+    canvas_lua_type["clip"] = sol::overload(
+         &xwidgets_type::clip
+    );
 
     // Transform methods
     canvas_lua_type["save"] = &xwidgets_type::save;
     canvas_lua_type["restore"] = &xwidgets_type::restore;
-    canvas_lua_type["translate"] = &xwidgets_type::translate;
+    canvas_lua_type["translate"] = sol::overload( 
+        &xwidgets_type::translate,
+        [](xwidgets_type & self, coord_t a){
+            self.translate(a[0], a[1]);
+        }
+    );
     canvas_lua_type["rotate"] = &xwidgets_type::rotate;
 
     // Extras
@@ -169,9 +252,9 @@ void setup_xcanvas(
     }
 
     for k,widget_cls in pairs(  atomic_widgets) do
-        mc = getmetatable(xcanvas)
+        mc = getmetatable(widget_cls)
         function mc.__tostring(...)
-            return "xcanvas"
+            return k
         end
     end
 
@@ -195,7 +278,20 @@ void setup_xcanvas(
         return "rgb(" .. tostring(r) .. ", " ..  tostring(g) .. ", " .. tostring(b) .. ")"
     end
 
-    
+    function ilua.canvas.detail.xcanvas:rand_coord(c)
+        return {
+            math.random(1, self.width),
+            math.random(1, self.height)
+        }
+    end
+
+    function ilua.canvas.detail.xcanvas:rand_color()
+        return ilua.canvas.color.rgb(
+            math.random(50, 200),
+            math.random(50, 200),
+            math.random(50, 200)
+        )
+    end
 
 
     )"""";
