@@ -157,7 +157,7 @@ endif()
 
 if(XLUA_WITH_XCANVAS)
     if (NOT TARGET xcanvas)
-        find_package(xcanvas REQUIRED)
+        find_package(XCANVAS REQUIRED)
     endif ()
 endif()
 
@@ -316,10 +316,10 @@ macro(xeus_lua_create_target target_name linkage output_name)
 
 
     if(XLUA_WITH_XCANVAS)
-        message(STATUS "xcanvas_FOUND" ${xcanvas_FOUND})
-        message(STATUS "xcanvas_LIBRARY" ${xcanvas_LIBRARY})
-        message(STATUS "xcanvas_INCLUDE" ${xcanvas_INCLUDE_DIRS})
-        set(XLUA_XCANVAS_TARGET "")
+        message(STATUS "XCANVAS_FOUND" ${XCANVAS_FOUND})
+        message(STATUS "XCANVAS_LIBRARY" ${XCANVAS_LIBRARY})
+        message(STATUS "XCANVAS_INCLUDE" ${XCANVAS_INCLUDE_DIRS})
+        set(XLUA_XCANVAS_TARGET ${XCANVAS_LIBRARY})
         set(XLUA_XCANVAS_INCLUDE_DIRS ${xcanvas_INCLUDE_DIRS})
     else()
         set(XLUA_XCANVAS_INCLUDE_DIRS "")

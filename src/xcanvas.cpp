@@ -25,9 +25,9 @@ namespace xlua
 
 
 
+
 void setup_xcanvas(
-  sol::state_view & lua,
-  interpreter & interp
+  sol::state_view & lua
 )
 {
     // get display table
@@ -35,7 +35,28 @@ void setup_xcanvas(
     sol::table display_table = ilua_table["display"];
     sol::table detail_table = display_table["detail"];
 
-    auto self = &interp;
+
+
+    using canvas_type = xc::canvas;
+    const std::string widget_name  = "xcanvas";
+    // make usertype metatable
+    sol::usertype<canvas_type> canvas_lua_type = detail_table.new_usertype<canvas_type>(
+        widget_name,
+        // 1 constructors
+        sol::constructors<canvas_type()>()
+    );
+    // typical member function that returns a variable
+    //canvas_lua_type["display"] = &canvas_type::display;
+    //canvas_lua_type["id"] = &canvas_type::id;
+
+    canvas_lua_type[sol::meta_function::to_string] = [widget_name](canvas_type & ){
+        return widget_name;
+    };
+
+    detail_table[widget_name] = canvas_lua_type;
+
+
+
 
 
     std::string script = R""""(
