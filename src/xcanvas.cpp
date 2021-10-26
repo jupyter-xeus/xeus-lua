@@ -190,6 +190,12 @@ void setup_xcanvas(
         end
     end
 
+
+    ilua.canvas["rgb"] = function(r,g,b)
+        return "rgb(" .. tostring(r) .. ", " ..  tostring(g) .. ", " .. tostring(b) .. ")"
+    end
+
+
     )"""";
     sol::protected_function_result code_result  = lua.safe_script(script, &sol::script_pass_on_error);
     if (!code_result.valid()) {
