@@ -145,12 +145,17 @@ void setup_xcanvas(
     canvas_lua_type["begin_path"] = &xwidgets_type::begin_path;
     canvas_lua_type["close_path"] = &xwidgets_type::close_path;
     canvas_lua_type["stroke"] = &xwidgets_type::stroke;
-    canvas_lua_type["fill"] = &xwidgets_type::fill;
+    canvas_lua_type["fill"] = sol::overload(
+        &xwidgets_type::fill,
+         [](xwidgets_type & self){
+            self.fill();
+        }
+    );
     canvas_lua_type["move_to"] = sol::overload(
-        &xwidgets_type::move_to,
         [](xwidgets_type & self, std::array<double, 2> coord){
             self.move_to(coord[0], coord[1]);
-        }
+        },
+        &xwidgets_type::move_to
     );
     canvas_lua_type["line_to"] = sol::overload(
         &xwidgets_type::line_to,
