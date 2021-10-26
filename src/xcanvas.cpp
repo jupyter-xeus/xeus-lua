@@ -78,17 +78,20 @@ void setup_xcanvas(
         // 1 constructors
         sol::constructors<xwidgtes_type()>()
     );
-    // typical member function that returns a variable
-    canvas_lua_type["display"] = &xwidgtes_type::display;
-    canvas_lua_type["flush"] = &xwidgtes_type::flush;
-    canvas_lua_type["clear"] = &xwidgtes_type::clear;
-    //canvas_lua_type["id"] = &xwidgtes_type::id;
 
+    // special functions
     canvas_lua_type[sol::meta_function::to_string] = [widget_name](xwidgtes_type & ){
         return widget_name;
     };
 
 
+    // simpl
+    canvas_lua_type["display"] = &xwidgtes_type::display;
+    canvas_lua_type["flush"] = &xwidgtes_type::flush;
+    canvas_lua_type["clear"] = &xwidgtes_type::clear;
+
+
+    // some overloaded function
     canvas_lua_type["fill_rect"] = sol::overload( 
         [](xwidgtes_type & self,  double x, double y, double width){
             self.fill_rect(x,y,width);
@@ -97,6 +100,8 @@ void setup_xcanvas(
             self.fill_rect(x,y,width, height);
         }
     );
+
+    // simple non-overloaded function
     canvas_lua_type["fill_circle"] = &xwidgtes_type::fill_circle;
 
 
@@ -105,10 +110,8 @@ void setup_xcanvas(
 
 
 
-
+    // patch the print function with pure lua code
     std::string script = R""""(
-
-        
 
     local atomic_widgets = {
         xcanvas = ilua.canvas.detail.xcanvas
