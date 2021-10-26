@@ -157,6 +157,19 @@ void setup_xcanvas(
     XLUA_ADD_PROPERTY(canvas_lua_type, double, global_alpha);
     XLUA_ADD_PROPERTY(canvas_lua_type, std::string, font);
 
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, text_align);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, text_baseline);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, direction);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, global_composite_operation);    
+
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, shadow_offset_x);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, shadow_offset_y);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, shadow_blur);
+    //MISSING  shadow_color
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, line_cap);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, line_join);
+
+
     // patch the print function with pure lua code
     std::string script = R""""(
 
