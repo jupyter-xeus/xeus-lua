@@ -162,6 +162,11 @@ namespace xlua
         #ifdef XLUA_WITH_XWIDGETS
         register_xwidgets(lua);            
         #endif    
+
+        // add widgets
+        #ifdef XLUA_WITH_XCANVAS
+        setup_xcanvas(lua);            
+        #endif    
     }
 
     bool interpreter::allow_stdin()const

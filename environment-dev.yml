@@ -13,6 +13,8 @@ dependencies:
   - openlibm # [linux]
   - xwidgets>=0.26.1
   - xcanvas>=0.2.0
+  # to try it out
+  - jupyterlab
   # Test dependencies
   - pytest
   - nbval
