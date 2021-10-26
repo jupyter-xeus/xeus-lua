@@ -29,6 +29,10 @@ inline bool startswith(const std::string& str, const std::string& cmp)
   return str.compare(0, cmp.length(), cmp) == 0;
 }
 
+
+
+
+
 std::vector<std::string> split_string(const std::string & str, const char split_on)
 {
     std::istringstream iss(str);
@@ -42,6 +46,28 @@ std::vector<std::string> split_string(const std::string & str, const char split_
     }
     return tokens;
 }
+
+std::vector<std::string> split_string_dot(const std::string & inputString)
+{
+    std::vector<std::string> result_tokens;
+    for(auto tokens : split_string(inputString,':'))
+    {
+        for(const auto & inner_token : split_string(tokens,'.'))
+        {
+            result_tokens.push_back(inner_token);
+        }
+    }
+    return result_tokens;
+}
+
+
+
+
+
+
+
+
+
 
 class Constants
 {
@@ -65,6 +91,13 @@ std::pair<bool, sol::table> get_table_from_path(sol::state_view & lua, const std
     sol::table current_table = lua["_G"];
     while(i < path.size())
     {
+        sol::object as_obj = current_table[path[i]];
+        sol::type t = as_obj.get_type();
+        if (t != sol::type::table)
+        {
+            return std::make_pair(false, current_table);   
+        }
+
         current_table = current_table[path[i]];
         if(current_table == sol::lua_nil)
         {
@@ -90,7 +123,6 @@ void match_from_table_like(table_like & table, const std::string & to_match, nl:
 }
 
 int complete(sol::state_view & lua, const std::string & code, int cursor_pos, nl::json & matches) {
-
     auto is_dot = [&](char c)
     {
        return c == '.' || c == ':';
@@ -103,6 +135,7 @@ int complete(sol::state_view & lua, const std::string & code, int cursor_pos, nl
     int cursor_start;
     int dotpos = -1;
     bool found_dot = false;    
+    char split_on = ' ';
     --cursor_pos;
 
     // some extra scope to not have the "i" in the scope above
@@ -119,6 +152,7 @@ int complete(sol::state_view & lua, const std::string & code, int cursor_pos, nl
                 else if (!found_dot)
                 { 
                     dotpos = i; 
+                    split_on = code[i];
                     found_dot = true;
                 }
                 else if(code[i] == ':')
@@ -145,7 +179,7 @@ int complete(sol::state_view & lua, const std::string & code, int cursor_pos, nl
     {
         const std::string to_match = code.substr(dotpos + 1, cursor_pos-dotpos);
         const std::string path = code.substr(cursor_start, dotpos-cursor_start+1);
-        auto path_tokens = split_string(path, '.');
+        auto path_tokens = split_string_dot(path);
         auto [has_path, table] = get_table_from_path(lua, path_tokens);
         if(has_path)
         {

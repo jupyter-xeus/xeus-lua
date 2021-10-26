@@ -24,6 +24,7 @@ void add_ilua_module(sol::state_view & lua){
             detail = {}
         },
         canvas = {
+            color = {},
             detail = {}
         },
         config = {

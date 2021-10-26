@@ -169,9 +169,9 @@ void setup_xcanvas(
     }
 
     for k,widget_cls in pairs(  atomic_widgets) do
-        mc = getmetatable(widget_cls)
+        mc = getmetatable(xcanvas)
         function mc.__tostring(...)
-            return k
+            return "xcanvas"
         end
     end
 
@@ -191,9 +191,11 @@ void setup_xcanvas(
     end
 
 
-    ilua.canvas["rgb"] = function(r,g,b)
+    ilua.canvas.color["rgb"] = function(r,g,b)
         return "rgb(" .. tostring(r) .. ", " ..  tostring(g) .. ", " .. tostring(b) .. ")"
     end
+
+    
 
 
     )"""";
