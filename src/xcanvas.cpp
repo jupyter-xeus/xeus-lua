@@ -147,6 +147,16 @@ void setup_xcanvas(
 
     detail_table[widget_name] = canvas_lua_type;
 
+
+
+    // add properties
+    XLUA_ADD_PROPERTY(canvas_lua_type, bool, _send_client_ready_event);
+    XLUA_ADD_PROPERTY(canvas_lua_type, int, width);
+    XLUA_ADD_PROPERTY(canvas_lua_type, int, height);
+    XLUA_ADD_PROPERTY(canvas_lua_type, bool, sync_image_data);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, global_alpha);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, font);
+
     // patch the print function with pure lua code
     std::string script = R""""(
 
@@ -158,6 +168,21 @@ void setup_xcanvas(
         mc = getmetatable(widget_cls)
         function mc.__tostring(...)
             return k
+        end
+    end
+
+    for k,widget_cls in pairs(  atomic_widgets) do
+    ilua.canvas[k:sub(2)] = function(options) 
+            options = options or {}
+            w = widget_cls.new()
+            for kw,val in pairs(options) do
+                if w[kw] ~= nil then
+                    w[kw] = val
+                else
+                    error(k.." has no attribute `"..kw.."`")
+                end
+            end
+            return w
         end
     end
 
