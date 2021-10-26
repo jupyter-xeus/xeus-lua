@@ -1,9 +1,9 @@
 #############################################################################
-#Copyright (c) 2021,                                          
-#                                                                         
-#Distributed under the terms of the BSD 3-Clause License.                 
-#                                                                         
-#The full license is in the file LICENSE, distributed with this software. 
+#Copyright (c) 2021,
+#
+#Distributed under the terms of the BSD 3-Clause License.
+#
+#The full license is in the file LICENSE, distributed with this software.
 #############################################################################
 
 cmake_minimum_required(VERSION 3.4.3)
@@ -74,7 +74,7 @@ if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     SET(XEUS_LUA_USE_SHARED_XEUS OFF)
     SET(XEUS_LUA_USE_SHARED_XEUS_LUA OFF)
     SET(XEUS_LUA_BUILD_TESTS OFF)
-    SET(XLUA_WITH_XCANVAS OFF) # since it is not static atm
+    SET(XLUA_WITH_XCANVAS ON)
 endif()
 
 
@@ -85,7 +85,7 @@ set(xtl_REQUIRED_VERSION 0.6.23)
 set(xeus_REQUIRED_VERSION 0.25.0)
 
 set(xwidgets_REQUIRED_VERSION 0.25.0)
-#set(xcanvas_REQUIRED_VERSION 0.2.0)
+set(xcanvas_REQUIRED_VERSION 0.2.1)
 set(xproperty_REQUIRED_VERSION 0.11.0)
 set(Lua_REQUIRED_VERSION 5.3.4)
 
@@ -117,7 +117,7 @@ if (MSVC)
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)    
+    if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder")
     endif()
     if (XEUS_LUA_DISABLE_ARCH_NATIVE AND NOT XEUS_LUA_DISABLE_TUNE_GENERIC)
@@ -157,7 +157,7 @@ endif()
 
 if(XLUA_WITH_XCANVAS)
     if (NOT TARGET xcanvas)
-        find_package(XCANVAS REQUIRED)
+        find_package(xcanvas REQUIRED)
     endif ()
 endif()
 
@@ -192,7 +192,7 @@ set(XEUS_LUA_HEADERS
 )
 
 set(XEUS_LUA_SRC
-    src/xinterpreter.cpp 
+    src/xinterpreter.cpp
     src/xextend.cpp
     src/xcomplete.cpp
     src/xio.cpp
@@ -285,7 +285,7 @@ macro(xeus_lua_set_kernel_options target_name)
         target_link_libraries(${target_name} PRIVATE xeus-lua-static)
     endif()
     if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
-        find_package(Threads) 
+        find_package(Threads)
         target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
     else()
         target_link_libraries(${target_name} PRIVATE  ${LUA_LIBRARIES})
@@ -316,20 +316,17 @@ macro(xeus_lua_create_target target_name linkage output_name)
 
 
     if(XLUA_WITH_XCANVAS)
-        message(STATUS "XCANVAS_FOUND" ${XCANVAS_FOUND})
-        message(STATUS "XCANVAS_LIBRARY" ${XCANVAS_LIBRARY})
-        message(STATUS "XCANVAS_INCLUDE" ${XCANVAS_INCLUDE_DIRS})
-        set(XLUA_XCANVAS_TARGET ${XCANVAS_LIBRARY})
-        set(XLUA_XCANVAS_INCLUDE_DIRS ${xcanvas_INCLUDE_DIRS})
+        set(XLUA_XCANVAS_TARGET ${xcanvas_LIBRARY})
+        set(XLUA_XCANVAS_INCLUDE_DIR ${xcanvas_INCLUDE_DIR})
     else()
-        set(XLUA_XCANVAS_INCLUDE_DIRS "")
+        set(XLUA_XCANVAS_INCLUDE_DIR "")
     endif()
 
 
     target_include_directories(${target_name}
                                PUBLIC
                                ${LUA_INCLUDE_DIR}
-                               ${XLUA_XCANVAS_INCLUDE_DIRS}
+                               ${XLUA_XCANVAS_INCLUDE_DIR}
                                $<BUILD_INTERFACE:${XEUS_LUA_INCLUDE_DIR}>
                                $<INSTALL_INTERFACE:include>)
 
@@ -352,13 +349,13 @@ macro(xeus_lua_create_target target_name linkage output_name)
     endif()
 
 
-    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl  
-        ${XLUA_XWIDGETS_TARGET} 
+    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl
+        ${XLUA_XWIDGETS_TARGET}
         ${XLUA_XPROPERTY_TARGET}
         ${XLUA_XCANVAS_TARGET}
     )
     if (WIN32 OR CYGWIN)
-        # 
+        #
     elseif (APPLE)
         target_link_libraries(${target_name} PRIVATE "-undefined dynamic_lookup")
     endif ()
@@ -368,7 +365,7 @@ macro(xeus_lua_create_target target_name linkage output_name)
     else()
         target_link_libraries(${target_name} PRIVATE  ${LUA_LIBRARIES})
     endif()
-    
+
 endmacro()
 
 # xeus-lua

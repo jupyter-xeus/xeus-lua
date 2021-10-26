@@ -26,17 +26,17 @@ namespace sol {
         template<template <class> class B, class... P>
         struct is_container<xw::xmaterialize<B, P...>> : std::false_type {};
 
-       
+
 
 }
 
 
 #define XLUA_ADD_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
     CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
-        [](xwidgtes_type & widget){\
+        [](xwidgets_type & widget){\
             return PROPERTY_TYPE(widget.PROPERTY_NAME);\
         }, \
-        [](xwidgtes_type & widget, const PROPERTY_TYPE & val){\
+        [](xwidgets_type & widget, const PROPERTY_TYPE & val){\
             widget.PROPERTY_NAME = val;\
         })\
     )
@@ -45,15 +45,12 @@ namespace sol {
 namespace xlua
 {
 
-
-
-
 #define XLUA_ADD_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
     CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
-        [](xwidgtes_type & widget){\
+        [](xwidgets_type & widget){\
             return PROPERTY_TYPE(widget.PROPERTY_NAME);\
         }, \
-        [](xwidgtes_type & widget, const PROPERTY_TYPE & val){\
+        [](xwidgets_type & widget, const PROPERTY_TYPE & val){\
             widget.PROPERTY_NAME = val;\
         })\
     )
@@ -68,47 +65,87 @@ void setup_xcanvas(
     sol::table canvas_table = ilua_table["canvas"];
     sol::table detail_table = canvas_table["detail"];
 
-
-
-    using xwidgtes_type = xc::canvas;
+    using xwidgets_type = xc::canvas;
     const std::string widget_name  = "xcanvas";
     // make usertype metatable
-    sol::usertype<xwidgtes_type> canvas_lua_type = detail_table.new_usertype<xwidgtes_type>(
+    sol::usertype<xwidgets_type> canvas_lua_type = detail_table.new_usertype<xwidgets_type>(
         widget_name,
         // 1 constructors
-        sol::constructors<xwidgtes_type()>()
+        sol::constructors<xwidgets_type()>()
     );
 
     // special functions
-    canvas_lua_type[sol::meta_function::to_string] = [widget_name](xwidgtes_type & ){
+    canvas_lua_type[sol::meta_function::to_string] = [widget_name](xwidgets_type & ){
         return widget_name;
     };
 
+    // Simple methods
+    canvas_lua_type["display"] = &xwidgets_type::display;
 
-    // simpl
-    canvas_lua_type["display"] = &xwidgtes_type::display;
-    canvas_lua_type["flush"] = &xwidgtes_type::flush;
-    canvas_lua_type["clear"] = &xwidgtes_type::clear;
-
-
-    // some overloaded function
-    canvas_lua_type["fill_rect"] = sol::overload( 
-        [](xwidgtes_type & self,  double x, double y, double width){
-            self.fill_rect(x,y,width);
+    // Rect methods
+    canvas_lua_type["fill_rect"] = sol::overload(
+        [](xwidgets_type & self,  double x, double y, double width){
+            self.fill_rect(x, y, width);
         },
-        [](xwidgtes_type & self,  double x, double y, double width, double height){
-            self.fill_rect(x,y,width, height);
+        [](xwidgets_type & self,  double x, double y, double width, double height){
+            self.fill_rect(x, y, width, height);
+        }
+    );
+    canvas_lua_type["stroke_rect"] = sol::overload(
+        [](xwidgets_type & self,  double x, double y, double width){
+            self.stroke_rect(x, y, width);
+        },
+        [](xwidgets_type & self,  double x, double y, double width, double height){
+            self.stroke_rect(x, y, width, height);
+        }
+    );
+    canvas_lua_type["clear_rect"] = sol::overload(
+        [](xwidgets_type & self,  double x, double y, double width){
+            self.clear_rect(x, y, width);
+        },
+        [](xwidgets_type & self,  double x, double y, double width, double height){
+            self.clear_rect(x, y, width, height);
         }
     );
 
-    // simple non-overloaded function
-    canvas_lua_type["fill_circle"] = &xwidgtes_type::fill_circle;
+    // Arc methods
+    canvas_lua_type["fill_arc"] = &xwidgets_type::fill_arc;
+    canvas_lua_type["fill_circle"] = &xwidgets_type::fill_circle;
+    canvas_lua_type["stroke_arc"] = &xwidgets_type::stroke_arc;
+    canvas_lua_type["stroke_circle"] = &xwidgets_type::stroke_circle;
 
+    // Line methods
+    canvas_lua_type["stroke_line"] = &xwidgets_type::stroke_line;
+
+    // Path methods
+    canvas_lua_type["begin_path"] = &xwidgets_type::begin_path;
+    canvas_lua_type["close_path"] = &xwidgets_type::close_path;
+    canvas_lua_type["stroke"] = &xwidgets_type::stroke;
+    canvas_lua_type["fill"] = &xwidgets_type::fill;
+    canvas_lua_type["move_to"] = &xwidgets_type::move_to;
+    canvas_lua_type["line_to"] = &xwidgets_type::line_to;
+    canvas_lua_type["rect"] = &xwidgets_type::rect;
+    canvas_lua_type["arc"] = &xwidgets_type::arc;
+    canvas_lua_type["ellipse"] = &xwidgets_type::ellipse;
+    canvas_lua_type["arc_to"] = &xwidgets_type::arc_to;
+    canvas_lua_type["quadratic_curve_to"] = &xwidgets_type::quadratic_curve_to;
+    canvas_lua_type["bezier_curve_to"] = &xwidgets_type::bezier_curve_to;
+
+    // Clip methods
+    canvas_lua_type["clip"] = &xwidgets_type::clip;
+
+    // Transform methods
+    canvas_lua_type["save"] = &xwidgets_type::save;
+    canvas_lua_type["restore"] = &xwidgets_type::restore;
+    canvas_lua_type["translate"] = &xwidgets_type::translate;
+    canvas_lua_type["rotate"] = &xwidgets_type::rotate;
+
+    // Extras
+    canvas_lua_type["cache"] = &xwidgets_type::cache;
+    canvas_lua_type["flush"] = &xwidgets_type::flush;
+    canvas_lua_type["clear"] = &xwidgets_type::clear;
 
     detail_table[widget_name] = canvas_lua_type;
-
-
-
 
     // patch the print function with pure lua code
     std::string script = R""""(
