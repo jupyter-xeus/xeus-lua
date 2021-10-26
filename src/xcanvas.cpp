@@ -92,6 +92,9 @@ void setup_xcanvas(
     canvas_lua_type["fill_rect"] = sol::overload( 
         [](xwidgtes_type & self,  double x, double y, double width){
             self.fill_rect(x,y,width);
+        },
+        [](xwidgtes_type & self,  double x, double y, double width, double height){
+            self.fill_rect(x,y,width, height);
         }
     );
     canvas_lua_type["fill_circle"] = &xwidgtes_type::fill_circle;
