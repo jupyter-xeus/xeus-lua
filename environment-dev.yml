@@ -1,4 +1,4 @@
-name: xeus-lua
+name: xeus-lua-xcanvas
 channels:
   - conda-forge
 dependencies:
@@ -12,6 +12,7 @@ dependencies:
   - lua>=5.2.0
   - openlibm # [linux]
   - xwidgets>=0.26.1
+  - xcanvas>=0.2.0
   # Test dependencies
   - pytest
   - nbval

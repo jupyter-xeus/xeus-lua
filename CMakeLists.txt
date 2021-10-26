@@ -59,6 +59,9 @@ OPTION(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
 OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (instead of the static library)" ON)
 OPTION(XEUS_LUA_EMSCRIPTEN_WASM_BUILD "Build for wasm with emscripten" OFF)
 
+OPTION(XLUA_WITH_XCANVAS "Build xeus-lua with xcanvas" ON)
+
+
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_emscripten;${CMAKE_MODULE_PATH}")
     add_compile_definitions(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
@@ -71,6 +74,7 @@ if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     SET(XEUS_LUA_USE_SHARED_XEUS OFF)
     SET(XEUS_LUA_USE_SHARED_XEUS_LUA OFF)
     SET(XEUS_LUA_BUILD_TESTS OFF)
+    SET(XLUA_WITH_XCANVAS OFF) # since it is not static atm
 endif()
 
 
@@ -81,6 +85,7 @@ set(xtl_REQUIRED_VERSION 0.6.23)
 set(xeus_REQUIRED_VERSION 0.25.0)
 
 set(xwidgets_REQUIRED_VERSION 0.25.0)
+#set(xcanvas_REQUIRED_VERSION 0.2.0)
 set(xproperty_REQUIRED_VERSION 0.11.0)
 set(Lua_REQUIRED_VERSION 5.3.4)
 
@@ -138,11 +143,21 @@ if(XLUA_WITH_XWIDGETS)
     add_compile_definitions(XLUA_WITH_XWIDGETS)
 endif()
 
-if(XLUA_WITH_XWIDGETS)
+if(XLUA_WITH_XWIDGETS OR XLUA_WITH_XCANVAS)
     if (NOT TARGET xwidgets)
         find_package(xwidgets ${xwidgets_REQUIRED_VERSION} REQUIRED)
         find_package(xproperty ${xproperty_REQUIRED_VERSION} REQUIRED)
+    endif ()
+endif()
 
+
+if(XLUA_WITH_XCANVAS)
+    add_compile_definitions(XLUA_WITH_XCANVAS)
+endif()
+
+if(XLUA_WITH_XCANVAS)
+    if (NOT TARGET xcanvas)
+        find_package(xcanvas REQUIRED)
     endif ()
 endif()
 
@@ -189,6 +204,13 @@ if(XLUA_WITH_XWIDGETS)
     set(XEUS_LUA_SRC
         ${XEUS_LUA_SRC}
         src/xwidgets.cpp
+    )
+endif()
+
+if(XLUA_WITH_XCANVAS)
+    set(XEUS_LUA_SRC
+        ${XEUS_LUA_SRC}
+        src/xcanvas.cpp
     )
 endif()
 
@@ -292,9 +314,22 @@ macro(xeus_lua_create_target target_name linkage output_name)
 
     target_compile_features(${target_name} PRIVATE cxx_std_17)
 
+
+    if(XLUA_WITH_XCANVAS)
+        message(STATUS "xcanvas_FOUND" ${xcanvas_FOUND})
+        message(STATUS "xcanvas_LIBRARY" ${xcanvas_LIBRARY})
+        message(STATUS "xcanvas_INCLUDE" ${xcanvas_INCLUDE_DIRS})
+        set(XLUA_XCANVAS_TARGET "")
+        set(XLUA_XCANVAS_INCLUDE_DIRS ${xcanvas_INCLUDE_DIRS})
+    else()
+        set(XLUA_XCANVAS_INCLUDE_DIRS "")
+    endif()
+
+
     target_include_directories(${target_name}
                                PUBLIC
                                ${LUA_INCLUDE_DIR}
+                               ${XLUA_XCANVAS_INCLUDE_DIRS}
                                $<BUILD_INTERFACE:${XEUS_LUA_INCLUDE_DIR}>
                                $<INSTALL_INTERFACE:include>)
 
@@ -304,7 +339,7 @@ macro(xeus_lua_create_target target_name linkage output_name)
         set(XEUS_LUA_XEUS_TARGET xeus-static)
     endif ()
 
-    if(XLUA_WITH_XWIDGETS)
+    if(XLUA_WITH_XWIDGETS OR XLUA_WITH_XCANVAS)
         if (XLUA_USE_SHARED_XWIDGETS)
             set(XLUA_XWIDGETS_TARGET xwidgets)
         else ()
@@ -316,7 +351,12 @@ macro(xeus_lua_create_target target_name linkage output_name)
         set(XLUA_XWIDGETS_TARGET "")
     endif()
 
-    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl  ${XLUA_XWIDGETS_TARGET} ${XLUA_XPROPERTY_TARGET})
+
+    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl  
+        ${XLUA_XWIDGETS_TARGET} 
+        ${XLUA_XPROPERTY_TARGET}
+        ${XLUA_XCANVAS_TARGET}
+    )
     if (WIN32 OR CYGWIN)
         # 
     elseif (APPLE)
