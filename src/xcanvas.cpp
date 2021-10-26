@@ -31,17 +31,6 @@ namespace sol {
 }
 
 
-#define XLUA_ADD_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
-    CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
-        [](xwidgets_type & widget){\
-            return PROPERTY_TYPE(widget.PROPERTY_NAME);\
-        }, \
-        [](xwidgets_type & widget, const PROPERTY_TYPE & val){\
-            widget.PROPERTY_NAME = val;\
-        })\
-    )
-
-
 namespace xlua
 {
 
@@ -81,6 +70,27 @@ void setup_xcanvas(
 
     // Simple methods
     canvas_lua_type["display"] = &xwidgets_type::display;
+
+    XLUA_ADD_PROPERTY(canvas_lua_type, int, width);
+    XLUA_ADD_PROPERTY(canvas_lua_type, int, height);
+    XLUA_ADD_PROPERTY(canvas_lua_type, bool, sync_image_data);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, global_alpha);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, font);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, text_align);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, text_baseline);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, direction);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, global_composite_operation);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, shadow_offset_x);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, shadow_offset_y);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, shadow_blur);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, shadow_color);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, line_width);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, line_cap);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, line_join);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, miter_limit);
+    XLUA_ADD_PROPERTY(canvas_lua_type, double, line_dash_offset);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, fill_style);
+    XLUA_ADD_PROPERTY(canvas_lua_type, std::string, stroke_style);
 
     // Rect methods
     canvas_lua_type["fill_rect"] = sol::overload(
