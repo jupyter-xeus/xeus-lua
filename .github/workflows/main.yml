@@ -220,7 +220,7 @@ jobs:
           cd bld
           pwd
           emcmake cmake .. \
-           -DXEUS_MYLANG_EMSCRIPTEN_WASM_BUILD=ON \
+           -DXEUS_LUA_EMSCRIPTEN_WASM_BUILD=ON \
            -Dxwidgets_DIR=/custom_sysroot/lib/cmake/xwidgets \
            -Dxcanvas_DIR=/custom_sysroot/lib/cmake/xcanvas \
            -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
@@ -408,7 +408,7 @@ jobs:
           cd bld
           emcmake cmake .. \
            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/custom_sysroot \
-           -DXEUS_MYLANG_EMSCRIPTEN_WASM_BUILD=ON \
+           -DXEUS_LUA_EMSCRIPTEN_WASM_BUILD=ON \
            -Dxtl_DIR=$GITHUB_WORKSPACE/custom_sysroot/share/cmake/xtl \
            -Dnlohmann_json_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/nlohmann_json \
            -Dxeus_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xeus \
