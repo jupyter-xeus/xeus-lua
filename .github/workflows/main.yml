@@ -219,7 +219,7 @@ jobs:
           pwd
           cd bld
           pwd
-          emcmake cmake .. \
+          emcmake cmake $GITHUB_WORKSPACE \
            -DXEUS_LUA_EMSCRIPTEN_WASM_BUILD=ON \
            -Dxwidgets_DIR=/custom_sysroot/lib/cmake/xwidgets \
            -Dxcanvas_DIR=/custom_sysroot/lib/cmake/xcanvas \
