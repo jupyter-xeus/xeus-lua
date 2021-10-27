@@ -114,6 +114,15 @@ jobs:
       - name: Verify emscripten
         run: emcc -v
 
+
+      - name: "install lua"
+        run: |
+          mkdir -p /opt/wasm_lua
+          git clone https://github.com/DerThorsten/wasm_lua   /opt/wasm_lua
+          cd /opt/wasm_lua && git checkout tags/0.1.0
+          cd /opt/wasm_lua && \
+          emmake make
+
       - name: "install xtl"
         run: |
           mkdir -p /opt/xtl/build 
@@ -209,7 +218,9 @@ jobs:
            -Dxcanvas_DIR=/custom_sysroot/lib/cmake/xcanvas \
            -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
            -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
-           -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \
+           -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \ 
+           -DLUA_INCLUDE_DIR=/opt/wasm_lua/lua-5.3.4/src \
+           -DLUA_LIBRARY=/opt/wasm_lua/lua-5.3.4/src/liblua.a \
            -DCMAKE_INSTALL_PREFIX=/custom_sysroot
       - name: build rendered project
         shell: bash -l {0}
@@ -250,13 +261,25 @@ jobs:
           environment-file: environment-dev.yml
           environment-name: xeus-mylang
 
+
+      - name: "install lua"
+        run: |
+          cd /opt/emsdk
+          ./emsdk activate ${{matrix.emsdk_ver}}
+          source "/opt/emsdk/emsdk_env.sh"
+
+          mkdir -p /opt/wasm_lua
+          git clone https://github.com/DerThorsten/wasm_lua   /opt/wasm_lua
+          cd /opt/wasm_lua && git checkout tags/0.1.0
+          cd /opt/wasm_lua && \
+          emmake make
+
       - name: "install xtl"
         run: |
           cd /opt/emsdk
-           
           ./emsdk activate ${{matrix.emsdk_ver}}
-           
           source "/opt/emsdk/emsdk_env.sh"
+
           mkdir -p /opt/xtl/build 
           git clone https://github.com/xtensor-stack/xtl.git  /opt/xtl/src
           cd /opt/xtl/src 
@@ -385,12 +408,14 @@ jobs:
            -Dxproperty_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xproperty \
            -Dxwidgets_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xwidgets \
            -Dxcanvas_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xcanvas \
+           -DLUA_INCLUDE_DIR=/opt/wasm_lua/lua-5.3.4/src \
+           -DLUA_LIBRARY=/opt/wasm_lua/lua-5.3.4/src/liblua.a \
            -DXLUA_WITH_XWIDGETS=ON \
            -DXLUA_WITH_XCANVAS=ON \
            -DXLUA_USE_SHARED_XWIDGETS=OFF\
            -DXLUA_USE_SHARED_XCANVAS=OFF
 
-      - name: build rendered project
+      - name: build  project
         shell: bash
         run: |
           cd /opt/emsdk
@@ -401,7 +426,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           cd bld
           emmake make -j8
-      - name: install rendered project
+      - name: install  project
         shell: bash -l {0}
         run: |
           cd /opt/emsdk
