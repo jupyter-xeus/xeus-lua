@@ -110,32 +110,42 @@ void setup_xcanvas(
 
     // Arc methods
     canvas_lua_type["fill_arc"] = sol::overload(
-        &xwidgets_type::fill_arc,
+        [](xwidgets_type & self, double x, double y, double radius, double start_angle, double end_angle, bool anticlockwise){
+            self.fill_arc(x, y, radius, start_angle, end_angle, anticlockwise);
+        },
         [](xwidgets_type & self, coord_t coord, double radius, double start_angle, double end_angle, bool anticlockwise){
             self.fill_arc(coord[0], coord[1], radius, start_angle, end_angle, anticlockwise);
         }
     );
     canvas_lua_type["fill_circle"] = sol::overload(
-        &xwidgets_type::fill_circle,
+        [](xwidgets_type & self,  double x, double y, double r){
+            self.fill_circle(x, y, r);
+        },
         [](xwidgets_type & self, coord_t coord, double r){
             self.fill_circle(coord[0], coord[1], r);
         }
     );
     canvas_lua_type["stroke_arc"] = sol::overload(
-        &xwidgets_type::stroke_arc,
+        [](xwidgets_type & self, double x, double y, double radius, double start_angle, double end_angle, bool anticlockwise){
+            self.stroke_arc(x, y, radius, start_angle, end_angle, anticlockwise);
+        },
         [](xwidgets_type & self, coord_t coord, double radius, double start_angle, double end_angle, bool anticlockwise){
             self.stroke_arc(coord[0], coord[1], radius, start_angle, end_angle, anticlockwise);
         }
     );
     canvas_lua_type["stroke_circle"] = sol::overload(
-        &xwidgets_type::stroke_circle,
+        [](xwidgets_type & self,  double x, double y, double r){
+            self.stroke_circle(x, y, r);
+        },
         [](xwidgets_type & self, coord_t coord, double r){
             self.stroke_circle(coord[0], coord[1], r);
         }
     );
     // Line methods
     canvas_lua_type["stroke_line"] = sol::overload(
-        &xwidgets_type::stroke_line,
+        [](xwidgets_type & self, double x1, double y1, double x2, double y2){
+            self.stroke_line(x1, y1, x2, y2);
+        },
         [](xwidgets_type & self, coord_t a, coord_t b){
             self.stroke_line(a[0], a[1], b[0], b[1]);
         }
@@ -152,25 +162,33 @@ void setup_xcanvas(
         }
     );
     canvas_lua_type["move_to"] = sol::overload(
-        [](xwidgets_type & self, std::array<double, 2> coord){
-            self.move_to(coord[0], coord[1]);
+        [](xwidgets_type & self, double x, double y){
+            self.move_to(x, y);
         },
-        &xwidgets_type::move_to
+        [](xwidgets_type & self, coord_t coord){
+            self.move_to(coord[0], coord[1]);
+        }
     );
     canvas_lua_type["line_to"] = sol::overload(
-        &xwidgets_type::line_to,
-        [](xwidgets_type & self, std::array<double, 2> coord){
+        [](xwidgets_type & self, double x, double y){
+            self.line_to(x, y);
+        },
+        [](xwidgets_type & self, coord_t coord){
             self.line_to(coord[0], coord[1]);
         }
     );
     canvas_lua_type["rect"] = sol::overload(
-        &xwidgets_type::rect,
+        [](xwidgets_type & self, double x, double y, double width, double height){
+            self.rect(x, y, width, height);
+        },
         [](xwidgets_type & self, coord_t coord, coord_t size){
             self.rect(coord[0], coord[1], size[0], size[1]);
         }
     );
     canvas_lua_type["arc"] = sol::overload(
-        &xwidgets_type::arc,
+        [](xwidgets_type & self, double x, double y, double radius, double start_angle, double end_angle, bool anticlockwise){
+            self.arc(x, y, radius, start_angle, end_angle, anticlockwise);
+        },
         [](xwidgets_type & self, coord_t coord, double radius, double start_angle, double end_angle, bool anticlockwise){
             self.arc(coord[0], coord[1], radius, start_angle, end_angle, anticlockwise);
         }
@@ -209,7 +227,7 @@ void setup_xcanvas(
     // Transform methods
     canvas_lua_type["save"] = &xwidgets_type::save;
     canvas_lua_type["restore"] = &xwidgets_type::restore;
-    canvas_lua_type["translate"] = sol::overload( 
+    canvas_lua_type["translate"] = sol::overload(
         &xwidgets_type::translate,
         [](xwidgets_type & self, coord_t a){
             self.translate(a[0], a[1]);
