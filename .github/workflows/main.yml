@@ -216,7 +216,9 @@ jobs:
         shell: bash -l {0}
         run: |
           mkdir -p bld
+          pwd
           cd bld
+          pwd
           emcmake cmake .. \
            -DXEUS_MYLANG_EMSCRIPTEN_WASM_BUILD=ON \
            -Dxwidgets_DIR=/custom_sysroot/lib/cmake/xwidgets \

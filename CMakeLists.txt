@@ -60,7 +60,7 @@ OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (in
 OPTION(XEUS_LUA_EMSCRIPTEN_WASM_BUILD "Build for wasm with emscripten" OFF)
 
 OPTION(XLUA_WITH_XCANVAS      "Build xeus-lua with xcanvas" ON)
-OPTION(XLUA_USE_SHARED_XCANVAS"Link xlua  with the xcanvas shared library (instead of the static library)" ON)
+OPTION(XLUA_USE_SHARED_XCANVAS "Link xlua  with the xcanvas shared library (instead of the static library)" ON)
 
 
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
