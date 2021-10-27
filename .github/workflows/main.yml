@@ -125,7 +125,7 @@ jobs:
           echo "LS"
           ls
           cd /opt/wasm_lua/lua-5.3.4/src
-          ech "LS src"
+          echo "LS src"
           ls
 
       - name: "install xtl"
