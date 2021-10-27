@@ -194,41 +194,48 @@ void setup_xcanvas(
         }
     );
     canvas_lua_type["ellipse"] = sol::overload(
-        &xwidgets_type::ellipse,
+        [](xwidgets_type & self, double x, double y, double radius_x, double radius_y, double rotation, double start_angle, double end_angle, bool anticlockwise){
+            self.ellipse(x, y, radius_x, radius_y, rotation, start_angle, end_angle, anticlockwise);
+        },
         [](xwidgets_type & self, coord_t coord, coord_t radius, double rotation, double start_angle, double end_angle, bool anticlockwise){
             self.ellipse(coord[0], coord[1], radius[0], radius[1], rotation, start_angle, end_angle, anticlockwise);
         }
-
     );
     canvas_lua_type["arc_to"] = sol::overload(
-        &xwidgets_type::arc_to,
+        [](xwidgets_type & self, double x1, double y1, double x2, double y2, double radius){
+            self.arc_to(x1, y1, x2, y2, radius);
+        },
         [](xwidgets_type & self, coord_t a, coord_t b, double radius){
             self.arc_to(a[0], a[1], b[0], b[1], radius);
         }
     );
     canvas_lua_type["quadratic_curve_to"] = sol::overload(
-        &xwidgets_type::quadratic_curve_to,
+        [](xwidgets_type & self, double cp1x, double cp1y, double x, double y){
+            self.quadratic_curve_to(cp1x, cp1y, x, y);
+        },
         [](xwidgets_type & self, coord_t a, coord_t b){
             self.quadratic_curve_to(a[0], a[1], b[0], b[1]);
         }
     );
     canvas_lua_type["bezier_curve_to"] = sol::overload(
-        &xwidgets_type::bezier_curve_to,
+        [](xwidgets_type & self, double cp1x, double cp1y, double cp2x, double cp2y, double x, double y){
+            self.bezier_curve_to(cp1x, cp1y, cp2x, cp2y, x, y);
+        },
         [](xwidgets_type & self, coord_t a, coord_t b, coord_t c){
-            self.bezier_curve_to(a[0], a[1], b[0], b[1],  c[0], c[1]);
+            self.bezier_curve_to(a[0], a[1], b[0], b[1], c[0], c[1]);
         }
     );
 
     // Clip methods
-    canvas_lua_type["clip"] = sol::overload(
-         &xwidgets_type::clip
-    );
+    canvas_lua_type["clip"] = &xwidgets_type::clip;
 
     // Transform methods
     canvas_lua_type["save"] = &xwidgets_type::save;
     canvas_lua_type["restore"] = &xwidgets_type::restore;
     canvas_lua_type["translate"] = sol::overload(
-        &xwidgets_type::translate,
+        [](xwidgets_type & self, double x, double y){
+            self.translate(x, y);
+        },
         [](xwidgets_type & self, coord_t a){
             self.translate(a[0], a[1]);
         }
