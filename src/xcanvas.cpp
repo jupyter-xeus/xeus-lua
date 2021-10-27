@@ -156,8 +156,10 @@ void setup_xcanvas(
     canvas_lua_type["close_path"] = &xwidgets_type::close_path;
     canvas_lua_type["stroke"] = &xwidgets_type::stroke;
     canvas_lua_type["fill"] = sol::overload(
-        &xwidgets_type::fill,
-         [](xwidgets_type & self){
+        [](xwidgets_type & self, std::string rule){
+            self.fill(rule);
+        },
+        [](xwidgets_type & self){
             self.fill();
         }
     );
