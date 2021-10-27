@@ -332,7 +332,7 @@ jobs:
            -Dxproperty_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xproperty \
            -Dxtl_DIR=$GITHUB_WORKSPACE/custom_sysroot/share/cmake/xtl \
            -Dnlohmann_json_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/nlohmann_json \
-           -Dxeus_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xeus 
+           -Dxeus_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xeus \
            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/custom_sysroot 
           emmake make -j2
           emmake make -j2 install
