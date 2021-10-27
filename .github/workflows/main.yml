@@ -121,7 +121,12 @@ jobs:
           git clone https://github.com/DerThorsten/wasm_lua   /opt/wasm_lua
           cd /opt/wasm_lua && git checkout tags/0.1.0
           cd /opt/wasm_lua && \
-          emmake make
+          emmake make 
+          echo "LS"
+          ls
+          cd /opt/wasm_lua/lua-5.3.4/src
+          ech "LS src"
+          ls
 
       - name: "install xtl"
         run: |
