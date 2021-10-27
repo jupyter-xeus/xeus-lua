@@ -279,7 +279,7 @@ jobs:
           git checkout 0.26.1
           cd /opt/xwidgets/build 
           emcmake cmake ../src \
-           -Dxproperty_DIR=$GITHUB_WORKSPACE/custom_sysroot/share/cmake/xproperty \
+           -Dxproperty_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xproperty \
            -Dxtl_DIR=$GITHUB_WORKSPACE/custom_sysroot/share/cmake/xtl \
            -Dnlohmann_json_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/nlohmann_json \
            -Dxeus_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xeus 
@@ -300,7 +300,7 @@ jobs:
           git checkout 0.2.1
           cd /opt/xcanvas/build 
           emcmake cmake ../src \
-           -Dxproperty_DIR=$GITHUB_WORKSPACE/custom_sysroot/share/cmake/xproperty \
+           -Dxproperty_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xproperty \
            -Dxtl_DIR=$GITHUB_WORKSPACE/custom_sysroot/share/cmake/xtl \
            -Dnlohmann_json_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/nlohmann_json \
            -Dxeus_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xeus 
