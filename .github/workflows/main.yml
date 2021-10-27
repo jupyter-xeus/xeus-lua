@@ -378,9 +378,9 @@ jobs:
            
           source "/opt/emsdk/emsdk_env.sh"
           mkdir -p /opt/xcanvas/build 
-          git clone -b get_attr_function https://github.com/DerThorsten/xcanvas.git  /opt/xcanvas/src
+          git clone -b master https://github.com/martinRenou/xcanvas.git  /opt/xcanvas/src
           cd  /opt/xcanvas/src
-          # git checkout 0.2.1
+          git checkout 0.2.2
           cd /opt/xcanvas/build 
           emcmake cmake ../src \
             -DXCANVAS_BUILD_SHARED_LIBS=OFF \
