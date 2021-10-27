@@ -97,148 +97,148 @@ jobs:
           cmake --build . --target ALL_BUILD
 
 
-  emscripten_wasm_docker:
-    runs-on: ubuntu-20.04
+  # emscripten_wasm_docker:
+  #   runs-on: ubuntu-20.04
 
-    strategy:
-      fail-fast: false
-      matrix:
-        container: ["emscripten/emsdk:2.0.27", "emscripten/emsdk:2.0.32", "emscripten/emsdk:latest"]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       container: ["emscripten/emsdk:2.0.27", "emscripten/emsdk:2.0.32", "emscripten/emsdk:latest"]
 
     
-    container: ${{ matrix.container}}
+  #   container: ${{ matrix.container}}
      
-    steps:
-      - uses: actions/checkout@v2
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Verify emscripten
-        run: emcc -v
-
-
-      - name: "install lua"
-        run: |
-          mkdir -p /opt/wasm_lua
-          git clone https://github.com/DerThorsten/wasm_lua   /opt/wasm_lua
-          cd /opt/wasm_lua && git checkout tags/0.1.0
-          cd /opt/wasm_lua && \
-          emmake make 
-          echo "LS"
-          ls
-          cd /opt/wasm_lua/lua-5.3.4/src
-          echo "LS src"
-          ls
-
-      - name: "install xtl"
-        run: |
-          mkdir -p /opt/xtl/build 
-          git clone https://github.com/xtensor-stack/xtl.git  /opt/xtl/src
-          cd /opt/xtl/src 
-          git checkout 0.7.2
-          cd /opt/xtl/build 
-          emcmake cmake ../src/ -DCMAKE_INSTALL_PREFIX=/custom_sysroot
-          emmake make -j2 install
-      - name: "install nlohmann-json"
-        run: |
-          mkdir -p /opt/nlohmannjson/build 
-          git clone https://github.com/nlohmann/json.git  /opt/nlohmannjson/src
-          cd  /opt/nlohmannjson/src
-          git checkout v3.9.0
-          cd /opt/nlohmannjson/build 
-          emcmake cmake ../src/  -DJSON_BuildTests=OFF -DCMAKE_INSTALL_PREFIX=/custom_sysroot
-          emmake make -j2 install
-      - name: "install xeus"
-        run: |
-          mkdir -p /opt/xeus/build 
-          git clone https://github.com/jupyter-xeus/xeus.git  /opt/xeus/src
-          cd  /opt/xeus/src
-          git checkout 2.2.0
-          cd /opt/xeus/build 
-          emcmake cmake ../src \
-            -DXEUS_EMSCRIPTEN_WASM_BUILD=ON \
-            -DXEUS_BUILD_TESTS=ON \
-            -DCMAKE_INSTALL_PREFIX=/custom_sysroot \
-            -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
-            -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json 
-          emmake make -j2
-          emmake make -j2 install
-
-      - name: "install xproperty"
-        run: |
-          mkdir -p /opt/xproperty/build 
-          git clone https://github.com/jupyter-xeus/xproperty.git  /opt/xproperty/src
-          cd  /opt/xproperty/src
-          git checkout 0.11.0
-          cd /opt/xproperty/build 
-          emcmake cmake ../src \
-            -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
-            -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
-          emmake make -j2
-          emmake make -j2 install
+  #     - name: Verify emscripten
+  #       run: emcc -v
 
 
-      - name: "install xwidgets"
-        run: |
-          mkdir -p /opt/xwidgets/build 
-          git clone https://github.com/jupyter-xeus/xwidgets.git  /opt/xwidgets/src
-          cd  /opt/xwidgets/src
-          git checkout 0.26.1
-          cd /opt/xwidgets/build 
-          emcmake cmake ../src \
-           -Dxproperty_DIR=/custom_sysroot/lib/cmake/xproperty \
-           -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
-           -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
-           -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \
-           -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
-          emmake make -j2
-          emmake make -j2 install
+  #     - name: "install lua"
+  #       run: |
+  #         mkdir -p /opt/wasm_lua
+  #         git clone https://github.com/DerThorsten/wasm_lua   /opt/wasm_lua
+  #         cd /opt/wasm_lua && git checkout tags/0.1.0
+  #         cd /opt/wasm_lua && \
+  #         emmake make 
+  #         echo "LS"
+  #         ls
+  #         cd /opt/wasm_lua/lua-5.3.4/src
+  #         echo "LS src"
+  #         ls
 
-      - name: "install xcanvas"
-        run: |
-          mkdir -p /opt/xcanvas/build 
-          git clone https://github.com/MartinRenou/xcanvas.git  /opt/xcanvas/src
-          cd  /opt/xcanvas/src
-          git checkout 0.2.1
-          cd /opt/xcanvas/build 
-          emcmake cmake ../src \
-           -Dxproperty_DIR=/custom_sysroot/lib/cmake/xproperty \
-           -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
-           -Dxwidgets_DIR=/custom_sysroot/lib/cmake/xwidgets \
-           -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
-           -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \
-           -DXCANVAS_BUILD_SHARED_LIBS=OFF \
-           -DXCANVAS_BUILD_STATIC_LIBS=ON \
-           -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
-          emmake make -j2
-          emmake make -j2 install
+  #     - name: "install xtl"
+  #       run: |
+  #         mkdir -p /opt/xtl/build 
+  #         git clone https://github.com/xtensor-stack/xtl.git  /opt/xtl/src
+  #         cd /opt/xtl/src 
+  #         git checkout 0.7.2
+  #         cd /opt/xtl/build 
+  #         emcmake cmake ../src/ -DCMAKE_INSTALL_PREFIX=/custom_sysroot
+  #         emmake make -j2 install
+  #     - name: "install nlohmann-json"
+  #       run: |
+  #         mkdir -p /opt/nlohmannjson/build 
+  #         git clone https://github.com/nlohmann/json.git  /opt/nlohmannjson/src
+  #         cd  /opt/nlohmannjson/src
+  #         git checkout v3.9.0
+  #         cd /opt/nlohmannjson/build 
+  #         emcmake cmake ../src/  -DJSON_BuildTests=OFF -DCMAKE_INSTALL_PREFIX=/custom_sysroot
+  #         emmake make -j2 install
+  #     - name: "install xeus"
+  #       run: |
+  #         mkdir -p /opt/xeus/build 
+  #         git clone https://github.com/jupyter-xeus/xeus.git  /opt/xeus/src
+  #         cd  /opt/xeus/src
+  #         git checkout 2.2.0
+  #         cd /opt/xeus/build 
+  #         emcmake cmake ../src \
+  #           -DXEUS_EMSCRIPTEN_WASM_BUILD=ON \
+  #           -DXEUS_BUILD_TESTS=ON \
+  #           -DCMAKE_INSTALL_PREFIX=/custom_sysroot \
+  #           -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
+  #           -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json 
+  #         emmake make -j2
+  #         emmake make -j2 install
+
+  #     - name: "install xproperty"
+  #       run: |
+  #         mkdir -p /opt/xproperty/build 
+  #         git clone https://github.com/jupyter-xeus/xproperty.git  /opt/xproperty/src
+  #         cd  /opt/xproperty/src
+  #         git checkout 0.11.0
+  #         cd /opt/xproperty/build 
+  #         emcmake cmake ../src \
+  #           -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
+  #           -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
+  #         emmake make -j2
+  #         emmake make -j2 install
 
 
-      - name: cmake configure rendered project
-        shell: bash -l {0}
-        run: |
-          mkdir -p bld
-          pwd
-          cd bld
-          pwd
-          emcmake cmake $GITHUB_WORKSPACE \
-           -DXEUS_LUA_EMSCRIPTEN_WASM_BUILD=ON \
-           -Dxwidgets_DIR=/custom_sysroot/lib/cmake/xwidgets \
-           -Dxcanvas_DIR=/custom_sysroot/lib/cmake/xcanvas \
-           -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
-           -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
-           -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \ 
-           -DLUA_INCLUDE_DIR=/opt/wasm_lua/lua-5.3.4/src \
-           -DLUA_LIBRARY=/opt/wasm_lua/lua-5.3.4/src/liblua.a \
-           -DCMAKE_INSTALL_PREFIX=/custom_sysroot
-      - name: build rendered project
-        shell: bash -l {0}
-        run: |
-          cd bld
-          emmake make -j2
-      - name: install rendered project
-        shell: bash -l {0}
-        run: |
-          cd bld
-          make install
+  #     - name: "install xwidgets"
+  #       run: |
+  #         mkdir -p /opt/xwidgets/build 
+  #         git clone https://github.com/jupyter-xeus/xwidgets.git  /opt/xwidgets/src
+  #         cd  /opt/xwidgets/src
+  #         git checkout 0.26.1
+  #         cd /opt/xwidgets/build 
+  #         emcmake cmake ../src \
+  #          -Dxproperty_DIR=/custom_sysroot/lib/cmake/xproperty \
+  #          -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
+  #          -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
+  #          -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \
+  #          -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
+  #         emmake make -j2
+  #         emmake make -j2 install
+
+  #     - name: "install xcanvas"
+  #       run: |
+  #         mkdir -p /opt/xcanvas/build 
+  #         git clone https://github.com/MartinRenou/xcanvas.git  /opt/xcanvas/src
+  #         cd  /opt/xcanvas/src
+  #         git checkout 0.2.1
+  #         cd /opt/xcanvas/build 
+  #         emcmake cmake ../src \
+  #          -Dxproperty_DIR=/custom_sysroot/lib/cmake/xproperty \
+  #          -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
+  #          -Dxwidgets_DIR=/custom_sysroot/lib/cmake/xwidgets \
+  #          -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
+  #          -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \
+  #          -DXCANVAS_BUILD_SHARED_LIBS=OFF \
+  #          -DXCANVAS_BUILD_STATIC_LIBS=ON \
+  #          -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
+  #         emmake make -j2
+  #         emmake make -j2 install
+
+
+  #     - name: cmake configure rendered project
+  #       shell: bash -l {0}
+  #       run: |
+  #         mkdir -p bld
+  #         pwd
+  #         cd bld
+  #         pwd
+  #         emcmake cmake $GITHUB_WORKSPACE \
+  #          -DXEUS_LUA_EMSCRIPTEN_WASM_BUILD=ON \
+  #          -Dxwidgets_DIR=/custom_sysroot/lib/cmake/xwidgets \
+  #          -Dxcanvas_DIR=/custom_sysroot/lib/cmake/xcanvas \
+  #          -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
+  #          -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
+  #          -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \ 
+  #          -DLUA_INCLUDE_DIR=/opt/wasm_lua/lua-5.3.4/src \
+  #          -DLUA_LIBRARY=/opt/wasm_lua/lua-5.3.4/src/liblua.a \
+  #          -DCMAKE_INSTALL_PREFIX=/custom_sysroot
+  #     - name: build rendered project
+  #       shell: bash -l {0}
+  #       run: |
+  #         cd bld
+  #         emmake make -j2
+  #     - name: install rendered project
+  #       shell: bash -l {0}
+  #       run: |
+  #         cd bld
+  #         make install
 
   emscripten_wasm:
     runs-on: ubuntu-latest
@@ -378,7 +378,7 @@ jobs:
            
           source "/opt/emsdk/emsdk_env.sh"
           mkdir -p /opt/xcanvas/build 
-          git clone https://github.com/MartinRenou/xcanvas.git  /opt/xcanvas/src
+          git clone -b get_attr_function https://github.com/DerThorsten/xcanvas.git  /opt/xcanvas/src
           cd  /opt/xcanvas/src
           git checkout 0.2.1
           cd /opt/xcanvas/build 
