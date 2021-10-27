@@ -142,7 +142,7 @@ jobs:
           emcmake cmake ../src \
             -DXEUS_EMSCRIPTEN_WASM_BUILD=ON \
             -DXEUS_BUILD_TESTS=ON \
-            -DCMAKE_INSTALL_PREFIX=/custom_sysroot\
+            -DCMAKE_INSTALL_PREFIX=/custom_sysroot \
             -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
             -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json 
           emmake make -j2
@@ -157,7 +157,7 @@ jobs:
           cd /opt/xproperty/build 
           emcmake cmake ../src \
             -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/custom_sysroot 
+            -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
           emmake make -j2
           emmake make -j2 install
 
@@ -174,7 +174,7 @@ jobs:
            -Dxtl_DIR=/custom_sysroot/share/cmake/xtl \
            -Dnlohmann_json_DIR=/custom_sysroot/lib/cmake/nlohmann_json \
            -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \
-           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/custom_sysroot 
+           -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
           emmake make -j2
           emmake make -j2 install
 
@@ -192,7 +192,7 @@ jobs:
            -Dxeus_DIR=/custom_sysroot/lib/cmake/xeus \
            -DXCANVAS_BUILD_SHARED_LIBS=OFF \
            -DXCANVAS_BUILD_STATIC_LIBS=ON \
-           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/custom_sysroot 
+           -DCMAKE_INSTALL_PREFIX=/custom_sysroot 
           emmake make -j2
           emmake make -j2 install
 
