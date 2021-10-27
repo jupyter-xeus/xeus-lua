@@ -33,3 +33,9 @@
 *.wasm
 
 bld
+
+# Notebook checkpoints
+notebooks/.ipynb_checkpoints/*
+
+# Build dir
+build/*
