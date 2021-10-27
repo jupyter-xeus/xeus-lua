@@ -98,6 +98,11 @@ namespace xlua
     void register_xwidgets(sol::state_view & lua);
     #endif
 
+    #ifdef XLUA_WITH_XCANVAS
+    // implemented in xwidgets.cpp
+    void setup_xcanvas(sol::state_view & lua);
+    #endif
+
     interpreter::interpreter()
     : m_allow_stdin(true)
     {
@@ -156,6 +161,11 @@ namespace xlua
         // add widgets
         #ifdef XLUA_WITH_XWIDGETS
         register_xwidgets(lua);            
+        #endif    
+
+        // add widgets
+        #ifdef XLUA_WITH_XCANVAS
+        setup_xcanvas(lua);            
         #endif    
     }
 

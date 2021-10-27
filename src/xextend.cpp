@@ -23,6 +23,10 @@ void add_ilua_module(sol::state_view & lua){
         widgets = {
             detail = {}
         },
+        canvas = {
+            color = {},
+            detail = {}
+        },
         config = {
             printer = "pprint",
             auto_print = true
