@@ -380,7 +380,7 @@ jobs:
           mkdir -p /opt/xcanvas/build 
           git clone -b get_attr_function https://github.com/DerThorsten/xcanvas.git  /opt/xcanvas/src
           cd  /opt/xcanvas/src
-          git checkout 0.2.1
+          # git checkout 0.2.1
           cd /opt/xcanvas/build 
           emcmake cmake ../src \
             -DXCANVAS_BUILD_SHARED_LIBS=OFF \
