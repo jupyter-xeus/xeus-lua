@@ -79,7 +79,7 @@ jobs:
       - name: install cxx compiler
         shell: powershell
         run: |
-          .\micromamba.exe install cxx-compiler -c conda-forge -y
+          micromamba install cxx-compiler -c conda-forge -y
 
       - name: cmake configure
         shell: powershell
