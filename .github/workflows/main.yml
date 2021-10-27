@@ -37,6 +37,8 @@ jobs:
           mkdir -p bld
           cd bld
           cmake .. \
+           -DXLUA_WITH_XWIDGETS=ON\
+           -DXLUA_WITH_XCANVAS=ON\
            -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
            -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX 
 
@@ -213,10 +215,9 @@ jobs:
       - name: "install nlohmann-json"
         run: |
           cd /opt/emsdk
-           
           ./emsdk activate ${{matrix.emsdk_ver}}
-           
           source "/opt/emsdk/emsdk_env.sh"
+
           mkdir -p /opt/nlohmannjson/build 
           git clone https://github.com/nlohmann/json.git  /opt/nlohmannjson/src
           cd  /opt/nlohmannjson/src
@@ -228,10 +229,9 @@ jobs:
       - name: "install xeus"
         run: |
           cd /opt/emsdk
-           
           ./emsdk activate ${{matrix.emsdk_ver}}
-           
           source "/opt/emsdk/emsdk_env.sh"
+
           mkdir -p /opt/xeus/build 
           git clone https://github.com/jupyter-xeus/xeus.git  /opt/xeus/src
           cd  /opt/xeus/src
@@ -247,18 +247,18 @@ jobs:
           emmake make -j2 install
 
 
-      - name: "install xpropery"
+      - name: "install xproperty"
         run: |
           cd /opt/emsdk
            
           ./emsdk activate ${{matrix.emsdk_ver}}
            
           source "/opt/emsdk/emsdk_env.sh"
-          mkdir -p /opt/xpropery/build 
-          git clone https://github.com/jupyter-xeus/xproperty.git  /opt/xpropery/src
-          cd  /opt/xpropery/src
+          mkdir -p /opt/xproperty/build 
+          git clone https://github.com/jupyter-xeus/xproperty.git  /opt/xproperty/src
+          cd  /opt/xproperty/src
           git checkout 0.11.0
-          cd /opt/xpropery/build 
+          cd /opt/xproperty/build 
           emcmake cmake ../src \
             -Dxtl_DIR=$GITHUB_WORKSPACE/custom_sysroot/share/cmake/xtl \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/custom_sysroot 
@@ -331,7 +331,8 @@ jobs:
            -Dxcanvas_DIR=$GITHUB_WORKSPACE/custom_sysroot/lib/cmake/xcanvas \
            -DXLUA_WITH_XWIDGETS=ON\
            -DXLUA_WITH_XCANVAS=ON\
-           -DXLUA_USE_SHARED_XWIDGETS=OFF
+           -DXLUA_USE_SHARED_XWIDGETS=OFF\
+           -DXLUA_USE_SHARED_XCANVAS=OFF
 
       - name: build rendered project
         shell: bash

@@ -59,7 +59,8 @@ OPTION(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
 OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (instead of the static library)" ON)
 OPTION(XEUS_LUA_EMSCRIPTEN_WASM_BUILD "Build for wasm with emscripten" OFF)
 
-OPTION(XLUA_WITH_XCANVAS "Build xeus-lua with xcanvas" ON)
+OPTION(XLUA_WITH_XCANVAS      "Build xeus-lua with xcanvas" ON)
+OPTION(XLUA_USE_SHARED_XCANVAS"Link xlua  with the xcanvas shared library (instead of the static library)" ON)
 
 
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
@@ -315,18 +316,10 @@ macro(xeus_lua_create_target target_name linkage output_name)
     target_compile_features(${target_name} PRIVATE cxx_std_17)
 
 
-    if(XLUA_WITH_XCANVAS)
-        set(XLUA_XCANVAS_TARGET ${xcanvas_LIBRARY})
-        set(XLUA_XCANVAS_INCLUDE_DIR ${xcanvas_INCLUDE_DIR})
-    else()
-        set(XLUA_XCANVAS_INCLUDE_DIR "")
-    endif()
-
 
     target_include_directories(${target_name}
                                PUBLIC
                                ${LUA_INCLUDE_DIR}
-                               ${XLUA_XCANVAS_INCLUDE_DIR}
                                $<BUILD_INTERFACE:${XEUS_LUA_INCLUDE_DIR}>
                                $<INSTALL_INTERFACE:include>)
 
@@ -346,6 +339,17 @@ macro(xeus_lua_create_target target_name linkage output_name)
     else()
         set(XLUA_XPROPERTY_TARGET "")
         set(XLUA_XWIDGETS_TARGET "")
+    endif()
+
+
+    if(XLUA_WITH_XCANVAS)
+        if(XLUA_USE_SHARED_XCANVAS)
+            set(XLUA_XCANVAS_TARGET xcanvas)
+        else()
+            set(XLUA_XCANVAS_TARGET xcanvas-static)
+        endif()
+    else()
+        set(XLUA_XCANVAS_TARGET "")
     endif()
 
 
