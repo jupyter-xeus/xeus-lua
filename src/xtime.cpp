@@ -26,8 +26,6 @@ namespace nl = nlohmann;
 
 
 
-
-
 namespace xlua
 {
 
