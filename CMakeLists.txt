@@ -202,6 +202,7 @@ set(XEUS_LUA_SRC
     src/xio.cpp
     src/xdisplay.cpp
     src/xjson.cpp
+    src/xtime.cpp
 )
 
 if(XLUA_WITH_XWIDGETS)

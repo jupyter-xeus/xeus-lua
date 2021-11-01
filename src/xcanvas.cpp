@@ -325,6 +325,37 @@ void setup_xcanvas(
         )
     end
 
+    function ilua.canvas.detail.xcanvas:with(options, callback)
+        local options = options or {}
+        local old_options = {}
+
+        for kw,val in pairs(options) do
+            if w[kw] ~= nil then
+                old_options[kw] = self[kw]
+                self[kw] = val
+            else
+                error(k.." has no attribute `"..kw.."`")
+            end
+        end
+
+        callback()
+        for kw,val in pairs(options) do
+            if w[kw] ~= nil then
+                self[kw] = old_options[kw]
+            else
+                error(k.." has no attribute `"..kw.."`")
+            end
+        end
+    end
+
+    function ilua.canvas.detail.xcanvas:fill_bg(options)
+        local options = options or {}
+        self:with(options, function() 
+            self:fill_rect({0,0}, {canvas.width, canvas.height})
+        end)
+    end
+
+
 
     )"""";
     sol::protected_function_result code_result  = lua.safe_script(script, &sol::script_pass_on_error);

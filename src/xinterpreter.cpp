@@ -93,6 +93,8 @@ namespace xlua
     // implemented in xjson.cpp
     void setup_json(sol::state_view & lua, interpreter & interp);
 
+    void setup_xtime(sol::state_view & lua);
+
     #ifdef XLUA_WITH_XWIDGETS
     // implemented in xwidgets.cpp
     void register_xwidgets(sol::state_view & lua);
@@ -149,6 +151,8 @@ namespace xlua
 
         // add functions to display data
         setup_display(lua, *this);
+
+        setup_xtime(lua);
 
 
 

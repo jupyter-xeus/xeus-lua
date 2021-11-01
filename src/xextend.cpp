@@ -34,6 +34,9 @@ void add_ilua_module(sol::state_view & lua){
         detail = {},
         json = {
             detail = {}
+        },
+        time = {
+            detail = {}
         }
     }
     )"""";
