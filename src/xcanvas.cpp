@@ -348,6 +348,20 @@ void setup_xcanvas(
         end
     end
 
+    function ilua.canvas.detail.xcanvas:with_save_and_restore(options, f)
+        self:with(options, function()
+            self:save()
+            f()
+            self:restore()
+        end)
+    end
+
+    function ilua.canvas.detail.xcanvas:rotate_arround(point, angle)
+        self:translate(point[1],point[2])
+        self:rotate(angle)
+        self:translate(-1.0 * point[1],-1.0 * point[2])
+    end
+
     function ilua.canvas.detail.xcanvas:fill_bg(options)
         local options = options or {}
         self:with(options, function() 
