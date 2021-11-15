@@ -16,6 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
+        luajit: [ON, OFF]
 
     steps:
       - uses: actions/checkout@v2
@@ -31,6 +32,13 @@ jobs:
         run: |
           $HOME/micromamba-bin/micromamba install cxx-compiler -c conda-forge -y
 
+      - name: install luajit
+        shell: bash -l {0}
+        run: |
+          $HOME/micromamba-bin/micromamba install luajit -c conda-forge -y
+        if: matrix.luajit == 'ON'
+
+
       - name: cmake configure
         shell: bash -l {0}
         run: |
@@ -39,6 +47,7 @@ jobs:
           cmake .. \
            -DXLUA_WITH_XWIDGETS=ON\
            -DXLUA_WITH_XCANVAS=ON\
+           -DXEUS_LUA_USE_LUAJIT=${{matrix.luajit}} \
            -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
            -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX 
 
