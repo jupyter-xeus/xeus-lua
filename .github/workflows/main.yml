@@ -36,7 +36,7 @@ jobs:
         shell: bash -l {0}
         run: |
           $HOME/micromamba-bin/micromamba install luajit -c conda-forge -y
-        # if: matrix.luajit == 'ON'
+        if: matrix.luajit == 'ON'
 
 
       - name: cmake configure
@@ -47,7 +47,7 @@ jobs:
           cmake .. \
            -DXLUA_WITH_XWIDGETS=ON\
            -DXLUA_WITH_XCANVAS=ON\
-           -DXEUS_LUA_USE_LUAJIT=${{luajit}} \
+           -DXEUS_LUA_USE_LUAJIT=${{matrix.luajit}} \
            -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
            -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX 
 
