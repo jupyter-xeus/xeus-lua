@@ -23,7 +23,6 @@
 
 extern "C" {
 #ifndef XEUS_LUA_USE_LUAJIT
-#error "BAAA"
 # include "lua.h"
 # include "lauxlib.h"
 # include "lualib.h"
