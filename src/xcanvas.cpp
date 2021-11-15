@@ -243,6 +243,7 @@ void setup_xcanvas(
         }
     );
     canvas_lua_type["rotate"] = &xwidgets_type::rotate;
+    
 
     // Extras
     canvas_lua_type["cache"] = &xwidgets_type::cache;
