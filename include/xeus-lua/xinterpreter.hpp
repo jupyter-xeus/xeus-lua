@@ -22,9 +22,16 @@
 
 
 extern "C" {
+#ifndef XEUS_LUA_USE_LUAJIT
+#error "BAAA"
 # include "lua.h"
 # include "lauxlib.h"
 # include "lualib.h"
+#else
+#include "luajit-2.0/lua.h"
+#include "luajit-2.0/lauxlib.h"
+#include "luajit-2.0/lualib.h"
+#endif
 }
 namespace nl = nlohmann;
 

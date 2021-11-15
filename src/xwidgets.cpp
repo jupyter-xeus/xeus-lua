@@ -748,7 +748,8 @@ local link_widgets = {
 
 local concat_tables = function(...)
     local ret = {}
-    tables = table.pack(...)
+    -- tables = table.pack(...)
+    tables = {n = select('#', ...), ...}
     for i=1,tables.n do
         t = tables[i]
         for kw,val in pairs(t) do
@@ -764,7 +765,7 @@ end
 -- add 
 for k,widget_cls in pairs(layout_widgets) do
     function widget_cls:add(...)
-        args = table.pack(...)
+        tables = {n = select('#', ...), ...}
         for i=1,args.n do
             arg = args[i]
             self:_add(arg.id(arg))
@@ -806,7 +807,7 @@ end
     auto code_result = lua.script(extend);
     if (!code_result.valid()) {
         sol::error err = code_result;
-        std::cerr << "failed to load string-based script into the program" << err.what() << std::endl;
+        std::cerr << "failed to load string-based script into the program for xwidgets" << err.what() << std::endl;
         throw std::runtime_error(err.what());
     }
 }

@@ -52,6 +52,7 @@ OPTION(XEUS_LUA_DISABLE_TUNE_GENERIC "disable -mtune=generic flag" OFF)
 option(XEUS_LUA_BUILD_STATIC "Build xeus-lua static library" OFF)
 OPTION(XEUS_LUA_BUILD_SHARED "Split xlua build into executable and library" ON)
 OPTION(XEUS_LUA_BUILD_EXECUTABLE "Build the xlua executable" ON)
+OPTION(XEUS_LUA_USE_LUAJIT "Use LuaJit" OFF)
 
 OPTION(XEUS_LUA_USE_SHARED_XEUS "Link xlua  with the xeus shared library (instead of the static library)" ON)
 OPTION(XEUS_LUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (instead of the static library)" ON)
@@ -105,9 +106,17 @@ endif ()
 if (NOT TARGET xeus AND NOT TARGET xeus-static)
     find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
 endif ()
-if (NOT TARGET Lua) # not sure about these lines
-    find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
-endif ()
+
+if(NOT XEUS_LUA_USE_LUAJIT)
+
+    if (NOT TARGET Lua) # not sure about these lines
+        find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
+    endif ()
+else()
+    if (NOT TARGET LuaJIT) # not sure about these lines
+        find_package(LuaJIT  REQUIRED)
+    endif ()
+endif()
 
 
 
@@ -141,6 +150,11 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     endif ()
 
 endif ()
+
+if(XEUS_LUA_USE_LUAJIT)
+    add_compile_definitions(XEUS_LUA_USE_LUAJIT)
+    add_compile_definitions(SOL_LUAJIT=1)
+endif()
 
 
 if(XLUA_WITH_XWIDGETS)
@@ -224,6 +238,14 @@ set(XEUS_LUA_MAIN_SRC
     src/main.cpp
 )
 
+if(NOT XEUS_LUA_USE_LUAJIT)
+    SET(XEUS_LUA_LUA_LIBRARIES   ${LUA_LIBRARIES})
+    SET(XEUS_LUA_LUA_INCLUDE_DIR ${LUA_INCLUDE_DIR})
+else()
+    SET(XEUS_LUA_LUA_LIBRARIES ${LUAJIT_LIBRARIES})
+    SET(XEUS_LUA_LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
+endif()
+
 
 # Targets and link - Macros
 # =========================
@@ -291,9 +313,9 @@ macro(xeus_lua_set_kernel_options target_name)
     endif()
     if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
         find_package(Threads)
-        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
+        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${XEUS_LUA_LUA_LIBRARIES})
     else()
-        target_link_libraries(${target_name} PRIVATE  ${LUA_LIBRARIES})
+        target_link_libraries(${target_name} PRIVATE  ${XEUS_LUA_LUA_LIBRARIES})
     endif()
 endmacro()
 
@@ -323,7 +345,7 @@ macro(xeus_lua_create_target target_name linkage output_name)
 
     target_include_directories(${target_name}
                                PUBLIC
-                               ${LUA_INCLUDE_DIR}
+                               ${XEUS_LUA_LUA_INCLUDE_DIR}
                                $<BUILD_INTERFACE:${XEUS_LUA_INCLUDE_DIR}>
                                $<INSTALL_INTERFACE:include>)
 
@@ -369,9 +391,9 @@ macro(xeus_lua_create_target target_name linkage output_name)
     endif ()
     if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
         find_package(Threads) # TODO: add Threads as a dependence of xeus-static?
-        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${LUA_LIBRARIES})
+        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${XEUS_LUA_LUA_LIBRARIES})
     else()
-        target_link_libraries(${target_name} PRIVATE  ${LUA_LIBRARIES})
+        target_link_libraries(${target_name} PRIVATE  ${XEUS_LUA_LUA_LIBRARIES})
     endif()
 
 endmacro()
@@ -409,7 +431,7 @@ endif()
 
 
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
-    message(STATUS ${LUA_LIBRARIES})
+    message(STATUS ${XEUS_LUA_LUA_LIBRARIES})
 
     add_executable(xeus_kernel src/main_emscripten_kernel.cpp )
     target_link_libraries(xeus_kernel  xeus-lua-static)# ${LUA_LIBRARY} )

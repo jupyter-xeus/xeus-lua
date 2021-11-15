@@ -540,7 +540,7 @@ void add_pprint_module(sol::state_view & lua){
         local ilua_printer = {data=""}
         local meta = {
             __call = function(self, ...)
-                local args = table.pack(...)
+                local args = {n = select('#', ...), ...}
                 for i=1,args.n do
                    self.data = self.data .. tostring(args[i])
                 end
