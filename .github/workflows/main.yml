@@ -32,7 +32,7 @@ jobs:
         run: |
           $HOME/micromamba-bin/micromamba install cxx-compiler -c conda-forge -y
 
-      - name: install luajit compiler
+      - name: install luajit
         shell: bash -l {0}
         run: |
           $HOME/micromamba-bin/micromamba install luajit -c conda-forge -y
