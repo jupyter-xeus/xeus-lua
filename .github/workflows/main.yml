@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        luajit: ["OFF", "ON"]
+        luajit: [ON, OFF]
 
     steps:
       - uses: actions/checkout@v2
