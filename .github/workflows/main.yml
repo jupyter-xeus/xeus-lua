@@ -47,7 +47,7 @@ jobs:
           cmake .. \
            -DXLUA_WITH_XWIDGETS=ON\
            -DXLUA_WITH_XCANVAS=ON\
-           -DXEUS_LUA_USE_LUAJIT=${{luajit}}
+           -DXEUS_LUA_USE_LUAJIT=${{luajit}} \
            -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
            -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX 
 
