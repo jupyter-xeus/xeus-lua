@@ -86,11 +86,11 @@ endif()
 # Dependencies
 # ============
 
-set(xtl_REQUIRED_VERSION 0.6.23)
-set(xeus_REQUIRED_VERSION 0.25.0)
+set(xtl_REQUIRED_VERSION 0.7.0)
+set(xeus_REQUIRED_VERSION 2.0.0)
 
-set(xwidgets_REQUIRED_VERSION 0.25.0)
-set(xcanvas_REQUIRED_VERSION 0.2.1)
+set(xwidgets_REQUIRED_VERSION 0.26.1)
+set(xcanvas_REQUIRED_VERSION 0.2.2)
 set(xproperty_REQUIRED_VERSION 0.11.0)
 set(Lua_REQUIRED_VERSION 5.3.4)
 
