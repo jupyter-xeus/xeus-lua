@@ -8,35 +8,11 @@
 ****************************************************************************/
 
 #include <iostream>
+
 #include "sol/sol.hpp"
 #include "xeus-lua/xinterpreter.hpp"
 #include "nlohmann/json.hpp"
-
 #include "xeus/xinput.hpp"
-
-#ifdef XEUS_LUA_EMSCRIPTEN_WASM_BUILD
-#include <emscripten.h>
-#endif
-
-namespace nl = nlohmann;
-
-
-
-#ifdef XEUS_LUA_EMSCRIPTEN_WASM_BUILD
-
-EM_JS(char *, async_get_input_function, (const char* str), {
-  return Asyncify.handleAsync(function () {
-    return self.async_get_input_function( UTF8ToString(str))
-    .then(function (jsString) {
-      var lengthBytes = lengthBytesUTF8(jsString)+1;
-      var stringOnWasmHeap = _malloc(lengthBytes);
-      stringToUTF8(jsString, stringOnWasmHeap, lengthBytes);
-      return stringOnWasmHeap;
-    });
-  });
-});
-
-#endif
 
 
 namespace xlua
@@ -618,20 +594,13 @@ void setup_io(
     detail_table.set_function("__io_read_custom", [self]( ) {
         if(self->allow_stdin())
         {
-            #ifdef __EMSCRIPTEN__
-              char* str = async_get_input_function("");
-              std::string as_string(str);
-              free(str);
-              return as_string;
-            #else
-              return xeus::blocking_input_request("", false);
-            #endif
+            return xeus::blocking_input_request("", false);
         }
         else
         {
             std::string error_str = "stdin is not allowed";
-            self->publish_execution_error(error_str,error_str,std::vector<std::string>());
-            return std::string("");
+            self->publish_execution_error(error_str,error_str, std::vector<std::string>());
+            return std::string();
         }
     });
 
