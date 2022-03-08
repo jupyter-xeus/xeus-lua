@@ -8,7 +8,6 @@
 `xeus-lua` is a Jupyter kernel for Lua based on the native implementation of the
 Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus).
 
-
 ## Installation
 
 xeus-lua has  been packaged for the mamba (or conda) package manager.
@@ -70,7 +69,6 @@ and launch a new Python notebook by selecting the **xlua** kernel.
 
 ![Output streams](docs/source/streams.gif)
 
-
 **Input streams**:
 
 ![Input streams](docs/source/input.gif)
@@ -79,11 +77,9 @@ and launch a new Python notebook by selecting the **xlua** kernel.
 
 ![Error handling](docs/source/error.gif)
 
-
 **Code completion**:
 
 ![Code completion](docs/source/completion.gif)
-
 
 **Display Data**:
 
@@ -93,11 +89,8 @@ and launch a new Python notebook by selecting the **xlua** kernel.
 
 ![Code completion](docs/source/widgets.gif)
 
-
 **Binary Buffers for Widgets**:
 ![Code completion](docs/source/buffers.gif)
-
-
 
 ## Documentation
 
@@ -119,7 +112,6 @@ While these implemetentations are feature rich and work very well, none of  the 
 Since this implementation is based on [xeus](https://github.com/jupyter-xeus/xeus), we can reuse components from
 the xeus ecosystem like [xwidgets](https://github.com/jupyter-xeus/xwidgets).
 
-
 ## Dependencies
 
 `xeus-lua` depends on
@@ -131,9 +123,8 @@ the xeus ecosystem like [xwidgets](https://github.com/jupyter-xeus/xwidgets).
 
 | `xeus-lua`    | `xeus`        | `xwidgets`    | `xtl`        | `cppzmq` | `nlohmann_json` | `lua`        | 
 | ------------- | ------------- | ------------- | ------------ | -------- | --------------- | ------------ | 
-| master        | >=1.0.3,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
-| 0.3.2         | >=1.0.3,<0.26 | >=0.25.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
-
+| master        | >=2.4.0,<3    | >=0.26.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
+| 0.6.2         | >=2.4.0,<3    | >=0.26.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
 
 ## Contributing
 

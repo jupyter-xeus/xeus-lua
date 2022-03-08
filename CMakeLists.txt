@@ -85,7 +85,7 @@ endif()
 # ============
 
 set(xtl_REQUIRED_VERSION 0.7.0)
-set(xeus_REQUIRED_VERSION 2.0.0)
+set(xeus_REQUIRED_VERSION 2.4.0)
 
 set(xwidgets_REQUIRED_VERSION 0.26.1)
 set(xcanvas_REQUIRED_VERSION 0.2.2)
