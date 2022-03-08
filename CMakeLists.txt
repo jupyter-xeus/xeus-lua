@@ -177,11 +177,7 @@ endif()
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     # ENV (https://github.com/emscripten-core/emscripten/commit/6d9681ad04f60b41ef6345ab06c29bbc9eeb84e0)
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s \"EXTRA_EXPORTED_RUNTIME_METHODS=[ENV']\"")
-    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} ---proxy-to-worker")
 endif()
-
-
-
 
 # Source files
 # ============
@@ -227,7 +223,6 @@ else()
     SET(XEUS_LUA_LUA_LIBRARIES ${LUAJIT_LIBRARIES})
     SET(XEUS_LUA_LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
 endif()
-
 
 # Targets and link - Macros
 # =========================
@@ -359,7 +354,6 @@ macro(xeus_lua_create_target target_name linkage output_name)
     else()
         set(XLUA_XCANVAS_TARGET "")
     endif()
-
 
     target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl
         ${XLUA_XWIDGETS_TARGET}
