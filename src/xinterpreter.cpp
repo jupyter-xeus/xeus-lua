@@ -154,8 +154,6 @@ namespace xlua
 
         setup_xtime(lua);
 
-
-
         // add package path only do this for emscripten
         #ifdef __EMSCRIPTEN__
             const std::string script = R""""(package.path =  "/asset_dir/lua_packages/?.lua;/asset_dir/lua_packages/?/init.lua")"""";

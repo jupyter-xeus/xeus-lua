@@ -13,27 +13,23 @@
 #else
 #include <thread>
 #endif
+
 #include <chrono>
-
-
 #include <string>
 #include <iostream>
 
 #include "sol/sol.hpp"
 #include "xeus-lua/xinterpreter.hpp"
 #include "nlohmann/json.hpp"
+
 namespace nl = nlohmann;
-
-
 
 namespace xlua
 {
 
 using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
 
-void setup_xtime(
-  sol::state_view & lua
-)
+void setup_xtime(sol::state_view & lua)
 {
     // get display table
     sol::table ilua_table = lua["ilua"];
@@ -55,27 +51,19 @@ void setup_xtime(
         return std::chrono::duration<double, std::milli>(t_end-t_start).count();
     };
 
-
-
     time_table["sleep_ms"] = sol::overload(
-
-    [](const double x){
-
-
-        #ifdef XEUS_LUA_EMSCRIPTEN_WASM_BUILD
-        emscripten_sleep(x);
-        #else
-        std::this_thread::sleep_for(std::chrono::milliseconds(int(x+0.5)));
-        #endif
-    }
-    ,[](const int x){
-
-
-        #ifdef XEUS_LUA_EMSCRIPTEN_WASM_BUILD
-        emscripten_sleep(x);
-        #else
-        std::this_thread::sleep_for(std::chrono::milliseconds(x));
-        #endif
+      [](const double x) {
+#ifdef XEUS_LUA_EMSCRIPTEN_WASM_BUILD
+          emscripten_sleep(x);
+#else
+          std::this_thread::sleep_for(std::chrono::milliseconds(int(x+0.5)));
+#endif
+      }, [](const int x) {
+#ifdef XEUS_LUA_EMSCRIPTEN_WASM_BUILD
+          emscripten_sleep(x);
+#else
+          std::this_thread::sleep_for(std::chrono::milliseconds(x));
+#endif
     });
 
     // patch the print function with pure lua code
@@ -126,7 +114,6 @@ void setup_xtime(
         std::cerr << "failed to load string-based script into the program for xtime" << err.what() << std::endl;
         throw std::runtime_error(err.what());
     }
-
 }
 
 }
