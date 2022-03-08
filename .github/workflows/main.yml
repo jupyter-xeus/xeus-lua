@@ -160,7 +160,7 @@ jobs:
   #         mkdir -p /opt/xeus/build 
   #         git clone https://github.com/jupyter-xeus/xeus.git  /opt/xeus/src
   #         cd  /opt/xeus/src
-  #         git checkout 2.2.0
+  #         git checkout 2.4.0
   #         cd /opt/xeus/build 
   #         emcmake cmake ../src \
   #           -DXEUS_EMSCRIPTEN_WASM_BUILD=ON \
@@ -327,7 +327,7 @@ jobs:
           mkdir -p /opt/xeus/build 
           git clone https://github.com/jupyter-xeus/xeus.git  /opt/xeus/src
           cd  /opt/xeus/src
-          git checkout 2.2.0
+          git checkout 2.4.0
           cd /opt/xeus/build 
           emcmake cmake ../src \
             -DXEUS_EMSCRIPTEN_WASM_BUILD=ON \

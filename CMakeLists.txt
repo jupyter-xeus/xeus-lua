@@ -63,7 +63,6 @@ OPTION(XEUS_LUA_EMSCRIPTEN_WASM_BUILD "Build for wasm with emscripten" OFF)
 OPTION(XLUA_WITH_XCANVAS      "Build xeus-lua with xcanvas" ON)
 OPTION(XLUA_USE_SHARED_XCANVAS "Link xlua  with the xcanvas shared library (instead of the static library)" ON)
 
-
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_emscripten;${CMAKE_MODULE_PATH}")
     add_compile_definitions(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
@@ -81,7 +80,6 @@ if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     SET(XLUA_USE_SHARED_XWIDGETS OFF)
     SET(XLUA_USE_SHARED_XCANVAS OFF)
 endif()
-
 
 # Dependencies
 # ============
@@ -108,7 +106,6 @@ if (NOT TARGET xeus AND NOT TARGET xeus-static)
 endif ()
 
 if(NOT XEUS_LUA_USE_LUAJIT)
-
     if (NOT TARGET Lua) # not sure about these lines
         find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
     endif ()
@@ -117,8 +114,6 @@ else()
         find_package(LuaJIT  REQUIRED)
     endif ()
 endif()
-
-
 
 # Flags
 # =====
@@ -180,22 +175,9 @@ if(XLUA_WITH_XCANVAS)
 endif()
 
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
-
-    include(XeusEmscriptenWasmFlags)
-
-    # async
-    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} --bind --std=c++17")
-    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s ASYNCIFY=1 -s 'ASYNCIFY_IMPORTS=[\"get_stdin\"]'")
-    set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} -s 'ASYNCIFY_STACK_SIZE=20480'")
-
     # ENV (https://github.com/emscripten-core/emscripten/commit/6d9681ad04f60b41ef6345ab06c29bbc9eeb84e0)
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s \"EXTRA_EXPORTED_RUNTIME_METHODS=[ENV']\"")
-    # filesystem
-    #file(COPY asset_dir DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-    #set(XEUS_EMSCRIPTEN_WASM_FLAGS "${XEUS_EMSCRIPTEN_WASM_FLAGS} --embed-file asset_dir")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${XEUS_EMSCRIPTEN_WASM_FLAGS}")
-    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}  ${XEUS_EMSCRIPTEN_WASM_FLAGS} ---proxy-to-worker")
+    set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} ---proxy-to-worker")
 endif()
 
 
@@ -313,9 +295,9 @@ macro(xeus_lua_set_kernel_options target_name)
     endif()
     if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
         find_package(Threads)
-        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${XEUS_LUA_LUA_LIBRARIES})
+        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${XEUS_LUA_LUA_LIBRARIES})
     else()
-        target_link_libraries(${target_name} PRIVATE  ${XEUS_LUA_LUA_LIBRARIES})
+        target_link_libraries(${target_name} PRIVATE ${XEUS_LUA_LUA_LIBRARIES})
     endif()
 endmacro()
 
@@ -391,9 +373,9 @@ macro(xeus_lua_create_target target_name linkage output_name)
     endif ()
     if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
         find_package(Threads) # TODO: add Threads as a dependence of xeus-static?
-        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT}  ${XEUS_LUA_LUA_LIBRARIES})
+        target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${XEUS_LUA_LUA_LIBRARIES})
     else()
-        target_link_libraries(${target_name} PRIVATE  ${XEUS_LUA_LUA_LIBRARIES})
+        target_link_libraries(${target_name} PRIVATE ${XEUS_LUA_LUA_LIBRARIES})
     endif()
 
 endmacro()
@@ -429,14 +411,11 @@ if (XEUS_LUA_BUILD_EXECUTABLE)
     xeus_lua_set_kernel_options(xlua)
 endif()
 
-
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     message(STATUS ${XEUS_LUA_LUA_LIBRARIES})
-
     add_executable(xeus_kernel src/main_emscripten_kernel.cpp )
-    target_link_libraries(xeus_kernel  xeus-lua-static)# ${LUA_LIBRARY} )
+    target_link_libraries(xeus_kernel xeus-lua-static)
     target_compile_features(xeus_kernel PRIVATE cxx_std_17)
-
 endif()
 
 
