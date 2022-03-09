@@ -33,8 +33,8 @@ namespace nl = nlohmann;
 
 namespace xlua
 {   
-
-    inline void my_panic(sol::optional<std::string> maybe_msg) {
+    inline void my_panic(sol::optional<std::string> maybe_msg)
+    {
         auto & interpreter = xeus::get_interpreter();
         std::stringstream ss;
         std::cerr << "Lua is in a panic state and will now abort() the application" << std::endl;
@@ -49,9 +49,8 @@ namespace xlua
         interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
     }
 
-
-    int my_exception_handler (lua_State* L, sol::optional<const std::exception&> maybe_exception, sol::string_view description) {
-        
+    int my_exception_handler (lua_State* L, sol::optional<const std::exception&> maybe_exception, sol::string_view description)
+    {
         auto & interpreter = xeus::get_interpreter();
         std::stringstream ss;
         // L is the lua state, which you can wrap in a state_view if necessary
@@ -77,10 +76,6 @@ namespace xlua
         // so we push a single string (in our case, the description of the error)
         return sol::stack::push(L, description);
     }
-
-
-
-
     
     // implemented in xextend.cpp
     void extend(sol::state_view & lua);
@@ -133,11 +128,8 @@ namespace xlua
             #endif
         );
 
-
         lua.set_exception_handler(&my_exception_handler);
-        lua.set_panic( sol::c_call<decltype(&my_panic), &my_panic> );
-
-
+        lua.set_panic(sol::c_call<decltype(&my_panic), &my_panic>);
 
         // install pure lua modules
         extend(lua);
@@ -197,11 +189,9 @@ namespace xlua
         // reset  payload
         nl::json kernel_res;
 
-
         kernel_res["payload"] = nl::json::array();
         kernel_res["user_expressions"] = nl::json::object();
         kernel_res["status"] = "ok";
-
 
         sol::table ilua_table = lua["ilua"];
         sol::table config_table = ilua_table["config"];
@@ -213,7 +203,7 @@ namespace xlua
         if(auto_print)
         {
             std::stringstream test_code;
-            test_code<<"print("<<code<<")";
+            test_code << "print(" << code << ")";
             auto test_code_result = lua.safe_script(test_code.str(), &sol::script_pass_on_error);
             need_eval = !test_code_result.valid();
         }
@@ -239,7 +229,7 @@ namespace xlua
                 kernel_res["status"] = "error";
                 kernel_res["ename"] = "load file error";
                 kernel_res["evalue"] = error_str;
-                kernel_res["traceback"] = error_str;
+                kernel_res["traceback"] = { error_str };
             }
         }
         return kernel_res;
@@ -252,13 +242,14 @@ namespace xlua
         sol::state_view lua(L);
         nl::json matches = nl::json::array();
 
-        int cursor_start =  complete(lua, code.c_str(), cursor_pos, matches);
+        int cursor_start = complete(lua, code.c_str(), cursor_pos, matches);
 
         nl::json result;
         result["status"] = "ok";
         result["matches"] = matches;
         result["cursor_start"] = cursor_start;
-        result["cursor_end"] = cursor_pos;  
+        result["metadata"] = nl::json::object();
+	result["cursor_end"] = cursor_pos;  
 
         return result;
     }
@@ -280,7 +271,6 @@ namespace xlua
         nl::json jresult;
         jresult["status"] = "complete";
         return jresult;
-
     }
 
     nl::json interpreter::kernel_info_request_impl()
@@ -293,13 +283,11 @@ namespace xlua
         result["language_info"]["version"] = "14.0.0";
         result["language_info"]["mimetype"] = "text/x-luasrc";
         result["language_info"]["file_extension"] = ".lua";
+        result["status"] = "ok";
         return result;
     }
 
     void interpreter::shutdown_request_impl()
     {
     }
-
-
-
 }

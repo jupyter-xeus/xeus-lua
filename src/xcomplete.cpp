@@ -26,12 +26,8 @@ namespace xlua
 
 inline bool startswith(const std::string& str, const std::string& cmp)
 {
-  return str.compare(0, cmp.length(), cmp) == 0;
+    return str.compare(0, cmp.length(), cmp) == 0;
 }
-
-
-
-
 
 std::vector<std::string> split_string(const std::string & str, const char split_on)
 {
@@ -59,15 +55,6 @@ std::vector<std::string> split_string_dot(const std::string & inputString)
     }
     return result_tokens;
 }
-
-
-
-
-
-
-
-
-
 
 class Constants
 {
@@ -122,7 +109,8 @@ void match_from_table_like(table_like & table, const std::string & to_match, nl:
     }
 }
 
-int complete(sol::state_view & lua, const std::string & code, int cursor_pos, nl::json & matches) {
+int complete(sol::state_view & lua, const std::string & code, int cursor_pos, nl::json & matches)
+{
     auto is_dot = [&](char c)
     {
        return c == '.' || c == ':';
