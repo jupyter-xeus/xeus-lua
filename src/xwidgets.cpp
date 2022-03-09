@@ -765,10 +765,10 @@ end
 -- add 
 for k,widget_cls in pairs(layout_widgets) do
     function widget_cls:add(...)
-        tables = {n = select('#', ...), ...}
+        args = {n = select('#', ...), ...}
         for i=1,args.n do
             arg = args[i]
-            self:_add(arg.id(arg))
+            self:_add(arg:id())
         end
     end
 end
