@@ -98,12 +98,6 @@ endif ()
 if (NOT TARGET xeus AND NOT TARGET xeus-static)
     find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
 endif ()
-if (NOT TARGET xtl)
-    find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
-endif ()
-if (NOT TARGET xeus AND NOT TARGET xeus-static)
-    find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
-endif ()
 
 if(NOT XEUS_LUA_USE_LUAJIT)
     if (NOT TARGET Lua) # not sure about these lines
