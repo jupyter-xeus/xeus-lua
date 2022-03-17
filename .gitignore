@@ -32,10 +32,26 @@
 *.app
 *.wasm
 
-bld
+# Vim tmp files
+*.swp
 
-# Notebook checkpoints
-notebooks/.ipynb_checkpoints/*
+# Test build artefacts
+test/CMakeCache.txt
+test/Makefile
+test/CMakeFiles/
+test/cmake_install.cmake
+test/__pycache__/
 
-# Build dir
-build/*
+# Documentation build artefacts
+docs/CMakeCache.txt
+docs/xml/
+docs/build/
+
+# Build directory
+build/
+
+# generated kernel specs
+/share/jupyter/kernels/xlua/kernel.json
+
+# Jupyter artefacts
+.ipynb_checkpoints/
