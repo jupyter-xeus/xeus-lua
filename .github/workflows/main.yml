@@ -63,11 +63,11 @@ jobs:
           cd bld
           make install
 
-      # - name: test
-      #   shell: bash -l {0}
-      #   run: |
-      #     cd test
-      #     pytest .
+      - name: test
+        shell: bash -l {0}
+        run: |
+          cd test
+          pytest .
 
   win:
     
