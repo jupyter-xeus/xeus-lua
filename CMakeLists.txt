@@ -46,9 +46,6 @@ configure_file (
 # =============
 
 # Compilation options
-OPTION(XEUS_LUA_DISABLE_ARCH_NATIVE "disable -march=native flag" OFF)
-OPTION(XEUS_LUA_DISABLE_TUNE_GENERIC "disable -mtune=generic flag" OFF)
-
 option(XEUS_LUA_BUILD_STATIC "Build xeus-lua static library" OFF)
 OPTION(XEUS_LUA_BUILD_SHARED "Split xlua build into executable and library" ON)
 OPTION(XEUS_LUA_BUILD_EXECUTABLE "Build the xlua executable" ON)
@@ -67,8 +64,6 @@ if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_emscripten;${CMAKE_MODULE_PATH}")
     add_compile_definitions(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     message("Build with emscripten")
-    SET(XEUS_LUA_DISABLE_ARCH_NATIVE ON)
-    SET(XEUS_LUA_DISABLE_TUNE_GENERIC ON)
     SET(XEUS_LUA_BUILD_STATIC ON)
     SET(XEUS_LUA_BUILD_SHARED OFF)
     SET(XEUS_LUA_BUILD_EXECUTABLE OFF)
@@ -122,14 +117,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder")
     endif()
-    if (XEUS_LUA_DISABLE_ARCH_NATIVE AND NOT XEUS_LUA_DISABLE_TUNE_GENERIC)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mtune=generic")
-    elseif (XEUS_LUA_DISABLE_TUNE_GENERIC)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else ()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-    endif ()
-
 
     CHECK_CXX_COMPILER_FLAG("-std=c++17" HAS_CPP_17_FLAG)
     if (HAS_CPP_17_FLAG)
@@ -238,14 +225,6 @@ macro(xeus_lua_set_common_options target_name)
         CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 
         target_compile_options(${target_name} PUBLIC -Wunused-parameter -Wextra -Wreorder)
-
-        # Mtune generic/native
-        if (XEUS_LUA_DISABLE_ARCH_NATIVE AND NOT XEUS_LUA_DISABLE_TUNE_GENERIC)
-            target_compile_options(${target_name} PUBLIC -mtune=generic)
-        elseif (XEUS_LUA_DISABLE_TUNE_GENERIC)
-        else ()
-            target_compile_options(${target_name} PUBLIC -march=native)
-        endif ()
 
         # 17 flag
         CHECK_CXX_COMPILER_FLAG("-std=c++17" HAS_CPP_17_FLAG)
