@@ -85,18 +85,18 @@ endif()
 # ============
 
 set(xtl_REQUIRED_VERSION 0.7.0)
-set(xeus_REQUIRED_VERSION 2.4.0)
+set(xeus-zmq_REQUIRED_VERSION 1.0.0)
 
-set(xwidgets_REQUIRED_VERSION 0.26.1)
-set(xcanvas_REQUIRED_VERSION 0.2.2)
+set(xwidgets_REQUIRED_VERSION 0.27.0)
+set(xcanvas_REQUIRED_VERSION 0.3.0)
 set(xproperty_REQUIRED_VERSION 0.11.0)
 set(Lua_REQUIRED_VERSION 5.3.4)
 
 if (NOT TARGET xtl)
     find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
 endif ()
-if (NOT TARGET xeus AND NOT TARGET xeus-static)
-    find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
+if (NOT TARGET xeus-zmq AND NOT TARGET xeus-zmq-static)
+    find_package(xeus-zmq ${xeus-zmq_REQUIRED_VERSION} REQUIRED)
 endif ()
 
 if(NOT XEUS_LUA_USE_LUAJIT)
@@ -321,9 +321,9 @@ macro(xeus_lua_create_target target_name linkage output_name)
                                $<INSTALL_INTERFACE:include>)
 
     if (XEUS_LUA_USE_SHARED_XEUS)
-        set(XEUS_LUA_XEUS_TARGET xeus)
+        set(XEUS_LUA_XEUS_TARGET xeus-zmq)
     else ()
-        set(XEUS_LUA_XEUS_TARGET xeus-static)
+        set(XEUS_LUA_XEUS_TARGET xeus-zmq-static)
     endif ()
 
     if(XLUA_WITH_XWIDGETS OR XLUA_WITH_XCANVAS)
