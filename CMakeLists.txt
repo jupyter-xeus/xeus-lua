@@ -80,8 +80,7 @@ endif()
 # ============
 
 set(xtl_REQUIRED_VERSION 0.7.0)
-set(xeus-zmq_REQUIRED_VERSION 1.0.0)
-
+set(xeus_REQUIRED_VERSION 3.0.0)
 set(xwidgets_REQUIRED_VERSION 0.27.0)
 set(xcanvas_REQUIRED_VERSION 0.3.0)
 set(xproperty_REQUIRED_VERSION 0.11.0)
@@ -90,8 +89,8 @@ set(Lua_REQUIRED_VERSION 5.3.4)
 if (NOT TARGET xtl)
     find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
 endif ()
-if (NOT TARGET xeus-zmq AND NOT TARGET xeus-zmq-static)
-    find_package(xeus-zmq ${xeus-zmq_REQUIRED_VERSION} REQUIRED)
+if (NOT TARGET xeus AND NOT TARGET xeus-static)
+    find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
 endif ()
 
 if(NOT XEUS_LUA_USE_LUAJIT)
@@ -147,9 +146,6 @@ endif()
 
 if(XLUA_WITH_XCANVAS)
     add_compile_definitions(XLUA_WITH_XCANVAS)
-endif()
-
-if(XLUA_WITH_XCANVAS)
     if (NOT TARGET xcanvas)
         find_package(xcanvas REQUIRED)
     endif ()
@@ -300,9 +296,9 @@ macro(xeus_lua_create_target target_name linkage output_name)
                                $<INSTALL_INTERFACE:include>)
 
     if (XEUS_LUA_USE_SHARED_XEUS)
-        set(XEUS_LUA_XEUS_TARGET xeus-zmq)
+        set(XEUS_LUA_XEUS_TARGET xeus)
     else ()
-        set(XEUS_LUA_XEUS_TARGET xeus-zmq-static)
+        set(XEUS_LUA_XEUS_TARGET xeus-static)
     endif ()
 
     if(XLUA_WITH_XWIDGETS OR XLUA_WITH_XCANVAS)
@@ -372,10 +368,12 @@ endif ()
 # xeus-lua
 # =======
 if (XEUS_LUA_BUILD_EXECUTABLE)
+    find_package(xeus-zmq 1.0.1 REQUIRED)
     add_executable(xlua ${XEUS_LUA_MAIN_SRC})
     target_compile_features(xlua PRIVATE cxx_std_17)
     xeus_lua_set_common_options(xlua)
     xeus_lua_set_kernel_options(xlua)
+    target_link_libraries(xlua PRIVATE xeus-zmq)
 endif()
 
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
