@@ -261,7 +261,9 @@ macro(xeus_lua_set_kernel_options target_name)
         find_package(Threads)
         target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${XEUS_LUA_LUA_LIBRARIES})
     else()
+        include(WasmBuildOptions)
         target_link_libraries(${target_name} PRIVATE ${XEUS_LUA_LUA_LIBRARIES})
+        xeus_wasm_compile_options(${target_name})
     endif()
 endmacro()
 
@@ -367,6 +369,7 @@ endif ()
 
 # xeus-lua
 # =======
+
 if (XEUS_LUA_BUILD_EXECUTABLE)
     find_package(xeus-zmq 1.0.1 REQUIRED)
     add_executable(xlua ${XEUS_LUA_MAIN_SRC})
@@ -377,10 +380,13 @@ if (XEUS_LUA_BUILD_EXECUTABLE)
 endif()
 
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+    include(WasmBuildOptions)
+    find_package(xeus-lite REQUIRED)
     message(STATUS ${XEUS_LUA_LUA_LIBRARIES})
     add_executable(xeus_kernel src/main_emscripten_kernel.cpp )
-    target_link_libraries(xeus_kernel xeus-lua-static)
+    target_link_libraries(xeus_kernel xeus-lua-static xeus-lite)
     target_compile_features(xeus_kernel PRIVATE cxx_std_17)
+    xeus_wasm_link_options(xeus_kernel "web,worker")
 endif()
 
 

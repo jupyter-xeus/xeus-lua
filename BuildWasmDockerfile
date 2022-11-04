@@ -52,9 +52,7 @@ RUN cd /deps/nlohmannjson/build && \
 ##################################################################
 
 RUN mkdir -p /deps/xeus/build
-RUN git clone --branch 2.4.1 https://github.com/jupyter-xeus/xeus.git /deps/xeus/src
-
-#COPY xeus /deps/xeus/src
+RUN git clone --branch 3.0.1 https://github.com/jupyter-xeus/xeus.git /deps/xeus/src
 
 RUN cd /deps/xeus/build && \
     emcmake cmake ../src  \
@@ -64,6 +62,23 @@ RUN cd /deps/xeus/build && \
         -DXEUS_EMSCRIPTEN_WASM_BUILD=ON
 
 RUN cd /deps/xeus/build && \
+    emmake make -j2 install
+
+##################################################################
+# xeus-lite
+##################################################################
+
+RUN mkdir -p /deps/xeus-lite/build
+RUN git clone https://github.com/jupyter-xeus/xeus-lite.git /deps/xeus-lite/src
+
+RUN cd /deps/xeus-lite/build && \
+    emcmake cmake ../src  \
+        -DCMAKE_INSTALL_PREFIX=/install \
+        -Dnlohmann_json_DIR=/install/lib/cmake/nlohmann_json \
+        -Dxtl_DIR=/install/share/cmake/xtl \
+        -Dxeus_DIR=/install/lib/cmake/xeus 
+
+RUN cd /deps/xeus-lite/build && \
     emmake make -j2 install
 
 ##################################################################
@@ -86,7 +101,7 @@ RUN cd /deps/xproperty/build && \
 ##################################################################
 
 RUN mkdir -p /deps/xwidgets/build
-RUN git clone --branch 0.26.1 https://github.com/jupyter-xeus/xwidgets.git /deps/xwidgets/src
+RUN git clone --branch 0.27.1 https://github.com/jupyter-xeus/xwidgets.git /deps/xwidgets/src
 
 RUN cd /deps/xwidgets/build && \
     emcmake cmake ../src \
@@ -106,7 +121,7 @@ RUN cd /deps/xwidgets/build && \
 ##################################################################
 
 RUN mkdir -p /deps/xcanvas/build
-RUN git clone --branch 0.2.2 https://github.com/martinRenou/xcanvas.git /deps/xcanvas/src
+RUN git clone --branch 0.4.1 https://github.com/martinRenou/xcanvas.git /deps/xcanvas/src
 
 RUN cd /deps/xcanvas/build && \
     emcmake cmake ../src \
@@ -134,8 +149,6 @@ ADD ./xeus-luaConfig.cmake.in /
 ADD ./test /test
 ADD ./cmake_emscripten /cmake_emscripten
 
-RUN ls /deps/wasm_lua/lua-5.3.4/src/
-
 RUN mkdir -p /xeus-build && cd /xeus-build && \
     emcmake cmake  .. \
        -DCMAKE_INSTALL_PREFIX=/install \
@@ -143,6 +156,7 @@ RUN mkdir -p /xeus-build && cd /xeus-build && \
        -Dxtl_DIR=/install/share/cmake/xtl \
        -Dnlohmann_json_DIR=/install/lib/cmake/nlohmann_json \
        -Dxeus_DIR=/install/lib/cmake/xeus \
+       -Dxeus-lite_DIR=/install/lib/cmake/xeus-lite \
        -Dxproperty_DIR=/install/lib/cmake/xproperty \
        -Dxwidgets_DIR=/install/lib/cmake/xwidgets \
        -Dxcanvas_DIR=/install/lib/cmake/xcanvas \
