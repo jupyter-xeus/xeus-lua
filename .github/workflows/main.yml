@@ -389,7 +389,7 @@ jobs:
            
           source "/opt/emsdk/emsdk_env.sh"
           mkdir -p /opt/xcanvas/build 
-          git clone -b master https://github.com/martinRenou/xcanvas.git  /opt/xcanvas/src
+          git clone https://github.com/martinRenou/xcanvas.git  /opt/xcanvas/src
           cd  /opt/xcanvas/src
           git checkout 0.2.2
           cd /opt/xcanvas/build 
