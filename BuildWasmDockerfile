@@ -1,0 +1,157 @@
+ARG EMSCRIPTEN_VER=2.0.32
+FROM emscripten/emsdk:$EMSCRIPTEN_VER
+
+ARG USER_ID
+ARG GROUP_ID
+
+RUN mkdir -p /install
+RUN mkdir -p /install/lib
+
+# make install dir
+RUN mkdir install
+
+##################################################################
+# Install lua
+##################################################################
+
+RUN mkdir -p /deps/wasm_lua && \
+    git clone --branch 0.1.0 https://github.com/DerThorsten/wasm_lua  /deps/wasm_lua
+
+RUN cd /deps/wasm_lua && \
+    emmake make
+
+##################################################################
+# xtl
+##################################################################
+
+RUN mkdir -p /deps/xtl/build && \
+    git clone --branch 0.7.2 https://github.com/xtensor-stack/xtl.git  /deps/xtl/src
+
+RUN cd /deps/xtl/build && \
+    emcmake cmake ../src/   -DCMAKE_INSTALL_PREFIX=/install
+
+RUN cd /deps/xtl/build && \
+    emmake make -j2 install
+
+
+##################################################################
+# nlohmann_json
+##################################################################
+
+RUN mkdir -p /deps/nlohmannjson/build && \
+    git clone --branch v3.9.1 --depth 1 https://github.com/nlohmann/json.git /deps/nlohmannjson/src
+
+RUN cd /deps/nlohmannjson/build && \
+    emcmake cmake ../src/   -DCMAKE_INSTALL_PREFIX=/install -DJSON_BuildTests=OFF
+
+RUN cd /deps/nlohmannjson/build && \
+    emmake make -j2 install
+
+##################################################################
+# xeus
+##################################################################
+
+RUN mkdir -p /deps/xeus/build
+RUN git clone --branch 2.4.1 https://github.com/jupyter-xeus/xeus.git /deps/xeus/src
+
+#COPY xeus /deps/xeus/src
+
+RUN cd /deps/xeus/build && \
+    emcmake cmake ../src  \
+        -DCMAKE_INSTALL_PREFIX=/install \
+        -Dnlohmann_json_DIR=/install/lib/cmake/nlohmann_json \
+        -Dxtl_DIR=/install/share/cmake/xtl \
+        -DXEUS_EMSCRIPTEN_WASM_BUILD=ON
+
+RUN cd /deps/xeus/build && \
+    emmake make -j2 install
+
+##################################################################
+# xproperty
+##################################################################
+
+RUN mkdir -p /deps/xproperty/build
+RUN git clone --branch 0.11.0 https://github.com/jupyter-xeus/xproperty.git /deps/xproperty/src
+
+RUN cd /deps/xproperty/build && \
+    emcmake cmake ../src \
+        -DCMAKE_INSTALL_PREFIX=/install \
+        -Dxtl_DIR=/install/share/cmake/xtl
+
+RUN cd /deps/xproperty/build && \
+    emmake make -j2 install
+
+##################################################################
+# xwidgets
+##################################################################
+
+RUN mkdir -p /deps/xwidgets/build
+RUN git clone --branch 0.26.1 https://github.com/jupyter-xeus/xwidgets.git /deps/xwidgets/src
+
+RUN cd /deps/xwidgets/build && \
+    emcmake cmake ../src \
+        -DCMAKE_INSTALL_PREFIX=/install \
+        -DXWIDGETS_BUILD_SHARED_LIBS=OFF \
+        -DXWIDGETS_BUILD_STATIC_LIBS=ON \
+        -Dxproperty_DIR=/install/lib/cmake/xproperty \
+        -Dxtl_DIR=/install/share/cmake/xtl \
+        -Dnlohmann_json_DIR=/install/lib/cmake/nlohmann_json \
+        -Dxeus_DIR=/install/lib/cmake/xeus
+
+RUN cd /deps/xwidgets/build && \
+    emmake make -j2 install
+
+##################################################################
+# xcanvas
+##################################################################
+
+RUN mkdir -p /deps/xcanvas/build
+RUN git clone --branch 0.2.2 https://github.com/martinRenou/xcanvas.git /deps/xcanvas/src
+
+RUN cd /deps/xcanvas/build && \
+    emcmake cmake ../src \
+        -DCMAKE_INSTALL_PREFIX=/install  \
+        -DXCANVAS_BUILD_SHARED_LIBS=OFF \
+        -DXCANVAS_BUILD_STATIC_LIBS=ON \
+        -Dxwidgets_DIR=/install/lib/cmake/xwidgets \
+        -Dxproperty_DIR=/install/lib/cmake/xproperty \
+        -Dxtl_DIR=/install/share/cmake/xtl \
+        -Dnlohmann_json_DIR=/install/lib/cmake/nlohmann_json \
+        -Dxeus_DIR=/install/lib/cmake/xeus
+
+RUN cd /deps/xcanvas/build && \
+    emmake make -j2 install
+
+##################################################################
+# xeus-lua itself
+##################################################################
+
+ADD ./CMakeLists.txt /
+ADD ./src /src 
+ADD ./share /share
+ADD ./include /include 
+ADD ./xeus-luaConfig.cmake.in /
+ADD ./test /test
+ADD ./cmake_emscripten /cmake_emscripten
+
+RUN ls /deps/wasm_lua/lua-5.3.4/src/
+
+RUN mkdir -p /xeus-build && cd /xeus-build && \
+    emcmake cmake  .. \
+       -DCMAKE_INSTALL_PREFIX=/install \
+       -DXEUS_LUA_EMSCRIPTEN_WASM_BUILD=ON \
+       -Dxtl_DIR=/install/share/cmake/xtl \
+       -Dnlohmann_json_DIR=/install/lib/cmake/nlohmann_json \
+       -Dxeus_DIR=/install/lib/cmake/xeus \
+       -Dxproperty_DIR=/install/lib/cmake/xproperty \
+       -Dxwidgets_DIR=/install/lib/cmake/xwidgets \
+       -Dxcanvas_DIR=/install/lib/cmake/xcanvas \
+       -DLUA_INCLUDE_DIR=/deps/wasm_lua/lua-5.3.4/src \
+       -DLUA_LIBRARY=/deps/wasm_lua/lua-5.3.4/src/liblua.a \
+       -DXLUA_WITH_XWIDGETS=ON \
+       -DXLUA_WITH_XCANVAS=ON \
+       -DXLUA_USE_SHARED_XWIDGETS=OFF\
+       -DXLUA_USE_SHARED_XCANVAS=OFF
+
+RUN cd /xeus-build && \
+    emmake make -j2
