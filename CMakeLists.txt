@@ -384,9 +384,11 @@ if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     find_package(xeus-lite REQUIRED)
     message(STATUS ${XEUS_LUA_LUA_LIBRARIES})
     add_executable(xlua_wasm src/main_emscripten_kernel.cpp )
-    target_link_libraries(xlua_wasm xeus-lua-static xeus-lite)
+    target_link_libraries(xlua_wasm PRIVATE xeus-lua-static xeus-lite)
     target_compile_features(xlua_wasm PRIVATE cxx_std_17)
+    xeus_lua_set_kernel_options(xlua_wasm)
     xeus_wasm_link_options(xlua_wasm "web,worker")
+    xeus_wasm_async_options(xlua_wasm)
 endif()
 
 
