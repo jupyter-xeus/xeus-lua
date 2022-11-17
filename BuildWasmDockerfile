@@ -52,7 +52,7 @@ RUN cd /deps/nlohmannjson/build && \
 ##################################################################
 
 RUN mkdir -p /deps/xeus/build
-RUN git clone --branch 3.0.1 https://github.com/jupyter-xeus/xeus.git /deps/xeus/src
+RUN git clone --branch 3.0.2 https://github.com/jupyter-xeus/xeus.git /deps/xeus/src
 
 RUN cd /deps/xeus/build && \
     emcmake cmake ../src  \
@@ -69,7 +69,7 @@ RUN cd /deps/xeus/build && \
 ##################################################################
 
 RUN mkdir -p /deps/xeus-lite/build
-RUN git clone --branch 1.0.0 https://github.com/jupyter-xeus/xeus-lite.git /deps/xeus-lite/src
+RUN git clone --branch 1.0.1 https://github.com/jupyter-xeus/xeus-lite.git /deps/xeus-lite/src
 
 RUN cd /deps/xeus-lite/build && \
     emcmake cmake ../src  \
