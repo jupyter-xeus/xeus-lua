@@ -87,11 +87,11 @@ jobs:
           environment-file: environment-dev.yml
           environment-name: xeus-lua
 
-      - name: install cxx compiler
+      - name: micromamba shell hook
         shell: powershell
         run: |
-          micromamba install cxx-compiler -c conda-forge -y
-
+          micromamba shell hook -s cmd.exe -p C:\Users\runneradmin\micromamba-root
+      
       - name: cmake configure
         shell: powershell
         run: |
