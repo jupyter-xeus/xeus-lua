@@ -380,7 +380,6 @@ endif()
 if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     include(WasmBuildOptions)
     find_package(xeus-lite REQUIRED)
-    message(STATUS ${XEUS_LUA_LUA_LIBRARIES})
     add_executable(xlua_wasm src/main_emscripten_kernel.cpp )
     target_link_libraries(xlua_wasm PRIVATE xeus-lua-static xeus-lite)
     target_compile_features(xlua_wasm PRIVATE cxx_std_17)
@@ -461,3 +460,13 @@ if (XEUS_LUA_BUILD_SHARED)
             FILE ${PROJECT_NAME}Targets.cmake
             DESTINATION ${XEUS_LUA_CMAKECONFIG_INSTALL_DIR})
 endif ()
+
+if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+    install(TARGETS xlua_wasm
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    install(FILES
+            "$<TARGET_FILE_DIR:xlua_wasm>/xlua_wasm.js"
+            "$<TARGET_FILE_DIR:xlua_wasm>/xlua_wasm.wasm"
+            DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
