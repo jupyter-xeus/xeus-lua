@@ -7,6 +7,10 @@ on:
     branches:
     - main
 
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   unix:
     
@@ -107,17 +111,61 @@ jobs:
 
   emscripten_wasm:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        emsdk: ["2.0.32", "latest"]
+        emsdk_ver: ["2.0.32", "3.1.2"]
+
     steps:
       - uses: actions/checkout@v2
-      - uses: docker-practice/actions-setup-docker@master
-      - run: |
-          chmod +x build_emscripten.sh
-          ./build_emscripten.sh BUILD ${{ matrix.emsdk }}
 
+      - name: Install mamba
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: environment-wasm-build.yml
+          environment-name: xeus-lua-wasm-build
+
+      - name: Setup emsdk
+        run: |
+          micromamba activate xeus-lua-wasm-build
+          emsdk install ${{matrix.emsdk_ver}}     
+
+      - name: Build xeus-lua
+        run: |
+          micromamba activate xeus-lua-wasm-build
+
+          emsdk activate ${{matrix.emsdk_ver}}
+          source $CONDA_EMSDK_DIR/emsdk_env.sh
+
+          micromamba create -f environment-wasm-host.yml --platform=emscripten-32
+          
+          mkdir build
+          pushd build
+
+          export EMPACK_PREFIX=$MAMBA_ROOT_PREFIX/envs/xeus-lua-wasm-build
+          export PREFIX=$MAMBA_ROOT_PREFIX/envs/xeus-lua-wasm-host
+          export CMAKE_PREFIX_PATH=$PREFIX
+          export CMAKE_SYSTEM_PREFIX_PATH=$PREFIX
+
+          emcmake cmake \
+            -DCMAKE_BUILD_TYPE=Release                        \
+            -DCMAKE_PREFIX_PATH=$PREFIX                       \
+            -DCMAKE_INSTALL_PREFIX=$PREFIX                    \
+            -DXEUS_LUA_EMSCRIPTEN_WASM_BUILD=ON               \
+            -DXLUA_WITH_XWIDGETS=ON                           \
+            -DXLUA_USE_SHARED_XWIDGETS=OFF                    \
+            -DXLUA_WITH_XCANVAS=ON                            \
+            -DXLUA_USE_SHARED_XCANVAS=OFF                     \
+            -DLUA_INCLUDE_DIR=$PREFIX/include                 \
+            -DLUA_LIBRARY=$PREFIX/lib/liblua.a                \
+            -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ON            \
+            ..
+
+          make -j5
+      #- uses: docker-practice/actions-setup-docker@master
+      #- run: |
+      #    chmod +x build_emscripten.sh
+      #    ./build_emscripten.sh BUILD ${{ matrix.emsdk }}
 
