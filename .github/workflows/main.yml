@@ -164,8 +164,4 @@ jobs:
             ..
 
           make -j5
-      #- uses: docker-practice/actions-setup-docker@master
-      #- run: |
-      #    chmod +x build_emscripten.sh
-      #    ./build_emscripten.sh BUILD ${{ matrix.emsdk }}
 
