@@ -23,7 +23,7 @@ jobs:
         luajit: [ON, OFF]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: install mamba
         uses: mamba-org/provision-with-micromamba@main
@@ -83,7 +83,7 @@ jobs:
         os: [ windows-latest]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: install mamba
         uses: mamba-org/provision-with-micromamba@main
@@ -119,7 +119,7 @@ jobs:
         emsdk_ver: ["2.0.32", "3.1.2"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install mamba
         uses: mamba-org/provision-with-micromamba@main
