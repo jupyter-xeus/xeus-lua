@@ -24,7 +24,7 @@
 #include "xwidgets/ximage.hpp"
 #include "xwidgets/xlabel.hpp"
 #include "xwidgets/xhtml.hpp"
-#include "xwidgets/xnumeral.hpp"
+//#include "xwidgets/xnumeral.hpp"
 #include "xwidgets/xpassword.hpp"
 #include "xwidgets/xplay.hpp"
 #include "xwidgets/xprogress.hpp"
@@ -455,21 +455,21 @@ void register_xwidgets_impl(sol::state_view  & lua)
             //XLUA_REGISTER_INDEX_OBSERVER(xwidgtes_lua_type, int, index);
         });
     }
-    {
-        using xwidgtes_type =  xw::numeral<double>;
-        register_widget_impl<xwidgtes_type>(lua, "xnumeral",[](auto && xwidgtes_lua_type){
+    // {
+    //     using xwidgtes_type =  xw::numeral<double>;
+    //     register_widget_impl<xwidgtes_type>(lua, "xnumeral",[](auto && xwidgtes_lua_type){
 
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, min);
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, max);
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, value);
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, step);
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, continuous_update);
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
+    //         XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, min);
+    //         XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, max);
+    //         XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, value);
+    //         XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, step);
+    //         XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, continuous_update);
+    //         XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
 
-            XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
+    //         XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
 
-        });
-    }
+    //     });
+    // }
     {
         using xwidgtes_type =  xw::password;
         register_widget_impl<xwidgtes_type>(lua, "xpassword",[](auto && xwidgtes_lua_type){
@@ -495,8 +495,8 @@ void register_xwidgets_impl(sol::state_view  & lua)
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, step);
 
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, _playing);
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, _repeat);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, playing);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, repeat);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, show_repeat);
 
             XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
@@ -543,7 +543,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
         register_widget_impl<xwidgtes_type>(lua, "xtab",[](auto && xwidgtes_lua_type){
 
             using titles_type = typename xwidgtes_type::titles_type;
-            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, titles_type, _titles);
+            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, titles_type, titles);
 
             xwidgtes_lua_type["_add"] = [](xwidgtes_type & widget, xeus::xguid id){
                 widget.add(id);
