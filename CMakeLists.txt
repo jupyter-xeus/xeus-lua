@@ -37,6 +37,7 @@ endif ()
 
 
 
+
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json"
@@ -468,8 +469,7 @@ endif ()
 if(EMSCRIPTEN)
     install(FILES
             "$<TARGET_FILE_DIR:xlua>/xlua.wasm"
-            DESTINATION ${XJUPYTER_DATA_DIR}/kernels/xlua)
-    install(FILES
             "$<TARGET_FILE_DIR:xlua>/xlua.js"
-            DESTINATION ${XJUPYTER_DATA_DIR}/kernels/xlua)
+            DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 endif()

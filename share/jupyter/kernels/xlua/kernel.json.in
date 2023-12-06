@@ -1,14 +1,13 @@
 {
   "display_name": "Lua @LUA_VERSION_STRING@ (XLua)",
   "argv": [
-      "@XLUA_KERNELSPEC_PATH@xlua",
+      "@CMAKE_INSTALL_FULL_BINDIR@/xlua",
       "-f",
       "{connection_file}"
   ],
   "language": "lua",
   "metadata": { 
     "debugger": false,
-    "lua_extra_package_path": "@XLUA_LUA_EXTRA_PACKAGE_PATH@",
-    "wasm_name" : "xlua"
+    "lua_extra_package_path": "@XLUA_LUA_EXTRA_PACKAGE_PATH@"
   }
 }

@@ -24,7 +24,6 @@
 #include "xwidgets/ximage.hpp"
 #include "xwidgets/xlabel.hpp"
 #include "xwidgets/xhtml.hpp"
-//#include "xwidgets/xnumeral.hpp"
 #include "xwidgets/xpassword.hpp"
 #include "xwidgets/xplay.hpp"
 #include "xwidgets/xprogress.hpp"
