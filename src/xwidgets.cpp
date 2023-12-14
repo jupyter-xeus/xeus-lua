@@ -70,6 +70,16 @@ namespace xlua
 {
 
 
+#define XLUA_ADD_PROPERTY_WITH_EXPLICIT_NAME(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME, MEMBER_NAME)\
+    CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
+        [](xwidgtes_type & widget){\
+            return PROPERTY_TYPE(widget.MEMBER_NAME);\
+        }, \
+        [](xwidgtes_type & widget, const PROPERTY_TYPE & val){\
+            widget.MEMBER_NAME = val;\
+        })\
+    )
+
 #define XLUA_ADD_PROPERTY(CLS_OBJ,PROPERTY_TYPE,PROPERTY_NAME)\
     CLS_OBJ.set(#PROPERTY_NAME, sol::property(\
         [](xwidgtes_type & widget){\
@@ -493,9 +503,14 @@ void register_xwidgets_impl(sol::state_view  & lua)
 
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, step);
-
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, playing);
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, repeat);
+            
+            #if XWIDGETS_VERSION_MAJOR==0 && XWIDGETS_VERSION_MINOR < 28
+                XLUA_ADD_PROPERTY_WITH_EXPLICIT_NAME(xwidgtes_lua_type, bool, playing, _playing)
+                XLUA_ADD_PROPERTY_WITH_EXPLICIT_NAME(xwidgtes_lua_type, bool, repeat, _repeat);
+            #else
+                XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, playing);
+                XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, repeat);
+            #endif
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, show_repeat);
 
             XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
@@ -542,7 +557,11 @@ void register_xwidgets_impl(sol::state_view  & lua)
         register_widget_impl<xwidgtes_type>(lua, "xtab",[](auto && xwidgtes_lua_type){
 
             using titles_type = typename xwidgtes_type::titles_type;
-            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, titles_type, titles);
+            #if XWIDGETS_VERSION_MAJOR==0 && XWIDGETS_VERSION_MINOR < 28
+                XLUA_ADD_PROPERTY_WITH_EXPLICIT_NAME(xwidgtes_lua_type, titles_type, titles, _titles);
+            #else
+                XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, titles_type, titles);
+            #endif
 
             xwidgtes_lua_type["_add"] = [](xwidgtes_type & widget, xeus::xguid id){
                 widget.add(id);
