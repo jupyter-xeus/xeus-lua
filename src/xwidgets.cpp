@@ -494,8 +494,8 @@ void register_xwidgets_impl(sol::state_view  & lua)
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, disabled);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, step);
 
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, _playing);
-            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, _repeat);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, playing);
+            XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, repeat);
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, show_repeat);
 
             XLUA_REGISTER_OBSERVER(xwidgtes_lua_type, double, value);
@@ -542,7 +542,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
         register_widget_impl<xwidgtes_type>(lua, "xtab",[](auto && xwidgtes_lua_type){
 
             using titles_type = typename xwidgtes_type::titles_type;
-            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, titles_type, _titles);
+            XLUA_ADD_CONTAINER_PROPERTY(xwidgtes_lua_type, titles_type, titles);
 
             xwidgtes_lua_type["_add"] = [](xwidgtes_type & widget, xeus::xguid id){
                 widget.add(id);
