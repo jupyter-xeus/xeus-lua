@@ -505,7 +505,7 @@ void register_xwidgets_impl(sol::state_view  & lua)
             XLUA_ADD_PROPERTY(xwidgtes_lua_type, double, step);
             
             #if XWIDGETS_VERSION_MAJOR==0 && XWIDGETS_VERSION_MINOR < 28
-                XLUA_ADD_PROPERTY_WITH_EXPLICIT_NAME(xwidgtes_lua_type, bool, playing, _playing)
+                XLUA_ADD_PROPERTY_WITH_EXPLICIT_NAME(xwidgtes_lua_type, bool, playing, _playing);
                 XLUA_ADD_PROPERTY_WITH_EXPLICIT_NAME(xwidgtes_lua_type, bool, repeat, _repeat);
             #else
                 XLUA_ADD_PROPERTY(xwidgtes_lua_type, bool, playing);
