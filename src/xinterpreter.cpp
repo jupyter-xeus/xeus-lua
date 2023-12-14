@@ -30,7 +30,6 @@
 
 namespace nl = nlohmann;
 
-
 namespace xlua
 {   
     inline void my_panic(sol::optional<std::string> maybe_msg)

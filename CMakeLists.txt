@@ -37,6 +37,7 @@ endif ()
 
 
 
+
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json"
@@ -55,12 +56,12 @@ OPTION(XEUS_LUA_USE_SHARED_XEUS "Link xlua  with the xeus shared library (instea
 OPTION(XEUS_LUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (instead of the static library)" ON)
 OPTION(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
 OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (instead of the static library)" ON)
-OPTION(XEUS_LUA_EMSCRIPTEN_WASM_BUILD "Build for wasm with emscripten" OFF)
+
 
 OPTION(XLUA_WITH_XCANVAS      "Build xeus-lua with xcanvas" ON)
 OPTION(XLUA_USE_SHARED_XCANVAS "Link xlua  with the xcanvas shared library (instead of the static library)" ON)
 
-if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+if(EMSCRIPTEN)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_emscripten;${CMAKE_MODULE_PATH}")
     add_compile_definitions(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     message("Build with emscripten")
@@ -70,8 +71,8 @@ if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     SET(XEUS_LUA_USE_SHARED_XEUS OFF)
     SET(XEUS_LUA_USE_SHARED_XEUS_LUA OFF)
     SET(XEUS_LUA_BUILD_TESTS OFF)
-    SET(XLUA_WITH_XCANVAS ON)
-    SET(XLUA_WITH_XWIDGETS ON)
+    # SET(XLUA_WITH_XCANVAS ON)
+    # SET(XLUA_WITH_XWIDGETS ON)
     SET(XLUA_USE_SHARED_XWIDGETS OFF)
     SET(XLUA_USE_SHARED_XCANVAS OFF)
 endif()
@@ -113,7 +114,7 @@ if (MSVC)
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+    if(NOT EMSCRIPTEN)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder")
     endif()
 
@@ -151,7 +152,7 @@ if(XLUA_WITH_XCANVAS)
     endif ()
 endif()
 
-if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+if(EMSCRIPTEN)
     # ENV (https://github.com/emscripten-core/emscripten/commit/6d9681ad04f60b41ef6345ab06c29bbc9eeb84e0)
     set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s \"EXTRA_EXPORTED_RUNTIME_METHODS=[ENV']\"")
 endif()
@@ -257,7 +258,7 @@ macro(xeus_lua_set_kernel_options target_name)
     else ()
         target_link_libraries(${target_name} PRIVATE xeus-lua-static)
     endif()
-    if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+    if(NOT EMSCRIPTEN)
         find_package(Threads)
         target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${XEUS_LUA_LUA_LIBRARIES})
     else()
@@ -334,11 +335,14 @@ macro(xeus_lua_create_target target_name linkage output_name)
     elseif (APPLE)
         target_link_libraries(${target_name} PRIVATE "-undefined dynamic_lookup")
     endif ()
-    if(NOT XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+    if(NOT EMSCRIPTEN)
         find_package(Threads) # TODO: add Threads as a dependence of xeus-static?
         target_link_libraries(${target_name} PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${XEUS_LUA_LUA_LIBRARIES})
     else()
         target_link_libraries(${target_name} PRIVATE ${XEUS_LUA_LUA_LIBRARIES})
+        set_target_properties(${target_name} PROPERTIES
+            POSITION_INDEPENDENT_CODE ON
+        )
     endif()
 
 endmacro()
@@ -377,16 +381,15 @@ if (XEUS_LUA_BUILD_EXECUTABLE)
     target_link_libraries(xlua PRIVATE xeus-zmq)
 endif()
 
-if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
+if(EMSCRIPTEN)
     include(WasmBuildOptions)
     find_package(xeus-lite REQUIRED)
-    add_executable(xlua_wasm src/main_emscripten_kernel.cpp )
-    target_link_libraries(xlua_wasm PRIVATE xeus-lua-static xeus-lite)
-    target_compile_features(xlua_wasm PRIVATE cxx_std_17)
-    xeus_lua_set_kernel_options(xlua_wasm)
-    xeus_wasm_compile_options(xlua_wasm)
-    xeus_wasm_link_options(xlua_wasm "web,worker")
-    xeus_wasm_async_options(xlua_wasm)
+    add_executable(xlua src/main_emscripten_kernel.cpp )
+    target_link_libraries(xlua PRIVATE  xeus-lite)
+    target_compile_features(xlua PRIVATE cxx_std_17)
+    xeus_lua_set_kernel_options(xlua)
+    xeus_wasm_compile_options(xlua)
+    xeus_wasm_link_options(xlua "web,worker")
 endif()
 
 
@@ -415,7 +418,9 @@ endif ()
 if (XEUS_LUA_BUILD_EXECUTABLE)
     install(TARGETS xlua
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 
+if(XEUS_LUA_BUILD_EXECUTABLE OR EMSCRIPTEN)
     # Configuration and data directories for jupyter and xeus-lua
     set(XJUPYTER_DATA_DIR "share/jupyter"    CACHE STRING "Jupyter data directory")
 
@@ -461,12 +466,10 @@ if (XEUS_LUA_BUILD_SHARED)
             DESTINATION ${XEUS_LUA_CMAKECONFIG_INSTALL_DIR})
 endif ()
 
-if(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
-    install(TARGETS xlua_wasm
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_BINDIR})
-
+if(EMSCRIPTEN)
     install(FILES
-            "$<TARGET_FILE_DIR:xlua_wasm>/xlua_wasm.js"
-            "$<TARGET_FILE_DIR:xlua_wasm>/xlua_wasm.wasm"
+            "$<TARGET_FILE_DIR:xlua>/xlua.wasm"
+            "$<TARGET_FILE_DIR:xlua>/xlua.js"
             DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 endif()

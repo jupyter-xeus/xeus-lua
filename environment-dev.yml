@@ -9,10 +9,10 @@ dependencies:
   - xeus-zmq>=1.0, <2.0
   - nlohmann_json
   - cppzmq
-  - xtl>=0.7, <0.8
+  - xtl>=0.7
   - lua>=5.2.0
   - openlibm # [linux]
-  - xwidgets>=0.27.3
+  - xwidgets <0.28
   - xcanvas>=0.4.1
   # to try it out
   - jupyterlab

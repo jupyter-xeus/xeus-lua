@@ -1,7 +1,7 @@
 {
   "display_name": "Lua @LUA_VERSION_STRING@ (XLua)",
   "argv": [
-      "@XLUA_KERNELSPEC_PATH@xlua",
+      "@CMAKE_INSTALL_FULL_BINDIR@/xlua",
       "-f",
       "{connection_file}"
   ],
