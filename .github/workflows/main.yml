@@ -13,9 +13,9 @@ defaults:
 
 jobs:
   unix:
-    
+
     runs-on: ${{ matrix.os }}
-     
+
     strategy:
       fail-fast: false
       matrix:
@@ -25,25 +25,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install mamba
-        uses: mamba-org/provision-with-micromamba@main
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment-dev.yml
-          environment-name: xeus-lua
 
-      - name: install cxx compiler
+      - name: Install luajit
         shell: bash -l {0}
         run: |
-          $HOME/micromamba-bin/micromamba install cxx-compiler -c conda-forge -y
-
-      - name: install luajit
-        shell: bash -l {0}
-        run: |
-          $HOME/micromamba-bin/micromamba install luajit -c conda-forge -y
+          micromamba install luajit -c conda-forge -y
         if: matrix.luajit == 'ON'
 
-
-      - name: cmake configure
+      - name: Configure cmake
         shell: bash -l {0}
         run: |
           mkdir -p bld
@@ -53,15 +46,15 @@ jobs:
            -DXLUA_WITH_XCANVAS=ON\
            -DXEUS_LUA_USE_LUAJIT=${{matrix.luajit}} \
            -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
-           -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX 
+           -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
 
-      - name: build
+      - name: Build
         shell: bash -l {0}
         run: |
           cd bld
           make -j8
 
-      - name: install
+      - name: Install
         shell: bash -l {0}
         run: |
           cd bld
@@ -74,9 +67,9 @@ jobs:
       #     pytest .
 
   win:
-    
+
     runs-on: ${{ matrix.os }}
-     
+
     strategy:
       fail-fast: false
       matrix:
@@ -85,25 +78,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: install mamba
-        uses: mamba-org/provision-with-micromamba@main
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment-dev.yml
           environment-name: xeus-lua
 
-      - name: micromamba shell hook
+      - name: Micromamba shell hook
         shell: powershell
         run: |
           micromamba shell hook -s cmd.exe -p C:\Users\runneradmin\micromamba-root
-      
-      - name: cmake configure
+
+      - name: Configure cmake
         shell: powershell
         run: |
           mkdir -p bld
           cd bld
           cmake .. -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
 
-      - name: build
+      - name: Build
         shell: powershell
         run: |
           cd bld
@@ -121,8 +114,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install mamba
-        uses: mamba-org/provision-with-micromamba@main
+      - name: Install micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment-wasm-build.yml
           environment-name: xeus-lua-wasm-build
@@ -130,7 +123,7 @@ jobs:
       - name: Setup emsdk
         run: |
           micromamba activate xeus-lua-wasm-build
-          emsdk install ${{matrix.emsdk_ver}}     
+          emsdk install ${{matrix.emsdk_ver}}
 
       - name: Build xeus-lua
         run: |
@@ -140,7 +133,7 @@ jobs:
           source $CONDA_EMSDK_DIR/emsdk_env.sh
 
           micromamba create -f environment-wasm-host.yml --platform=emscripten-wasm32
-          
+
           mkdir build
           pushd build
 
