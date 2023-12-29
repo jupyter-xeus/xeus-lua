@@ -60,7 +60,7 @@ jobs:
           cd bld
           make install
 
-      # - name: test
+      # - name: Test
       #   shell: bash -l {0}
       #   run: |
       #     cd test
@@ -81,13 +81,8 @@ jobs:
       - name: Install micromamba
         uses: mamba-org/setup-micromamba@v1
         with:
+          init-shell: powershell
           environment-file: environment-dev.yml
-          environment-name: xeus-lua
-
-      - name: Micromamba shell hook
-        shell: powershell
-        run: |
-          micromamba shell hook -s cmd.exe -p C:\Users\runneradmin\micromamba-root
 
       - name: Configure cmake
         shell: powershell
