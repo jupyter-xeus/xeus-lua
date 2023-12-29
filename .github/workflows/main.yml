@@ -24,6 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - run: mkdir build
 
       - name: Install micromamba
         uses: mamba-org/setup-micromamba@v1
@@ -38,32 +39,28 @@ jobs:
       - name: Configure cmake
         shell: bash -l {0}
         run: |
-          mkdir -p bld
-          cd bld
           cmake .. \
            -DXLUA_WITH_XWIDGETS=ON\
            -DXLUA_WITH_XCANVAS=ON\
            -DXEUS_LUA_USE_LUAJIT=${{matrix.luajit}} \
            -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
            -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
+        working-directory: build
 
       - name: Build
         shell: bash -l {0}
-        run: |
-          cd bld
-          make -j8
+        run: make -j8
+        working-directory: build
 
       - name: Install
         shell: bash -l {0}
-        run: |
-          cd bld
-          make install
+        run: make install
+        working-directory: build
 
       # - name: Test
       #   shell: bash -l {0}
-      #   run: |
-      #     cd test
-      #     pytest .
+      #   run: pytest . -vvv
+      #   working-directory: test
 
   win:
 
@@ -76,6 +73,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - run: mkdir build
 
       - name: Install micromamba
         uses: mamba-org/setup-micromamba@v1
@@ -85,16 +83,13 @@ jobs:
 
       - name: Configure cmake
         shell: powershell
-        run: |
-          mkdir -p bld
-          cd bld
-          cmake .. -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
+        run: cmake .. -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
+        working-directory: build
 
       - name: Build
         shell: powershell
-        run: |
-          cd bld
-          cmake --build . --target ALL_BUILD
+        run: cmake --build . --target ALL_BUILD
+        working-directory: build
 
   emscripten_wasm:
 
