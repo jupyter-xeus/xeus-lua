@@ -32,8 +32,7 @@ jobs:
 
       - name: Install luajit
         shell: bash -l {0}
-        run: |
-          micromamba install luajit -c conda-forge -y
+        run: micromamba install luajit -c conda-forge -y
         if: matrix.luajit == 'ON'
 
       - name: Configure cmake
@@ -116,14 +115,10 @@ jobs:
           environment-name: xeus-lua-wasm-build
 
       - name: Setup emsdk
-        run: |
-          micromamba activate xeus-lua-wasm-build
-          emsdk install ${{matrix.emsdk_ver}}
+        run: emsdk install ${{matrix.emsdk_ver}}
 
       - name: Build xeus-lua
         run: |
-          micromamba activate xeus-lua-wasm-build
-
           emsdk activate ${{matrix.emsdk_ver}}
           source $CONDA_EMSDK_DIR/emsdk_env.sh
 
