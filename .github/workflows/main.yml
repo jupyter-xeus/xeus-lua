@@ -24,12 +24,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir build
 
       - name: Install micromamba
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment-dev.yml
+
+      - name: Make build directory
+        run: mkdir build
 
       - name: Install luajit
         shell: bash -l {0}
@@ -40,8 +42,8 @@ jobs:
         shell: bash -l {0}
         run: |
           cmake .. \
-           -DXLUA_WITH_XWIDGETS=ON\
-           -DXLUA_WITH_XCANVAS=ON\
+           -DXLUA_WITH_XWIDGETS=ON \
+           -DXLUA_WITH_XCANVAS=ON \
            -DXEUS_LUA_USE_LUAJIT=${{matrix.luajit}} \
            -DCMAKE_PREFIX_PATH=$CONDA_PREFIX \
            -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX
@@ -69,11 +71,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-latest]
+        os: [ windows-latest ]
 
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir build
 
       - name: Install micromamba
         uses: mamba-org/setup-micromamba@v1
@@ -81,9 +82,16 @@ jobs:
           init-shell: powershell
           environment-file: environment-dev.yml
 
+      - name: Make build directory
+        run: mkdir build
+
       - name: Configure cmake
         shell: powershell
-        run: cmake .. -DCMAKE_BUILD_TYPE=Release  -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
+        run: |
+          cmake .. `
+            -DCMAKE_BUILD_TYPE=Release  `
+            -DDEPENDENCY_SEARCH_PREFIX="%CONDA_PREFIX%\Library" `
+            -DCMAKE_PREFIX_PATH="%CONDA_PREFIX%\Library"
         working-directory: build
 
       - name: Build
