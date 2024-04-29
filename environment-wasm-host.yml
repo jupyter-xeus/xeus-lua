@@ -5,7 +5,7 @@ channels:
 dependencies:
   - lua
   - nlohmann_json
-  - xeus-lite
+  - xeus-lite <2.0
   - xeus >=3.2.0,<4.0
   - xtl >=0.7,<0.8
   - xcanvas >=0.4,<5.0

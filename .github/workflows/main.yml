@@ -21,6 +21,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         luajit: [ON, OFF]
+        exclude:
+          - os: macos-latest
+            luajit: ON
 
     steps:
       - uses: actions/checkout@v4
