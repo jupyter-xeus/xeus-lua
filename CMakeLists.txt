@@ -12,6 +12,18 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 set(XEUS_LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+
+# PRINT THE COMPILER
+message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+
+if(EMSCRIPTEN)
+    message(STATUS "EMSCRIPTEN")
+else()
+    message(STATUS "NOT EMSCRIPTEN")
+endif()
+
+
+
 # Versionning
 # ===========
 
@@ -77,28 +89,19 @@ endif()
 # Dependencies
 # ============
 
-set(xtl_REQUIRED_VERSION 0.7.0)
-set(xeus_REQUIRED_VERSION 3.0.0)
-set(xwidgets_REQUIRED_VERSION 0.27.0)
-set(xcanvas_REQUIRED_VERSION 0.3.0)
-set(xproperty_REQUIRED_VERSION 0.11.0)
+
+set(xeus_REQUIRED_VERSION 5.0.0)
+set(xwidgets_REQUIRED_VERSION 0.29.0)
+set(xcanvas_REQUIRED_VERSION 0.5.0)
+set(xproperty_REQUIRED_VERSION 0.12.0)
 set(Lua_REQUIRED_VERSION 5.3.4)
 
-if (NOT TARGET xtl)
-    find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
-endif ()
-if (NOT TARGET xeus AND NOT TARGET xeus-static)
-    find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
-endif ()
+find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
 
 if(NOT XEUS_LUA_USE_LUAJIT)
-    if (NOT TARGET Lua) # not sure about these lines
-        find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
-    endif ()
+    find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
 else()
-    if (NOT TARGET LuaJIT) # not sure about these lines
-        find_package(LuaJIT  REQUIRED)
-    endif ()
+    find_package(LuaJIT  REQUIRED)
 endif()
 
 # Flags
@@ -315,7 +318,7 @@ macro(xeus_lua_create_target target_name linkage output_name)
         set(XLUA_XCANVAS_TARGET "")
     endif()
 
-    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl
+    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET}
         ${XLUA_XWIDGETS_TARGET}
         ${XLUA_XPROPERTY_TARGET}
         ${XLUA_XCANVAS_TARGET}
@@ -373,12 +376,12 @@ endif()
 if(EMSCRIPTEN)
     include(WasmBuildOptions)
     find_package(xeus-lite REQUIRED)
-    add_executable(xlua src/main_emscripten_kernel.cpp )
-    target_link_libraries(xlua PRIVATE xeus-lite)
-    target_compile_features(xlua PRIVATE cxx_std_17)
-    xeus_lua_set_kernel_options(xlua)
-    xeus_wasm_compile_options(xlua)
-    xeus_wasm_link_options(xlua "web,worker")
+    add_executable(xlua_wasm src/main_emscripten_kernel.cpp )
+    target_link_libraries(xlua_wasm PRIVATE  xeus-lite)
+    target_compile_features(xlua_wasm PRIVATE cxx_std_17)
+    xeus_lua_set_kernel_options(xlua_wasm)
+    xeus_wasm_compile_options(xlua_wasm)
+    xeus_wasm_link_options(xlua_wasm "web,worker")
 endif()
 
 

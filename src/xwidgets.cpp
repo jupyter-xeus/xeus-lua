@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <optional>
 
 #include "sol/sol.hpp"
 #include "xeus/xinterpreter.hpp"
@@ -158,7 +159,7 @@ namespace xlua
 #define XLUA_REGISTER_OPTIONAL_INDEX_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
     CLS_OBJ["register_observer"] = [](xwidgets_type & widget, sol::protected_function function){ \
         auto callback = [function](const auto& s) { \
-            auto res = function.call(xtl::xoptional<int>(s.PROPERTY_NAME).value()+1); \
+            auto res = function.call(std::optional<int>(s.PROPERTY_NAME).value()+1); \
             if (!res.valid()) \
             { \
                 auto & interpreter =  xeus::get_interpreter(); \

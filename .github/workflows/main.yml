@@ -129,7 +129,6 @@ jobs:
           source $CONDA_EMSDK_DIR/emsdk_env.sh
 
           micromamba create -f environment-wasm-host.yml --platform=emscripten-wasm32
-
           mkdir build
           pushd build
 
