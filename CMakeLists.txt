@@ -328,7 +328,7 @@ macro(xeus_lua_create_target target_name linkage output_name)
         set(XLUA_XCANVAS_TARGET "")
     endif()
 
-    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET} xtl
+    target_link_libraries(${target_name} PUBLIC ${XEUS_LUA_XEUS_TARGET}
         ${XLUA_XWIDGETS_TARGET}
         ${XLUA_XPROPERTY_TARGET}
         ${XLUA_XCANVAS_TARGET}
