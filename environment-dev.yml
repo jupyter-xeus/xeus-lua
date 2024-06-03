@@ -8,7 +8,7 @@ dependencies:
   # Host dependencies
   - xeus>=5.0,<=6
   - xeus-zmq
-  - nlohmann_json=3.11.2
+  - nlohmann_json
   - cppzmq
   - lua>=5.2.0
   - openlibm # [linux]
