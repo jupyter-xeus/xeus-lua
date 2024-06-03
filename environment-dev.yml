@@ -12,13 +12,8 @@ dependencies:
   - xtl>=0.7
   - lua>=5.2.0
   - openlibm # [linux]
-<<<<<<< HEAD
-  - xwidgets <0.28
-  - xcanvas>=0.4.1
-=======
   - xwidgets <0.29
   - xcanvas>=0.4.2
->>>>>>> upstream/main
   # to try it out
   - jupyterlab
   # Test dependencies
