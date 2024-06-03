@@ -117,14 +117,9 @@ the xeus ecosystem like [xwidgets](https://github.com/jupyter-xeus/xwidgets).
 `xeus-lua` depends on
 
 - [xeus](https://github.com/jupyter-xeus/xeus)
-- [xtl](https://github.com/xtensor-stack/xtl)
 - [xwidgets](https://github.com/jupyter-xeus/xwidgets)
 - [lua](https://www.lua.org/)
 
-| `xeus-lua`    | `xeus`        | `xwidgets`    | `xtl`        | `cppzmq` | `nlohmann_json` | `lua`        | 
-| ------------- | ------------- | ------------- | ------------ | -------- | --------------- | ------------ | 
-| master        | >=2.4.0,<3    | >=0.26.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
-| 0.6.2         | >=2.4.0,<3    | >=0.26.1      | >=0.7.0,<0.8 | ~4.4.1   | >=3.6.1,<4.0    | >=5.2.0      | 
 
 ## Contributing
 
