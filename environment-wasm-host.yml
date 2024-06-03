@@ -6,9 +6,6 @@ dependencies:
   - lua
   - nlohmann_json
   - xeus-lite <2.0
-  - xeus >=3.2.0,<4.0
-  - xtl >=0.7,<0.8
-  - xcanvas >=0.4,<5.0
-  - xwidgets >=0.27.3,<1.0
-
-  - xwidgets >=0.27.3,<1.0
+  - xeus>=5.0,<=6
+  - xcanvas >=0.5,<5.0
+  - xwidgets >=0.28.0,<1.0
