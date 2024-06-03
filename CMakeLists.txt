@@ -382,7 +382,6 @@ if(EMSCRIPTEN)
     xeus_lua_set_kernel_options(xlua_wasm)
     xeus_wasm_compile_options(xlua_wasm)
     xeus_wasm_link_options(xlua_wasm "web,worker")
-    xeus_wasm_async_options(xlua_wasm)
 endif()
 
 
