@@ -176,15 +176,14 @@ namespace xlua
     {
     }
 
-    nl::json interpreter::execute_request_impl(int /*execution_count*/,
+    void interpreter::execute_request_impl(send_reply_callback cb,
+                                               int execution_count,
                                                const std::string& code,
-                                               bool silent,
-                                               bool /*store_history*/,
-                                               nl::json /*user_expressions*/,
-                                               bool allow_stdin)
+                                               xeus::execute_request_config config,
+                                               nl::json user_expressions)
     {
         sol::state_view lua(L);
-        m_allow_stdin = allow_stdin;
+        m_allow_stdin = config.allow_stdin;
         // reset  payload
         nl::json kernel_res;
 
@@ -220,7 +219,7 @@ namespace xlua
                 sol::error err = code_result;
                 sol::call_status status = code_result.status();
                 const auto error_str = err.what();
-                if (!silent)
+                if (!config.silent)
                 {   
                     publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
                 }
@@ -231,7 +230,7 @@ namespace xlua
                 kernel_res["traceback"] = { error_str };
             }
         }
-        return kernel_res;
+        cb(kernel_res);
     }
 
     nl::json interpreter::complete_request_impl(
@@ -248,7 +247,7 @@ namespace xlua
         result["matches"] = matches;
         result["cursor_start"] = cursor_start;
         result["metadata"] = nl::json::object();
-	result["cursor_end"] = cursor_pos;  
+	    result["cursor_end"] = cursor_pos;  
 
         return result;
     }

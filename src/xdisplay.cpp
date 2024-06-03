@@ -23,7 +23,6 @@ namespace xlua
 
 
 
-
 void setup_display(
   sol::state_view & lua,
   interpreter & interp

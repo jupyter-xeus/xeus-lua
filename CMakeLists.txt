@@ -12,6 +12,18 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 set(XEUS_LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+
+# PRINT THE COMPILER
+message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+
+if(EMSCRIPTEN)
+    message(STATUS "EMSCRIPTEN")
+else()
+    message(STATUS "NOT EMSCRIPTEN")
+endif()
+
+
+
 # Versionning
 # ===========
 
@@ -80,28 +92,19 @@ endif()
 # Dependencies
 # ============
 
-set(xtl_REQUIRED_VERSION 0.7.0)
-set(xeus_REQUIRED_VERSION 3.0.0)
-set(xwidgets_REQUIRED_VERSION 0.27.0)
-set(xcanvas_REQUIRED_VERSION 0.3.0)
-set(xproperty_REQUIRED_VERSION 0.11.0)
+
+set(xeus_REQUIRED_VERSION 5.0.0)
+set(xwidgets_REQUIRED_VERSION 0.29.0)
+set(xcanvas_REQUIRED_VERSION 0.5.0)
+set(xproperty_REQUIRED_VERSION 0.12.0)
 set(Lua_REQUIRED_VERSION 5.3.4)
 
-if (NOT TARGET xtl)
-    find_package(xtl ${xtl_REQUIRED_VERSION} REQUIRED)
-endif ()
-if (NOT TARGET xeus AND NOT TARGET xeus-static)
-    find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
-endif ()
+find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
 
 if(NOT XEUS_LUA_USE_LUAJIT)
-    if (NOT TARGET Lua) # not sure about these lines
-        find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
-    endif ()
+    find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
 else()
-    if (NOT TARGET LuaJIT) # not sure about these lines
-        find_package(LuaJIT  REQUIRED)
-    endif ()
+    find_package(LuaJIT  REQUIRED)
 endif()
 
 # Flags
