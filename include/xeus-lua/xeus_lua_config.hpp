@@ -13,7 +13,7 @@
 // Project version
 #define XEUS_LUA_VERSION_MAJOR 0
 #define XEUS_LUA_VERSION_MINOR 7
-#define XEUS_LUA_VERSION_PATCH 3
+#define XEUS_LUA_VERSION_PATCH 5
 
 // Composing the version string from major, minor and patch
 #define XEUS_LUA_CONCATENATE(A, B) XEUS_LUA_CONCATENATE_IMPL(A, B)

@@ -6,7 +6,7 @@
 #The full license is in the file LICENSE, distributed with this software.
 #############################################################################
 
-cmake_minimum_required(VERSION 3.4.3)
+cmake_minimum_required(VERSION 3.5)
 project(xeus-lua)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
@@ -46,9 +46,6 @@ include(GNUInstallDirs)
 if (NOT DEFINED XEUS_LUA_KERNELSPEC_PATH)
     set(XEUS_LUA_KERNELSPEC_PATH "${CMAKE_INSTALL_FULL_BINDIR}/")
 endif ()
-
-
-
 
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/share/jupyter/kernels/xlua/kernel.json.in"
@@ -215,6 +212,7 @@ string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib; ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 
 macro(xeus_lua_set_common_options target_name)
+    target_compile_features(${target_name} PRIVATE cxx_std_17)
     if (MSVC)
         target_compile_options(${target_name} PUBLIC /wd4251 /wd4141)
         target_compile_options(${target_name} PUBLIC /wd4018 /wd4267 /wd4715 /wd4146 /wd4129)
@@ -225,14 +223,6 @@ macro(xeus_lua_set_common_options target_name)
         CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 
         target_compile_options(${target_name} PUBLIC -Wunused-parameter -Wextra -Wreorder)
-
-        # 17 flag
-        CHECK_CXX_COMPILER_FLAG("-std=c++17" HAS_CPP_17_FLAG)
-        if (HAS_CPP_17_FLAG)
-            target_compile_features(${target_name} PRIVATE cxx_std_17)
-        else ()
-            message(FATAL_ERROR "Unsupported compiler -- xeus-lua requires 17 support!")
-        endif ()
     endif ()
 
     if (APPLE)
@@ -378,7 +368,6 @@ endif ()
 if (XEUS_LUA_BUILD_EXECUTABLE)
     find_package(xeus-zmq 1.0.1 REQUIRED)
     add_executable(xlua ${XEUS_LUA_MAIN_SRC})
-    target_compile_features(xlua PRIVATE cxx_std_17)
     xeus_lua_set_common_options(xlua)
     xeus_lua_set_kernel_options(xlua)
     target_link_libraries(xlua PRIVATE xeus-zmq)
@@ -387,12 +376,13 @@ endif()
 if(EMSCRIPTEN)
     include(WasmBuildOptions)
     find_package(xeus-lite REQUIRED)
-    add_executable(xlua src/main_emscripten_kernel.cpp )
-    target_link_libraries(xlua PRIVATE  xeus-lite)
-    target_compile_features(xlua PRIVATE cxx_std_17)
-    xeus_lua_set_kernel_options(xlua)
-    xeus_wasm_compile_options(xlua)
-    xeus_wasm_link_options(xlua "web,worker")
+    add_executable(xlua_wasm src/main_emscripten_kernel.cpp )
+    target_link_libraries(xlua_wasm PRIVATE xeus-lua-static xeus-lite)
+    target_compile_features(xlua_wasm PRIVATE cxx_std_17)
+    xeus_lua_set_kernel_options(xlua_wasm)
+    xeus_wasm_compile_options(xlua_wasm)
+    xeus_wasm_link_options(xlua_wasm "web,worker")
+    xeus_wasm_async_options(xlua_wasm)
 endif()
 
 
