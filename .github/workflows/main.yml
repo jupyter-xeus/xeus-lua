@@ -120,9 +120,6 @@ jobs:
           environment-file: environment-wasm-build.yml
           environment-name: xeus-lua-wasm-build
 
-      - name: Setup emsdk
-        run: emsdk install ${{matrix.emsdk_ver}}
-
       - name: Build xeus-lua
         run: |
           emsdk activate ${{matrix.emsdk_ver}}

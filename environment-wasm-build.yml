@@ -1,7 +1,7 @@
 name: xeus-lua-wasm-build
 channels:
-  - conda-forge
+  - https://repo.prefix.dev/conda-forge
+  - https://repo.prefix.dev/emscripten-forge-dev
 dependencies:
   - cmake
-  - emsdk >=3.1.11
-  - empack >=2.0.1
+  - emscripten_emscripten-wasm32 == 3.1.73
