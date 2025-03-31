@@ -2458,7 +2458,7 @@ namespace sol {
 #define KEPLER_PROJECT_COMPAT53_H_
 
 #include <stddef.h>
-#include <limits.h>
+#include <limits>
 #include <string.h>
 #if defined(__cplusplus) && !defined(COMPAT53_LUA_CPP)
 extern "C" {
@@ -5090,6 +5090,7 @@ namespace sol {
             }
             else {
                 this->construct(std::forward<U>(u));
+                
             }
 
             return *this;
@@ -6056,7 +6057,9 @@ namespace sol {
             static_assert(std::is_constructible<T, Args&&...>::value, "T must be constructible with Args");
 
             *this = nullopt;
-            this->construct(std::forward<Args>(args)...);
+            // this->construct(std::forward<Args>(args)...);
+            new (static_cast<void*>(this)) optional(std::in_place, std::forward<Args>(args)...);
+			return **this;
         }
 
         /// Swaps this optional with the other.

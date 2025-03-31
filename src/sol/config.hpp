@@ -20,17 +20,15 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // This file was generated with a script.
-// Generated 2020-10-03 21:34:25.034794 UTC
-// This header was generated with sol v3.2.1 (revision 48eea7b5)
+// Generated 2025-03-31 11:18:48.510548 UTC
+// This header was generated with sol v3.5.0 (revision c1f95a77)
 // https://github.com/ThePhD/sol2
 
-#ifndef SOL_SINGLE_CONFIG_HPP
-#define SOL_SINGLE_CONFIG_HPP
+#ifndef SOL_SINGLE_SOL_CONFIG_HPP
+#define SOL_SINGLE_SOL_CONFIG_HPP
 
 // beginning of sol/config.hpp
 
-#include <limits>
-#include <algorithm>
 /* Base, empty configuration file!
 
      To override, place a file in your include paths of the form:
@@ -52,4 +50,4 @@ the build system, or the command line options of your compiler.
 
 // end of sol/config.hpp
 
-#endif // SOL_SINGLE_CONFIG_HPP
+#endif // SOL_SINGLE_SOL_CONFIG_HPP
