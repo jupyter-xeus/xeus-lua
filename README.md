@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/jupyter-xeus/xeus-lua/actions/workflows/main.yml/badge.svg)](https://github.com/jupyter-xeus/xeus-lua/actions/workflows/main.yml)
 [![Documentation Status](http://readthedocs.org/projects/xeus-lua/badge/?version=latest)](https://xeus-lua.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-lua/main?urlpath=/lab/tree/notebooks/game_of_life.ipynb)
-[![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Zulip](https://img.shields.io/badge/social_chat-zulip-blue.svg)](https://jupyter.zulipchat.com/#narrow/channel/539737-Jupyter-Kernels)
 
 `xeus-lua` is a Jupyter kernel for Lua based on the native implementation of the
 Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus).
