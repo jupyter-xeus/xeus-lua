@@ -12,8 +12,8 @@ dependencies:
   - cppzmq
   - lua>=5.2.0
   - openlibm # [linux]
-  - xwidgets >=0.29
-  - xcanvas>=0.4.2
+  - xwidgets >=0.29.2
+  - xcanvas>=0.6.1
   # to try it out
   - jupyterlab
   # Test dependencies
