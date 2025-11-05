@@ -91,8 +91,8 @@ endif()
 
 
 set(xeus_REQUIRED_VERSION 5.0.0)
-set(xwidgets_REQUIRED_VERSION 0.29.0)
-set(xcanvas_REQUIRED_VERSION 0.5.0)
+set(xwidgets_REQUIRED_VERSION 0.29.2)
+set(xcanvas_REQUIRED_VERSION 0.6.1)
 set(xproperty_REQUIRED_VERSION 0.12.0)
 set(Lua_REQUIRED_VERSION 5.3.4)
 
