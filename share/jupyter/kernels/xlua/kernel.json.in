@@ -9,5 +9,6 @@
   "metadata": { 
     "debugger": false,
     "lua_extra_package_path": "@XLUA_LUA_EXTRA_PACKAGE_PATH@"
-  }
+  },
+  "kernel_protocol_version": "5.6.0"
 }

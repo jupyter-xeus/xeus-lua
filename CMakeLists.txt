@@ -23,7 +23,6 @@ else()
 endif()
 
 
-
 # Versionning
 # ===========
 
@@ -66,7 +65,6 @@ OPTION(XEUS_LUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (in
 OPTION(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
 OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (instead of the static library)" ON)
 
-
 OPTION(XLUA_WITH_XCANVAS      "Build xeus-lua with xcanvas" ON)
 OPTION(XLUA_USE_SHARED_XCANVAS "Link xlua  with the xcanvas shared library (instead of the static library)" ON)
 
@@ -90,16 +88,16 @@ endif()
 # ============
 
 
-set(xeus_REQUIRED_VERSION 5.0.0)
-set(xwidgets_REQUIRED_VERSION 0.29.2)
-set(xcanvas_REQUIRED_VERSION 0.6.1)
-set(xproperty_REQUIRED_VERSION 0.12.0)
-set(Lua_REQUIRED_VERSION 5.3.4)
+set(xeus_REQUIRED_VERSION 6.0.0)
+set(xwidgets_REQUIRED_VERSION 0.30.0)
+set(xcanvas_REQUIRED_VERSION 0.7.0)
+set(xproperty_REQUIRED_VERSION 0.12.1)
+set(Lua_REQUIRED_VERSION 5.4.0)
 
 find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
 
 if(NOT XEUS_LUA_USE_LUAJIT)
-    find_package(Lua ${lua_REQUIRED_VERSION} REQUIRED)
+    find_package(Lua ${Lua_REQUIRED_VERSION} REQUIRED)
 else()
     find_package(LuaJIT  REQUIRED)
 endif()
@@ -366,7 +364,7 @@ endif ()
 # =======
 
 if (XEUS_LUA_BUILD_EXECUTABLE)
-    find_package(xeus-zmq 1.0.1 REQUIRED)
+    find_package(xeus-zmq 4.0.0 REQUIRED)
     add_executable(xlua ${XEUS_LUA_MAIN_SRC})
     xeus_lua_set_common_options(xlua)
     xeus_lua_set_kernel_options(xlua)
