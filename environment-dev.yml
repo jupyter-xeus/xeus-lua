@@ -6,14 +6,14 @@ dependencies:
   - cmake
   - cxx-compiler
   # Host dependencies
-  - xeus>=5.0,<=6
-  - xeus-zmq
+  - xeus>=6.0,<=7
+  - xeus-zmq>=4.0,<5
   - nlohmann_json
   - cppzmq
-  - lua>=5.2.0
+  - lua>=5.2.0,<5.5
   - openlibm # [linux]
-  - xwidgets >=0.29.2
-  - xcanvas>=0.6.1
+  - xwidgets >=0.30.0
+  - xcanvas>=0.7.0
   # to try it out
   - jupyterlab
   # Test dependencies

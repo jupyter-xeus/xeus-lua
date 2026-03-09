@@ -23,6 +23,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include "xeus/xhelper.hpp"
 #include "xeus/xinterpreter.hpp"
 #include "xeus-lua/xinterpreter.hpp"
 #include "sol/sol.hpp"
@@ -75,7 +76,7 @@ namespace xlua
         // so we push a single string (in our case, the description of the error)
         return sol::stack::push(L, description);
     }
-    
+
     // implemented in xextend.cpp
     void extend(sol::state_view & lua);
     // implemented in xcomplete.cpp
@@ -153,13 +154,13 @@ namespace xlua
 
         // add widgets
         #ifdef XLUA_WITH_XWIDGETS
-        register_xwidgets(lua);            
-        #endif    
+        register_xwidgets(lua);
+        #endif
 
         // add widgets
         #ifdef XLUA_WITH_XCANVAS
-        setup_xcanvas(lua);            
-        #endif    
+        setup_xcanvas(lua);
+        #endif
     }
 
     bool interpreter::allow_stdin()const
@@ -185,17 +186,13 @@ namespace xlua
         sol::state_view lua(L);
         m_allow_stdin = config.allow_stdin;
         // reset  payload
-        nl::json kernel_res;
-
-        kernel_res["payload"] = nl::json::array();
-        kernel_res["user_expressions"] = nl::json::object();
-        kernel_res["status"] = "ok";
+        nl::json kernel_res = xeus::create_successful_reply();
 
         sol::table ilua_table = lua["ilua"];
         sol::table config_table = ilua_table["config"];
 
         bool auto_print = config_table["auto_print"];
-       
+
         bool need_eval = true;
 
         if(auto_print)
@@ -205,29 +202,21 @@ namespace xlua
             auto test_code_result = lua.safe_script(test_code.str(), &sol::script_pass_on_error);
             need_eval = !test_code_result.valid();
         }
-            
-        if (need_eval){
-            sol::protected_function_result code_result = lua.safe_script(code,  &sol::script_pass_on_error);
-            if (code_result.valid())
-            {
 
-                kernel_res["status"] = "ok";
-                kernel_res["user_expressions"] = nl::json::object();
-            }
-            else
+        if (need_eval)
+        {
+            sol::protected_function_result code_result = lua.safe_script(code,  &sol::script_pass_on_error);
+            if (!code_result.valid())
             {
                 sol::error err = code_result;
                 sol::call_status status = code_result.status();
                 const auto error_str = err.what();
                 if (!config.silent)
-                {   
+                {
                     publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
                 }
 
-                kernel_res["status"] = "error";
-                kernel_res["ename"] = "load file error";
-                kernel_res["evalue"] = error_str;
-                kernel_res["traceback"] = { error_str };
+                kernel_res = xeus::create_error_reply("load file error", error_str, { error_str });
             }
         }
         cb(kernel_res);
@@ -242,13 +231,7 @@ namespace xlua
 
         int cursor_start = complete(lua, code.c_str(), cursor_pos, matches);
 
-        nl::json result;
-        result["status"] = "ok";
-        result["matches"] = matches;
-        result["cursor_start"] = cursor_start;
-        result["metadata"] = nl::json::object();
-	    result["cursor_end"] = cursor_pos;  
-
+        nl::json result = xeus::create_complete_reply(matches, cursor_start, cursor_pos);
         return result;
     }
 
@@ -256,36 +239,37 @@ namespace xlua
                                                int /*cursor_pos*/,
                                                int /*detail_level*/)
     {
-        nl::json jresult;
-        jresult["status"] = "ok";
-        jresult["found"] = false;
-        jresult["data"] = nl::json::object();
-        jresult["metadata"] = nl::json::object();
+        nl::json jresult = xeus::create_inspect_reply();
         return jresult;
     }
 
     nl::json interpreter::is_complete_request_impl(const std::string& /*code*/)
     {
-        nl::json jresult;
-        jresult["status"] = "complete";
+        nl::json jresult = xeus::create_is_complete_reply("complete");
         return jresult;
     }
 
     nl::json interpreter::kernel_info_request_impl()
     {
-        nl::json result;
-        result["implementation"] = "xlua";
-        result["implementation_version"] = "1.0.0";
+        nl::json result = xeus::create_info_reply(
+            "xlua",
+            "1.0.0",
+            "lua",
+            "14.0.0",
+            "text/x-luasrc",
+            ".lua"
+        );
         result["banner"] = "xlua";
-        result["language_info"]["name"] = "lua";
-        result["language_info"]["version"] = "14.0.0";
-        result["language_info"]["mimetype"] = "text/x-luasrc";
-        result["language_info"]["file_extension"] = ".lua";
-        result["status"] = "ok";
         return result;
     }
 
-    void interpreter::shutdown_request_impl()
+    nl::json interpreter::shutdown_request_impl(bool /*restart*/)
     {
+        return xeus::create_shutdown_reply(false);
+    }
+
+    nl::json interpreter::interrupt_request_impl()
+    {
+        return xeus::create_interrupt_reply();
     }
 }
