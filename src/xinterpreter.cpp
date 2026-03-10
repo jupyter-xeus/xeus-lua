@@ -52,18 +52,12 @@ namespace xlua
         return it != code.rend() && *it == ';';
     }
 
-    // Returns {head, tail}
     std::pair<std::string, std::string> split_lua_block(std::string code) {
-        // 1. Trim trailing whitespace/newlines
         code.erase(code.find_last_not_of(" \n\r\t") + 1);
-
         size_t last_nl = code.find_last_of('\n');
-        
-        // If there is no newline, the whole thing is the "tail"
         if (last_nl == std::string::npos) {
             return {"", code};
         }
-
         std::string head = code.substr(0, last_nl);
         std::string tail = code.substr(last_nl + 1);
 
@@ -123,9 +117,6 @@ namespace xlua
         }
         interp.publish_execution_result(execution_count, nl::json({{"text/plain", to_print}}), nl::json::object());
     }
-
-
-
 
     inline void my_panic(sol::optional<std::string> maybe_msg)
     {
@@ -292,12 +283,10 @@ namespace xlua
 
 
         // split the code into head and tail, where tail is the last line of the code and head is everything before it
-        // this allows us to only auto-print the result of the last line, which is more
-        // intuitive and matches the behavior of other kernels
+        // this allows us to only auto-print the result of the last line
         auto [head, tail] = split_lua_block(raw_code);
         bool head_alone_valid = has_valid_syntax(head, lua);
         bool tails_is_expression = is_expression(tail, lua);
-
 
         // if either head or tail alone is invalid, then we dont attempt to do any last value printing
         // => we just evalueate the whole block as is and print nothing (even if auto_print is on)
@@ -334,8 +323,7 @@ namespace xlua
                 }
                 print_last_value(*this, lua, cb, tail_value, config.silent, execution_count);
             }
-        
-   
+
             cb(xeus::create_successful_reply());
         
         }
