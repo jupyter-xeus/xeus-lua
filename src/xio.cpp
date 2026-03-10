@@ -71,10 +71,6 @@ int write_cb(lua_State * L, interpreter * interpr) {
     return 0; // io.write usually returns the file handle, but 0 is fine for kernels
 }
 
-
-
-
-
 int my_write_lua_cb(lua_State * L) {
   interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
   return write_cb(L, interpr);
