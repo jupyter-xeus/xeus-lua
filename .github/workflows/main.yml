@@ -62,11 +62,9 @@ jobs:
         run: make install
         working-directory: build
 
-      # - name: Test
-      #   shell: bash -l {0}
-      #   run: pytest . -vvv
-      #   working-directory: test
-
+      - name: Test
+        shell: bash -l {0}
+        run: pytest . -vvv
   win:
 
     runs-on: ${{ matrix.os }}
@@ -145,5 +143,4 @@ jobs:
             -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ON            \
             ..
 
-          make -j5
-
+          make -j5 install
