@@ -180,7 +180,6 @@ namespace xlua
     void register_xwidgets(sol::state_view & lua);
     #endif
 
-
     #ifdef XLUA_WITH_XCANVAS
     // implemented in xwidgets.cpp
     void setup_xcanvas(sol::state_view & lua);
@@ -265,13 +264,12 @@ namespace xlua
 
     void interpreter::execute_request_impl(send_reply_callback cb,
                                                int execution_count,
-                                               const std::string& raw_code,
+                                               const std::string& code,
                                                xeus::execute_request_config config,
                                                nl::json user_expressions)
     {
         sol::state_view lua(L);
         m_allow_stdin = config.allow_stdin;
-        std::string code = raw_code;
    
         // reset  payload
         nl::json kernel_res = xeus::create_successful_reply();
@@ -289,10 +287,9 @@ namespace xlua
         bool tails_is_expression = is_expression(tail, lua);
 
         // if either head or tail alone is invalid, then we dont attempt to do any last value printing
-        // => we just evalueate the whole block as is and print nothing (even if auto_print is on)
+        // => we just evalueate the whole block as is and print nothing
         if(!head_alone_valid || !tails_is_expression) {
 
-            std::cout<<"executing code:\n" << code << "\n";
             auto result = lua.safe_script(code, sol::script_pass_on_error);
             if(handle_err(*this, cb, result, config.silent, "executing whole block")) {
                 return;
