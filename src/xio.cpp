@@ -71,14 +71,14 @@ int write_cb(lua_State * L, interpreter * interpr) {
     return 0; // io.write usually returns the file handle, but 0 is fine for kernels
 }
 
-int my_write_lua_cb(lua_State * L) {
-  interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
-  return write_cb(L, interpr);
-}
-
 int my_print_lua_cb(lua_State * L) {
   interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
   return print_cb(L, interpr);
+}
+
+int my_write_lua_cb(lua_State * L) {
+  interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
+  return write_cb(L, interpr);
 }
 
 void add_pprint_module(sol::state_view & lua){
@@ -586,7 +586,6 @@ void setup_io(
     lua_pushlightuserdata(L, &interp);
     lua_pushcclosure(L, my_print_lua_cb, 1);
     lua_setglobal(L, "__custom_print");
-
 
     lua.script(R""""(
         local __io_write_custom = _G["__io_write_custom"]
