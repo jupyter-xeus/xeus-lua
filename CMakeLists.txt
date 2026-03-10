@@ -65,8 +65,8 @@ OPTION(XEUS_LUA_USE_SHARED_XEUS_LUA "Link xlua  with the xeus shared library (in
 OPTION(XLUA_WITH_XWIDGETS "Build xeus-lua with xwidgets" ON)
 OPTION(XLUA_USE_SHARED_XWIDGETS "Link xlua  with the xwidgets shared library (instead of the static library)" ON)
 
-OPTION(XLUA_WITH_XCANVAS      "Build xeus-lua with xcanvas" OFF)
-OPTION(XLUA_USE_SHARED_XCANVAS "Link xlua  with the xcanvas shared library (instead of the static library)" OFF)
+OPTION(XLUA_WITH_XCANVAS      "Build xeus-lua with xcanvas" ON)
+OPTION(XLUA_USE_SHARED_XCANVAS "Link xlua  with the xcanvas shared library (instead of the static library)" ON)
 
 if(EMSCRIPTEN)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_emscripten;${CMAKE_MODULE_PATH}")
