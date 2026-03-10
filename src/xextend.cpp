@@ -28,7 +28,7 @@ void add_ilua_module(sol::state_view & lua){
             detail = {}
         },
         config = {
-            printer = "pprin    t",
+            printer = "pprint",
             auto_print = true
         },
         detail = {},

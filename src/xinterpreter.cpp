@@ -74,7 +74,7 @@ namespace xlua
         if (!result.valid()) {
             std::string error_msg = result.template get<sol::error>().what() + context;
             auto kernel_res = xeus::create_error_reply("Execution error in " + context, error_msg, std::vector<std::string>(1,error_msg));
-            if (silent)
+            if (!silent)
             {
                 std::cout<<"error in " << context << ": " << error_msg << "\n";
                 interp.publish_execution_error(error_msg,error_msg,std::vector<std::string>(1,error_msg));
