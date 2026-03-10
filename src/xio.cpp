@@ -8,52 +8,72 @@
 ****************************************************************************/
 
 #include <iostream>
+#include <sstream>
 
 #include "sol/sol.hpp"
 #include "xeus-lua/xinterpreter.hpp"
 #include "nlohmann/json.hpp"
 #include "xeus/xinput.hpp"
 
-#include <iostream>
-
 namespace xlua
 {
 
 int print_cb(lua_State * L, interpreter * interpr) {
-    lua_getglobal(L, "tostring");
-    for (int i = 1; i <= lua_gettop(L)-1; ++i) {
-        lua_pushvalue(L, -1);
-        lua_pushvalue(L, i);
-        lua_call(L, 1, 1);
-        const char * tostr = lua_tostring(L, -1);
-        if (tostr == NULL) {
-            return luaL_error(L, "'tostring' returned NULL value\n");
+    int n = lua_gettop(L);
+    std::stringstream ss;
+    
+    for (int i = 1; i <= n; i++) {
+        size_t len;
+        // Convert to string and push onto stack
+        const char * s = luaL_tolstring(L, i, &len);
+        
+        if (s) {
+            ss << s;
         }
-        if (i > 1) {
-            interpr->publish_stream("stdout", " "); 
+        
+        // Add a tab separator between arguments (but not after the last one)
+        if (i < n) {
+            ss << "\t";
         }
-        interpr->publish_stream("stdout", tostr);
+        
+        // Pop the string pushed by luaL_tolstring
         lua_pop(L, 1);
     }
-    interpr->publish_stream("stdout", "\n");
+    
+    // Add the trailing newline
+    ss << "\n";
+    
+    // Publish the entire accumulated string at once
+    interpr->publish_stream("stdout", ss.str());
+    
     return 0;
 }
 
 int write_cb(lua_State * L, interpreter * interpr) {
-    auto top = lua_gettop(L);
-    for (int i = 1; i <= top; ++i) {
-        lua_pushvalue(L, -1);
-        lua_pushvalue(L, i);
-        // lua_call(L, 1, 1);
-        const char * tostr = lua_tostring(L, -1);
-        if (tostr == NULL) {
-            return luaL_error(L, "'tostring' returned NULL value\n");
+    int n = lua_gettop(L);  // Get number of arguments passed to io.write
+    std::stringstream ss;
+    for (int i = 1; i <= n; ++i) {
+        // luaL_tolstring handles converting any type to a string,
+        // respecting __tostring metamethods, and pushes the result to the stack.
+        size_t len;
+        const char * str = luaL_tolstring(L, i, &len);
+        
+        if (str) {
+            ss.write(str, len);
         }
-        interpr->publish_stream("stdout", tostr);
+
+        // Pop the string pushed by luaL_tolstring so the stack 
+        // stays clean for the next iteration.
         lua_pop(L, 1);
     }
-    return 0;
+    interpr->publish_stream("stdout", ss.str());
+    
+    return 0; // io.write usually returns the file handle, but 0 is fine for kernels
 }
+
+
+
+
 
 int my_write_lua_cb(lua_State * L) {
   interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
