@@ -572,10 +572,6 @@ void setup_io(
     lua_setglobal(L, "__custom_print");
 
 
-    lua_pushlightuserdata(L, &interp);
-    lua_pushcclosure(L, my_dont_print_just_return_the_printed_lua_cb, 1);
-    lua_setglobal(L, "__dont_print_just_return_the_printed");
-
     lua.script(R""""(
         local __io_write_custom = _G["__io_write_custom"]
         ilua.detail.__io_write_custom = __io_write_custom
