@@ -66,7 +66,7 @@ namespace xlua
     template<class T>
     auto handle_err(
         interpreter & interp,
-        send_reply_callback cb,
+        interpreter::send_reply_callback cb,
         T & result, 
         const bool silent,
         std::string context
@@ -77,7 +77,7 @@ namespace xlua
             if (silent)
             {
                 std::cout<<"error in " << context << ": " << error_msg << "\n";
-                publish_execution_error(error_msg,error_msg,std::vector<std::string>(1,error_msg));
+                interp.publish_execution_error(error_msg,error_msg,std::vector<std::string>(1,error_msg));
             }
             cb(kernel_res);
             return true;
@@ -88,25 +88,32 @@ namespace xlua
 
     // helper to print last value
     template<class T>
-    void print_last_value(interpreter & interp, const T & value, const bool silent) {
+    void print_last_value(
+        interpreter & interp, 
+        sol::state_view & lua,
+        interpreter::send_reply_callback cb,
+        const T & value, 
+        const bool silent,
+        int execution_count
+    ) {
         std::string to_print;
-        if (tail_value.get_type() == sol::type::string) {
-            to_print = tail_value.get<std::string>();
+        if (value.get_type() == sol::type::string) {
+            to_print = value. template get<std::string>();
         }
         // if value is nil
-        else if (tail_value.get_type() == sol::type::none) {
+        else if (value.get_type() == sol::type::none) {
             to_print = "nil";
         }
         else {
             // use tostring to convert it to a string
             sol::protected_function tostring = lua["tostring"];
-            sol::protected_function_result tostring_result = tostring(tail_value);
+            sol::protected_function_result tostring_result = tostring(value);
             if(handle_err(interp, cb, tostring_result, silent, "tostring call on tail value")) {
                 return;
             }
-            to_print = tostring_result.get<std::string>();
+            to_print = tostring_result. template get<std::string>();
         }
-        this->publish_execution_result(execution_count, nl::json({{"text/plain", to_print}}), nl::json::object());
+        interp.publish_execution_result(execution_count, nl::json({{"text/plain", to_print}}), nl::json::object());
     }
 
 
@@ -312,7 +319,7 @@ namespace xlua
             if(handle_err(*this, cb, tail_value, config.silent, "tail function call")) {
                 return;
             }
-            print_last_value(*this, tail_value, config.silent);
+            print_last_value(*this, lua, cb, tail_value, config.silent, execution_count);
 
             cb(xeus::create_successful_reply());
         
