@@ -33,6 +33,85 @@ namespace nl = nlohmann;
 
 namespace xlua
 {   
+
+
+    bool has_valid_syntax(std::string code, sol::state_view & lua) {
+        std::string wrapped_code = "function _xeus_lua_has_valid_syntax() " + code + " end";
+        return lua.safe_script(wrapped_code, sol::script_pass_on_error).valid();
+    }
+    bool is_expression(std::string code, sol::state_view & lua) {
+        std::string wrapped_code = "function _xeus_lua_is_expression() return " + code + " end";
+        return lua.safe_script(wrapped_code, sol::script_pass_on_error).valid();
+    }
+
+    // Returns {head, tail}
+    std::pair<std::string, std::string> split_lua_block(std::string code) {
+        // 1. Trim trailing whitespace/newlines
+        code.erase(code.find_last_not_of(" \n\r\t") + 1);
+
+        size_t last_nl = code.find_last_of('\n');
+        
+        // If there is no newline, the whole thing is the "tail"
+        if (last_nl == std::string::npos) {
+            return {"", code};
+        }
+
+        std::string head = code.substr(0, last_nl);
+        std::string tail = code.substr(last_nl + 1);
+
+        return {head, tail};
+    }
+
+    // helper function which calls 
+    template<class T>
+    auto handle_err(
+        interpreter & interp,
+        send_reply_callback cb,
+        T & result, 
+        const bool silent,
+        std::string context
+    ) {
+        if (!result.valid()) {
+            std::string error_msg = result.template get<sol::error>().what() + context;
+            auto kernel_res = xeus::create_error_reply("Execution error in " + context, error_msg, std::vector<std::string>(1,error_msg));
+            if (silent)
+            {
+                std::cout<<"error in " << context << ": " << error_msg << "\n";
+                publish_execution_error(error_msg,error_msg,std::vector<std::string>(1,error_msg));
+            }
+            cb(kernel_res);
+            return true;
+        }
+        return false;
+    };
+
+
+    // helper to print last value
+    template<class T>
+    void print_last_value(interpreter & interp, const T & value, const bool silent) {
+        std::string to_print;
+        if (tail_value.get_type() == sol::type::string) {
+            to_print = tail_value.get<std::string>();
+        }
+        // if value is nil
+        else if (tail_value.get_type() == sol::type::none) {
+            to_print = "nil";
+        }
+        else {
+            // use tostring to convert it to a string
+            sol::protected_function tostring = lua["tostring"];
+            sol::protected_function_result tostring_result = tostring(tail_value);
+            if(handle_err(interp, cb, tostring_result, silent, "tostring call on tail value")) {
+                return;
+            }
+            to_print = tostring_result.get<std::string>();
+        }
+        this->publish_execution_result(execution_count, nl::json({{"text/plain", to_print}}), nl::json::object());
+    }
+
+
+
+
     inline void my_panic(sol::optional<std::string> maybe_msg)
     {
         auto & interpreter = xeus::get_interpreter();
@@ -94,6 +173,7 @@ namespace xlua
     // implemented in xwidgets.cpp
     void register_xwidgets(sol::state_view & lua);
     #endif
+
 
     #ifdef XLUA_WITH_XCANVAS
     // implemented in xwidgets.cpp
@@ -193,33 +273,51 @@ namespace xlua
 
         bool auto_print = config_table["auto_print"];
 
-        bool need_eval = true;
 
-        if(auto_print)
-        {
-            std::stringstream test_code;
-            test_code << "print(" << code << ")";
-            auto test_code_result = lua.safe_script(test_code.str(), &sol::script_pass_on_error);
-            need_eval = !test_code_result.valid();
-        }
+        // split the code into head and tail, where tail is the last line of the code and head is everything before it
+        // this allows us to only auto-print the result of the last line, which is more
+        // intuitive and matches the behavior of other kernels
+        auto [head, tail] = split_lua_block(code);
+        bool head_alone_valid = has_valid_syntax(head, lua);
+        bool tails_is_expression = is_expression(tail, lua);
 
-        if (need_eval)
-        {
-            sol::protected_function_result code_result = lua.safe_script(code,  &sol::script_pass_on_error);
-            if (!code_result.valid())
-            {
-                sol::error err = code_result;
-                sol::call_status status = code_result.status();
-                const auto error_str = err.what();
-                if (!config.silent)
-                {
-                    publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str));
-                }
 
-                kernel_res = xeus::create_error_reply("load file error", error_str, { error_str });
+        // if either head or tail alone is invalid, then we dont attempt to do any last value printing
+        // => we just evalueate the whole block as is and print nothing (even if auto_print is on)
+        if(!head_alone_valid || !tails_is_expression) {
+
+            auto result = lua.safe_script(code, sol::script_pass_on_error);
+            if(handle_err(*this, cb, result, config.silent, "executing whole block")) {
+                return;
             }
+            cb(xeus::create_successful_reply());
         }
-        cb(kernel_res);
+        else{
+            // execute the head without printing anything
+            auto head_result = lua.safe_script(head, sol::script_pass_on_error);
+            if(handle_err(*this, cb, head_result, config.silent, "executing head block")) {
+                return;
+            }
+
+
+            // wrap tail in a function
+            std::string wrapped_tail = "function _xeus_lua_return_expression() return " + tail + " end";
+            auto wrapped_tail_result = lua.safe_script(wrapped_tail, sol::script_pass_on_error);
+            if(handle_err(*this, cb, wrapped_tail_result, config.silent, "executing wrapped tail block")) {
+                return;
+            }
+            // get the result value
+            sol::protected_function  tail_func = lua["_xeus_lua_return_expression"];
+            sol::protected_function_result tail_value = tail_func();
+            if(handle_err(*this, cb, tail_value, config.silent, "tail function call")) {
+                return;
+            }
+            print_last_value(*this, tail_value, config.silent);
+
+            cb(xeus::create_successful_reply());
+        
+        }
+
     }
 
     nl::json interpreter::complete_request_impl(

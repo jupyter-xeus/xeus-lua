@@ -14,6 +14,7 @@
 #include "nlohmann/json.hpp"
 #include "xeus/xinput.hpp"
 
+#include <iostream>
 
 namespace xlua
 {
@@ -37,12 +38,13 @@ int print_cb(lua_State * L, interpreter * interpr) {
     interpr->publish_stream("stdout", "\n");
     return 0;
 }
+
 int write_cb(lua_State * L, interpreter * interpr) {
-    lua_getglobal(L, "tostring");
-    for (int i = 1; i <= lua_gettop(L)-1; ++i) {
+    auto top = lua_gettop(L);
+    for (int i = 1; i <= top; ++i) {
         lua_pushvalue(L, -1);
         lua_pushvalue(L, i);
-        lua_call(L, 1, 1);
+        // lua_call(L, 1, 1);
         const char * tostr = lua_tostring(L, -1);
         if (tostr == NULL) {
             return luaL_error(L, "'tostring' returned NULL value\n");
@@ -53,13 +55,14 @@ int write_cb(lua_State * L, interpreter * interpr) {
     return 0;
 }
 
-int my_print_lua_cb(lua_State * L) {
-  interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
-  return print_cb(L, interpr);
-}
 int my_write_lua_cb(lua_State * L) {
   interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
   return write_cb(L, interpr);
+}
+
+int my_print_lua_cb(lua_State * L) {
+  interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
+  return print_cb(L, interpr);
 }
 
 void add_pprint_module(sol::state_view & lua){
@@ -567,6 +570,11 @@ void setup_io(
     lua_pushlightuserdata(L, &interp);
     lua_pushcclosure(L, my_print_lua_cb, 1);
     lua_setglobal(L, "__custom_print");
+
+
+    lua_pushlightuserdata(L, &interp);
+    lua_pushcclosure(L, my_dont_print_just_return_the_printed_lua_cb, 1);
+    lua_setglobal(L, "__dont_print_just_return_the_printed");
 
     lua.script(R""""(
         local __io_write_custom = _G["__io_write_custom"]
