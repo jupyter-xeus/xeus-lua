@@ -44,6 +44,14 @@ namespace xlua
         return lua.safe_script(wrapped_code, sol::script_pass_on_error).valid();
     }
 
+    // has a semicolon at the end of the code? ignore all whitespace at the end
+    bool ends_with_semicolon(const std::string & code) {
+        auto it = std::find_if(code.rbegin(), code.rend(), [](unsigned char ch) {
+            return !std::isspace(ch);
+        });
+        return it != code.rend() && *it == ';';
+    }
+
     // Returns {head, tail}
     std::pair<std::string, std::string> split_lua_block(std::string code) {
         // 1. Trim trailing whitespace/newlines
@@ -266,12 +274,14 @@ namespace xlua
 
     void interpreter::execute_request_impl(send_reply_callback cb,
                                                int execution_count,
-                                               const std::string& code,
+                                               const std::string& raw_code,
                                                xeus::execute_request_config config,
                                                nl::json user_expressions)
     {
         sol::state_view lua(L);
         m_allow_stdin = config.allow_stdin;
+        std::string code = raw_code;
+   
         // reset  payload
         nl::json kernel_res = xeus::create_successful_reply();
 
@@ -284,7 +294,7 @@ namespace xlua
         // split the code into head and tail, where tail is the last line of the code and head is everything before it
         // this allows us to only auto-print the result of the last line, which is more
         // intuitive and matches the behavior of other kernels
-        auto [head, tail] = split_lua_block(code);
+        auto [head, tail] = split_lua_block(raw_code);
         bool head_alone_valid = has_valid_syntax(head, lua);
         bool tails_is_expression = is_expression(tail, lua);
 
@@ -293,6 +303,7 @@ namespace xlua
         // => we just evalueate the whole block as is and print nothing (even if auto_print is on)
         if(!head_alone_valid || !tails_is_expression) {
 
+            std::cout<<"executing code:\n" << code << "\n";
             auto result = lua.safe_script(code, sol::script_pass_on_error);
             if(handle_err(*this, cb, result, config.silent, "executing whole block")) {
                 return;
@@ -306,7 +317,6 @@ namespace xlua
                 return;
             }
 
-
             // wrap tail in a function
             std::string wrapped_tail = "function _xeus_lua_return_expression() return " + tail + " end";
             auto wrapped_tail_result = lua.safe_script(wrapped_tail, sol::script_pass_on_error);
@@ -316,11 +326,16 @@ namespace xlua
             // get the result value
             sol::protected_function  tail_func = lua["_xeus_lua_return_expression"];
             sol::protected_function_result tail_value = tail_func();
-            if(handle_err(*this, cb, tail_value, config.silent, "tail function call")) {
-                return;
-            }
-            print_last_value(*this, lua, cb, tail_value, config.silent, execution_count);
 
+            if(!ends_with_semicolon(tail) && auto_print) {
+                
+                if(handle_err(*this, cb, tail_value, config.silent, "tail function call")) {
+                    return;
+                }
+                print_last_value(*this, lua, cb, tail_value, config.silent, execution_count);
+            }
+        
+   
             cb(xeus::create_successful_reply());
         
         }
