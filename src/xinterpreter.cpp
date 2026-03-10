@@ -282,7 +282,7 @@ namespace xlua
 
         // split the code into head and tail, where tail is the last line of the code and head is everything before it
         // this allows us to only auto-print the result of the last line
-        auto [head, tail] = split_lua_block(raw_code);
+        auto [head, tail] = split_lua_block(code);
         bool head_alone_valid = has_valid_syntax(head, lua);
         bool tails_is_expression = is_expression(tail, lua);
 
