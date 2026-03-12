@@ -36,7 +36,7 @@ The safest usage is to create an environment named `xeus-lua`
 .. code::
 
     mamba create -n xeus-lua
-    source activate xeus-lua
+    mamba activate xeus-lua
 
 Then you can install in this freshly created environment `xeus-lua` and its dependencies
 
