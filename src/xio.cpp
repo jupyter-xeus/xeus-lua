@@ -587,6 +587,10 @@ void setup_io(
     lua_pushcclosure(L, my_print_lua_cb, 1);
     lua_setglobal(L, "__custom_print");
 
+    lua.set_function("__write_to_kernel_stderr", [](const std::string & s) {
+        xeus::get_interpreter().publish_stream("stderr", s);
+    });
+
     lua.script(R""""(
         local __io_write_custom = _G["__io_write_custom"]
         ilua.detail.__io_write_custom = __io_write_custom
@@ -639,13 +643,31 @@ void setup_io(
         io.read = ilua.detail.__io_read_dispatch
 
         function ilua.detail.__io_write_dispatch(...)
-            if io.output() == io.stdout then
-                return ilua.detail.__io_write_custom(...)
-            else
-                return ilua.detail.__io_write(...)
-            end
+            return ilua.detail.__io_write_custom(...)
         end
         io.write = ilua.detail.__io_write_dispatch
+
+        my_stdout = {
+            write = function(self, ...)
+                for i = 1, select("#", ...) do
+                    io.write(tostring(select(i, ...)))
+                end
+            end
+        }
+        io.stdout = my_stdout
+
+
+        my_stderr = {
+            write = function(self, ...)
+                for i = 1, select("#", ...) do
+                    __write_to_kernel_stderr(tostring(select(i, ...)))
+                end
+            end
+        }
+        io.stderr = my_stderr
+
+
+
         function ilua.detail.__io_flush_dispatch(...)
             if io.output() == io.stdout then
                 return ilua.detail.__io_write_custom('\n')

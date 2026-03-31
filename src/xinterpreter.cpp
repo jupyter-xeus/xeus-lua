@@ -104,7 +104,8 @@ namespace xlua
         }
         // if value is nil
         else if (value.get_type() == sol::type::none) {
-            to_print = "nil";
+            // print nothing for nil
+            return;
         }
         else {
             // use tostring to convert it to a string

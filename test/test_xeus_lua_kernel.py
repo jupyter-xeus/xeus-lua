@@ -28,13 +28,29 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
 
     complete_code_samples = ["print('hello, world')", "function() function() end end"]
 
-    def test_xeus_lua_stdout(self):
+    def test_xeus_lua_io_write(self):
         self.flush_channels()
         reply, output_msgs = self.execute_helper(code="io.write('3')")
         self.assertEqual(reply["content"]["status"], "ok")
         self.assertEqual(output_msgs[0]['msg_type'], 'stream')
         self.assertEqual(output_msgs[0]['content']['name'], 'stdout')
         self.assertEqual(output_msgs[0]['content']['text'], '3')
+    
+    def test_xeus_lua_to_stdout(self):
+        self.flush_channels()
+        reply, output_msgs = self.execute_helper(code="io.stdout:write('hello')")
+        self.assertEqual(reply["content"]["status"], "ok")
+        self.assertEqual(output_msgs[0]['msg_type'], 'stream')
+        self.assertEqual(output_msgs[0]['content']['name'], 'stdout')
+        self.assertEqual(output_msgs[0]['content']['text'], 'hello')
+
+    def test_xeus_lua_write_to_stderr(self):
+        self.flush_channels()
+        reply, output_msgs = self.execute_helper(code="io.stderr:write('error')")
+        self.assertEqual(reply["content"]["status"], "ok")
+        self.assertEqual(output_msgs[0]['msg_type'], 'stream')
+        self.assertEqual(output_msgs[0]['content']['name'], 'stderr')
+        self.assertEqual(output_msgs[0]['content']['text'], 'error')
 
     def test_xeus_lua_stderr(self):
         self.flush_channels()
