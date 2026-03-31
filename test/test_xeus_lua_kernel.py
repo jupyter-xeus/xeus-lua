@@ -27,7 +27,7 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
     ]
 
     complete_code_samples = ["print('hello, world')", "function foo() function bar() end end"]
-    incomplete_code_samples = ["function foo(""]
+    incomplete_code_samples = ["function foo("]
 
     def test_xeus_lua_io_write(self):
         self.flush_channels()
