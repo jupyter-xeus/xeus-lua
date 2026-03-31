@@ -349,10 +349,12 @@ namespace xlua
         return jresult;
     }
 
-    nl::json interpreter::is_complete_request_impl(const std::string& /*code*/)
+    nl::json interpreter::is_complete_request_impl(const std::string& code)
     {
-        nl::json jresult = xeus::create_is_complete_reply("complete");
-        return jresult;
+        sol::state_view lua(L);
+        bool is_complete = has_valid_syntax(code, lua);
+        std::string status = is_complete ? "complete" : "incomplete";
+        return xeus::create_is_complete_reply(status);
     }
 
     nl::json interpreter::kernel_info_request_impl()
