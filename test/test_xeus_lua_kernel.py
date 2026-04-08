@@ -139,7 +139,7 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
     
     def test_lua_to_stdout(self):
         self.flush_channels()
-        reply, output_msgs = self.execute_helper(code="io.stdout:write('hello')")
+        reply, output_msgs = self.execute_helper(code="io.stdout:write('hello')\na=1")
         self.assertEqual(reply["content"]["status"], "ok")
         self.assertEqual(output_msgs[0]['msg_type'], 'stream')
         self.assertEqual(output_msgs[0]['content']['name'], 'stdout')
@@ -147,7 +147,7 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
 
     def test_lua_write_to_stderr(self):
         self.flush_channels()
-        reply, output_msgs = self.execute_helper(code="io.stderr:write('error')")
+        reply, output_msgs = self.execute_helper(code="io.stderr:write('error')\na=1")
         self.assertEqual(reply["content"]["status"], "ok")
         self.assertEqual(output_msgs[0]['msg_type'], 'stream')
         self.assertEqual(output_msgs[0]['content']['name'], 'stderr')
