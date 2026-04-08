@@ -620,7 +620,8 @@ void setup_io(
         ilua.detail.__stdout_filename = os.tmpname()
         ilua.detail.__stderr_filename = os.tmpname() 
         ilua.detail.__stdin_filename = os.tmpname()
-
+        ilua.detail.__original_output = io.output
+        ilua.detail.__original_input = io.input
 
         
 
@@ -634,47 +635,11 @@ void setup_io(
         end
 
 
-        ilua.detail.__redirect_output = function()
-
-
-            local function redirect_output(file, stream_name)
-                file:seek("set") 
-                local file_content = file:read("*a")
-                if file_content and #file_content > 0 then
-                    ilua.detail.__io_write_to_stream(stream_name, file_content)
-                end
-            end
-            redirect_output(ilua.detail.__stdout_file, "stdout")
-            redirect_output(ilua.detail.__stderr_file, "stderr")
-
-            local function flush_file(file, path)
-                file:close()
-                local new_file = io.open(path, "w+")  -- truncates file
-                return new_file
-            end
-            
-            local is_stdout_file = io.stdout == ilua.detail.__stdout_file
-            local is_stderr_file = io.stderr == ilua.detail.__stderr_file
-
-            ilua.detail.__stdout_file = flush_file(ilua.detail.__stdout_file, ilua.detail.__stdout_filename)
-            ilua.detail.__stderr_file = flush_file(ilua.detail.__stderr_file, ilua.detail.__stderr_filename)
-
-            if is_stdout_file then
-                io.stdout = ilua.detail.__stdout_file
-                io.output(ilua.detail.__stdout_file)
-            end
-
-            if is_stderr_file then
-                io.stderr = ilua.detail.__stderr_file
-            end
-
-        end
-
-
 
         io.stdout = ilua.detail.__stdout_file
         io.stderr = ilua.detail.__stderr_file
         io.stdin = ilua.detail.__stdin_file
+        io.input(ilua.detail.__stdin_file)
         io.output(ilua.detail.__stdout_file)
 
 
@@ -721,6 +686,37 @@ void setup_io(
                 return ilua.detail.__original_io_read(...)
             end
         end
+
+        io.output = function(file)
+            if file then
+                -- this means enable output redirect to xeus
+                if file == ilua.detail.__stdout_file or file == ilua.detail.__stdout_wrapper then
+                    ilua.detail.__original_output(ilua.detail.__stdout_file)
+                else
+                    ilua.detail.__original_output(file)
+                end
+            else
+                return ilua.detail.__original_output()
+            end
+        end 
+
+        ilua.detail.__stdout_wrapper = {
+            write = function(self, ...)
+                ilua.detail.__io_write_to_stream("stdout", ...)
+            end,
+            flush = function(self)
+                -- no need to do anything as we are writing directly to stream
+            end
+        }
+        ilua.detail.__stderr_wrapper = {
+            write = function(self, ...)
+                ilua.detail.__io_write_to_stream("stderr", ...)
+            end
+        }
+
+        io.stdout = ilua.detail.__stdout_wrapper
+        io.stderr = ilua.detail.__stderr_wrapper
+
 
 
 

@@ -358,39 +358,29 @@ namespace xlua
             tails_is_expression = is_expression(tail, lua);
         }
 
-        auto wrapped_cb = [this, cb = std::move(cb)](nl::json kernel_res) {
-            sol::state_view lua = sol::state_view(this->L); 
-            auto redirect_output = lua["ilua"]["detail"]["__redirect_output"];
-            // check if function exists
-            if (redirect_output.valid()) {
-                redirect_output();
-            }
-            cb(kernel_res);
-        };
-
 
         // if either head or tail alone is invalid, then we dont attempt to do any last value printing
         // => we just evalueate the whole block as is and print nothing
         if(!head_alone_valid || !tails_is_expression) {
 
             auto result = lua.safe_script(code, sol::script_pass_on_error);
-            if(handle_err(*this, wrapped_cb, result, config.silent, "executing whole block" + code)) {
+            if(handle_err(*this, cb, result, config.silent, "executing whole block" + code)) {
                 return;
             }
-            wrapped_cb(xeus::create_successful_reply());
+            cb(xeus::create_successful_reply());
         }
         else{
             // execute the head without printing anything
             if(!head.empty()) {
                  auto head_result = lua.safe_script(head, sol::script_pass_on_error);
-                if(handle_err(*this, wrapped_cb, head_result, config.silent, "executing head block")) {
+                if(handle_err(*this, cb, head_result, config.silent, "executing head block")) {
                     return;
                 }
             }
             // wrap tail in a function
             std::string wrapped_tail = "function _xeus_lua_return_expression() return \n " + tail + "\n end";
             auto wrapped_tail_result = lua.safe_script(wrapped_tail, sol::script_pass_on_error);
-            if(handle_err(*this, wrapped_cb, wrapped_tail_result, config.silent, "executing wrapped tail block")) {
+            if(handle_err(*this, cb, wrapped_tail_result, config.silent, "executing wrapped tail block")) {
                 return;
             }
             // get the result value
@@ -400,13 +390,13 @@ namespace xlua
 
             if(!ends_with_semicolon(tail) && auto_print) {
                 
-                if(handle_err(*this, wrapped_cb, tail_value, config.silent, "tail function call")) {
+                if(handle_err(*this, cb, tail_value, config.silent, "tail function call")) {
                     return;
                 }
-                print_last_value(*this, lua, wrapped_cb, tail_value, config.silent, execution_count);
+                print_last_value(*this, lua, cb, tail_value, config.silent, execution_count);
             }
 
-            wrapped_cb(xeus::create_successful_reply());
+            cb(xeus::create_successful_reply());
         
         }
 

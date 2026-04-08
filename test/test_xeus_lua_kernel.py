@@ -11,6 +11,7 @@ import tempfile
 import unittest
 import jupyter_kernel_test
 import pytest
+import json
 
 
 
@@ -89,7 +90,6 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
         if expected.endswith('\n'):
             expected = expected[:-1]
         self.assertEqual(actual, expected)
-        
 
     def test_code_snippets(self):
         self.flush_channels()
@@ -139,15 +139,54 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
     
     def test_lua_to_stdout(self):
         self.flush_channels()
-        reply, output_msgs = self.execute_helper(code="io.stdout:write('hello')\na=1")
+        reply, output_msgs = self.execute_helper(code="io.stdout:write('hello')")
         self.assertEqual(reply["content"]["status"], "ok")
         self.assertEqual(output_msgs[0]['msg_type'], 'stream')
         self.assertEqual(output_msgs[0]['content']['name'], 'stdout')
-        self.assertEqual(output_msgs[0]['content']['text'], 'hello')
+        self.assertEqual(output_msgs[0]['content']['text'], 'hello')            
+    
+    def test_lua_to_stdout_with_previous_redirect(self):
+        self.flush_channels()
+        code = R"""
+            -- open a tempfile for writing
+            local tmpfile = io.open("_xeus_lua_test_temp_output.txt", "w")
+
+            -- redirect stdout to the tempfile
+            io.output(tmpfile)
+
+            -- use io.write to write to the tempfile
+            io.write("This should go to the tempfile")
+
+            -- close the tempfile
+            tmpfile:close() 
+
+            -- reset stdout to the default
+            io.stdout:write("first hello\n")
+            io.output(io.stdout)
+
+
+
+            io.write("second hello\n")
+            io.stdout:flush();
+        """
+        reply, output_msgs = self.execute_helper(code=code)
+        print(json.dumps(output_msgs, indent=4, sort_keys=True, default=str))
+
+        # find first stream message 
+
+
+        self.assertEqual(reply["content"]["status"], "ok")
+        self.assertEqual(output_msgs[0]['msg_type'], 'stream')
+        self.assertEqual(output_msgs[0]['content']['name'], 'stdout')
+        self.assertEqual(output_msgs[0]['content']['text'], 'first hello\n')
+
+        self.assertEqual(output_msgs[1]['msg_type'], 'stream')
+        self.assertEqual(output_msgs[1]['content']['name'], 'stdout')
+        self.assertEqual(output_msgs[1]['content']['text'], 'second hello\n')
 
     def test_lua_write_to_stderr(self):
         self.flush_channels()
-        reply, output_msgs = self.execute_helper(code="io.stderr:write('error')\na=1")
+        reply, output_msgs = self.execute_helper(code="io.stderr:write('error')")
         self.assertEqual(reply["content"]["status"], "ok")
         self.assertEqual(output_msgs[0]['msg_type'], 'stream')
         self.assertEqual(output_msgs[0]['content']['name'], 'stderr')
@@ -220,7 +259,43 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
             
             self.assertEqual(output_msgs[0]['content']['data'][case["expected_mime"]], case["expected_data"])
         
+    def test_output_stream_replacement_detail(self):
+        self.flush_channels()
+        code = R"""
+            -- open a tempfile for writing
+            local tmpfile = io.open("_xeus_lua_test_temp_output.txt", "w")
+            -- redirect stdout to the tempfile
+            io.output(tmpfile)
+            -- use io.write to write to the tempfile
+            io.write("This should go to the tempfile")
+            -- close the tempfile
+            tmpfile:close()
 
+
+            -- reset stdout to the default
+            io.stdout:write("redirect1")
+            io.stdout:flush()
+            io.output(io.stdout)
+            io.write("redirect2")
+        """
+
+        reply, output_msgs = self.execute_helper(code=code)
+        self.assertEqual(reply["content"]["status"], "ok")
+        self.assertEqual(output_msgs[0]['msg_type'], 'stream')
+        self.assertEqual(output_msgs[0]['content']['text'], 'redirect1')
+        self.assertEqual(output_msgs[0]['content']['name'], 'stdout')
+
+        self.assertEqual(output_msgs[1]['msg_type'], 'stream')
+        self.assertEqual(output_msgs[1]['content']['text'], 'redirect2')
+        self.assertEqual(output_msgs[1]['content']['name'], 'stdout')
+        # read the content of the tempfile and check if it contains the expected text
+        with open("_xeus_lua_test_temp_output.txt", "r") as f:
+            content = f.read()
+            self.assertEqual(content, "This should go to the tempfile")
+        
+        # delete the tempfile
+        import os
+        os.remove("_xeus_lua_test_temp_output.txt")
     
     def test_output_stream_replacement(self):
         self.flush_channels()
