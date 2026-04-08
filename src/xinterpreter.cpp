@@ -32,15 +32,67 @@
 namespace nl = nlohmann;
 
 namespace xlua
-{   
+{      
+
+    std::vector<std::string> splitLines(const std::string& input) {
+        std::vector<std::string> lines;
+        std::istringstream stream(input);
+        std::string line;
+
+        while (std::getline(stream, line)) {
+            lines.push_back(line);
+        }
+
+        return lines;
+    }
+
+    bool string_starts_with(const std::string& str, const std::string& prefix) {
+        return str.size() >= prefix.size() && std::equal(prefix.begin(), prefix.end(), str.begin());
+    }
+
+
+    std::string trim_lines_at_end(const std::string& code) {
+        auto lines = splitLines(code);
+        std::vector<std::string> trimmed_lines;
+
+        for (auto it = lines.rbegin(); it != lines.rend(); ++it) {
+            auto& line = *it;
+
+            auto first_non_whitespace = line.find_first_not_of(" \t\r\n");
+
+            // check if line is empty or only contains whitespace
+            if (first_non_whitespace == std::string::npos) {
+                continue; // skip this line
+            }
+            // starts with a comment -- after trimming whitespace
+            std::string trimmed_line = line;
+            trimmed_line.erase(0, trimmed_line.find_first_not_of(" \t\r\n"));
+            if (string_starts_with(trimmed_line, "--")) {
+                continue; // skip this line 
+            }
+            trimmed_lines.push_back(line);
+        }
+        // reverse the order of the lines back to normal
+        std::reverse(trimmed_lines.begin(), trimmed_lines.end());
+        // join the lines back together
+        std::ostringstream oss;
+        for (size_t i = 0; i < trimmed_lines.size(); ++i) {
+            oss << trimmed_lines[i];
+            if (i != trimmed_lines.size() - 1) {
+                oss << "\n";
+            }
+        }
+        return oss.str();
+
+    }
 
 
     bool has_valid_syntax(std::string code, sol::state_view & lua) {
-        std::string wrapped_code = "function _xeus_lua_has_valid_syntax() " + code + " end";
+        std::string wrapped_code = "function _xeus_lua_has_valid_syntax() \n " + code + " \n end";
         return lua.safe_script(wrapped_code, sol::script_pass_on_error).valid();
     }
     bool is_expression(std::string code, sol::state_view & lua) {
-        std::string wrapped_code = "function _xeus_lua_is_expression() return " + code + " end";
+        std::string wrapped_code = "function _xeus_lua_is_expression() return \n" + code + " \n end";
         return lua.safe_script(wrapped_code, sol::script_pass_on_error).valid();
     }
 
@@ -65,10 +117,10 @@ namespace xlua
     }
 
     // helper function which calls 
-    template<class T>
+    template<class CB, class T>
     auto handle_err(
         interpreter & interp,
-        interpreter::send_reply_callback cb,
+        CB && cb,
         T & result, 
         const bool silent,
         std::string context
@@ -78,7 +130,6 @@ namespace xlua
             auto kernel_res = xeus::create_error_reply("Execution error in " + context, error_msg, std::vector<std::string>(1,error_msg));
             if (!silent)
             {
-                std::cout<<"error in " << context << ": " << error_msg << "\n";
                 interp.publish_execution_error(error_msg,error_msg,std::vector<std::string>(1,error_msg));
             }
             cb(kernel_res);
@@ -98,25 +149,29 @@ namespace xlua
         const bool silent,
         int execution_count
     ) {
+
+
         std::string to_print;
-        if (value.get_type() == sol::type::string) {
-            to_print = value. template get<std::string>();
-        }
-        // if value is nil
-        else if (value.get_type() == sol::type::none) {
+        if (value.get_type() == sol::type::none) {
             // print nothing for nil
             return;
         }
-        else {
-            // use tostring to convert it to a string
-            sol::protected_function tostring = lua["tostring"];
-            sol::protected_function_result tostring_result = tostring(value);
-            if(handle_err(interp, cb, tostring_result, silent, "tostring call on tail value")) {
-                return;
-            }
-            to_print = tostring_result. template get<std::string>();
+            
+        if (value.get_type() == sol::type::string) {
+            to_print = value. template get<std::string>();
+            interp.publish_execution_result(execution_count, nl::json({{"text/plain", to_print}}), nl::json::object());
         }
-        interp.publish_execution_result(execution_count, nl::json({{"text/plain", to_print}}), nl::json::object());
+        else if ( lua["ilua"]["detail"]["__is_redirect_file"](value).template get<bool>() ) {
+            // if the value is a redirect file, print nothing, as it is not useful information for the user and clutters the output
+            return;
+        }
+        else {
+            // get mimetype representation of the value
+            sol::protected_function_result lua_json_str = lua["ilua"]["display"]["mime_bundle_repr"](value);
+            const std::string json_str = lua_json_str. template get<std::string>();           auto json_result = nl::json::parse(json_str);
+            interp.publish_execution_result(execution_count, json_result, nl::json::object());
+        }
+        
     }
 
     inline void my_panic(sol::optional<std::string> maybe_msg)
@@ -265,10 +320,15 @@ namespace xlua
 
     void interpreter::execute_request_impl(send_reply_callback cb,
                                                int execution_count,
-                                               const std::string& code,
+                                               const std::string& raw_code,
                                                xeus::execute_request_config config,
                                                nl::json user_expressions)
     {
+
+        // some pre-processing on the code: trim empty lines and comments at the end, this allows users to put a comment at the end of the code without breaking the last value printing
+        std::string code = trim_lines_at_end(raw_code);
+
+
         sol::state_view lua(L);
         m_allow_stdin = config.allow_stdin;
    
@@ -284,45 +344,69 @@ namespace xlua
         // split the code into head and tail, where tail is the last line of the code and head is everything before it
         // this allows us to only auto-print the result of the last line
         auto [head, tail] = split_lua_block(code);
-        bool head_alone_valid = has_valid_syntax(head, lua);
-        bool tails_is_expression = is_expression(tail, lua);
+        bool everything_is_expression = is_expression(code, lua);
+        bool head_alone_valid = true;
+        bool tails_is_expression = true;
+        if(everything_is_expression) {
+            head_alone_valid = true;
+            tails_is_expression = true;
+            head = "";
+            tail = code;
+        }
+        if (!everything_is_expression) {
+            head_alone_valid = has_valid_syntax(head, lua);
+            tails_is_expression = is_expression(tail, lua);
+        }
+
+        auto wrapped_cb = [this, cb = std::move(cb)](nl::json kernel_res) {
+            sol::state_view lua = sol::state_view(this->L); 
+            auto redirect_output = lua["ilua"]["detail"]["__redirect_output"];
+            // check if function exists
+            if (redirect_output.valid()) {
+                redirect_output();
+            }
+            cb(kernel_res);
+        };
+
 
         // if either head or tail alone is invalid, then we dont attempt to do any last value printing
         // => we just evalueate the whole block as is and print nothing
         if(!head_alone_valid || !tails_is_expression) {
 
             auto result = lua.safe_script(code, sol::script_pass_on_error);
-            if(handle_err(*this, cb, result, config.silent, "executing whole block")) {
+            if(handle_err(*this, wrapped_cb, result, config.silent, "executing whole block" + code)) {
                 return;
             }
-            cb(xeus::create_successful_reply());
+            wrapped_cb(xeus::create_successful_reply());
         }
         else{
             // execute the head without printing anything
-            auto head_result = lua.safe_script(head, sol::script_pass_on_error);
-            if(handle_err(*this, cb, head_result, config.silent, "executing head block")) {
-                return;
+            if(!head.empty()) {
+                 auto head_result = lua.safe_script(head, sol::script_pass_on_error);
+                if(handle_err(*this, wrapped_cb, head_result, config.silent, "executing head block")) {
+                    return;
+                }
             }
-
             // wrap tail in a function
-            std::string wrapped_tail = "function _xeus_lua_return_expression() return " + tail + " end";
+            std::string wrapped_tail = "function _xeus_lua_return_expression() return \n " + tail + "\n end";
             auto wrapped_tail_result = lua.safe_script(wrapped_tail, sol::script_pass_on_error);
-            if(handle_err(*this, cb, wrapped_tail_result, config.silent, "executing wrapped tail block")) {
+            if(handle_err(*this, wrapped_cb, wrapped_tail_result, config.silent, "executing wrapped tail block")) {
                 return;
             }
             // get the result value
             sol::protected_function  tail_func = lua["_xeus_lua_return_expression"];
             sol::protected_function_result tail_value = tail_func();
 
+
             if(!ends_with_semicolon(tail) && auto_print) {
                 
-                if(handle_err(*this, cb, tail_value, config.silent, "tail function call")) {
+                if(handle_err(*this, wrapped_cb, tail_value, config.silent, "tail function call")) {
                     return;
                 }
-                print_last_value(*this, lua, cb, tail_value, config.silent, execution_count);
+                print_last_value(*this, lua, wrapped_cb, tail_value, config.silent, execution_count);
             }
 
-            cb(xeus::create_successful_reply());
+            wrapped_cb(xeus::create_successful_reply());
         
         }
 

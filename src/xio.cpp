@@ -18,76 +18,13 @@
 namespace xlua
 {
 
-int print_cb(lua_State * L, interpreter * interpr) {
-    int n = lua_gettop(L);
-    std::stringstream ss;
-    
-    for (int i = 1; i <= n; i++) {
-        size_t len;
-        // Convert to string and push onto stack
-        const char * s = luaL_tolstring(L, i, &len);
-        
-        if (s) {
-            ss << s;
-        }
-        
-        // Add a tab separator between arguments (but not after the last one)
-        if (i < n) {
-            ss << "\t";
-        }
-        
-        // Pop the string pushed by luaL_tolstring
-        lua_pop(L, 1);
-    }
-    
-    // Add the trailing newline
-    ss << "\n";
-    
-    // Publish the entire accumulated string at once
-    interpr->publish_stream("stdout", ss.str());
-    
-    return 0;
-}
-
-int write_cb(lua_State * L, interpreter * interpr) {
-    int n = lua_gettop(L);  // Get number of arguments passed to io.write
-    std::stringstream ss;
-    for (int i = 1; i <= n; ++i) {
-        // luaL_tolstring handles converting any type to a string,
-        // respecting __tostring metamethods, and pushes the result to the stack.
-        size_t len;
-        const char * str = luaL_tolstring(L, i, &len);
-        
-        if (str) {
-            ss.write(str, len);
-        }
-
-        // Pop the string pushed by luaL_tolstring so the stack 
-        // stays clean for the next iteration.
-        lua_pop(L, 1);
-    }
-    interpr->publish_stream("stdout", ss.str());
-    
-    return 0; // io.write usually returns the file handle, but 0 is fine for kernels
-}
-
-int my_print_lua_cb(lua_State * L) {
-  interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
-  return print_cb(L, interpr);
-}
-
-int my_write_lua_cb(lua_State * L) {
-  interpreter * interpr = static_cast<interpreter *>(lua_touserdata(L, lua_upvalueindex(1)));
-  return write_cb(L, interpr);
-}
-
 void add_pprint_module(sol::state_view & lua){
 
     std::string script = R""""(
     -- Chen Tao - jagttt@gmail.com
     -- This is free and unencumbered software released into the public domain.
     -- Anyone is free to copy, modify, publish, use, compile, sell, or
-    -- distribute this software, either in source code form or as a compiled
+    -- distribute this software, either in  code form or as a compiled
     -- binary, for any purpose, commercial or non-commercial, and by any
     -- means.
     -- In jurisdictions that recognize copyright laws, the author or authors
@@ -530,7 +467,7 @@ void add_pprint_module(sol::state_view & lua){
     )"""" 
     R""""(
     -- pprint all the arguments
-    function pprint.pprint( ... )
+    function pprint.pprint_impl(printer, ... )
         local args = {...}
         local ilua_printer = {data=""}
         local meta = {
@@ -546,16 +483,31 @@ void add_pprint_module(sol::state_view & lua){
         local len = select('#', ...)
         for ix = 1,len do
             pprint.pformat(args[ix], nil, ilua_printer)
-            ilua_printer(' ')
+            if ix < len then
+                ilua_printer(' ')
+            end
         end
-        ilua.detail.__custom_print(ilua_printer.data)
+        ilua_printer('\n')
+        return printer(ilua_printer.data)
+    end
+    function pprint.pprint(...)
+        return pprint.pprint_impl(io.write, ...)
+    end
+    function pprint.pprint_str(...)
+        local result = ''
+        local function printer(s)
+            result = result .. s
+        end
+        pprint.pprint_impl(printer, ...)
+        return result
     end
     setmetatable(pprint, {
         __call = function (_, ...)
             pprint.pprint(...)
         end
     })
-    --return pprint
+    _G.pprint = pprint
+    
     )"""";
     auto code_result = lua.script(script);
     if (!code_result.valid()) {
@@ -571,38 +523,16 @@ void setup_io(
   interpreter & interp
 )
 {
-    // we use a non-sol / pure c-lua
-    // solution to replace the print / io.write function
-    // since a sol based function gave issues
-    // when used from a co-routine
-
-
-    lua_State * L = lua;
-    lua_pushlightuserdata(L, &interp);
-    lua_pushcclosure(L, my_write_lua_cb, 1);
-    lua_setglobal(L, "__io_write_custom");
-
-
-    lua_pushlightuserdata(L, &interp);
-    lua_pushcclosure(L, my_print_lua_cb, 1);
-    lua_setglobal(L, "__custom_print");
-
-    lua.set_function("__write_to_kernel_stderr", [](const std::string & s) {
-        xeus::get_interpreter().publish_stream("stderr", s);
-    });
+    sol::table ilua_table = lua["ilua"];
+    sol::table detail_table = ilua_table["detail"];
 
     lua.script(R""""(
-        local __io_write_custom = _G["__io_write_custom"]
-        ilua.detail.__io_write_custom = __io_write_custom
-        _G["__io_write_custom"] = nil
 
-        local __custom_print = _G["__custom_print"]
-        ilua.detail.__custom_print = __custom_print
-        _G["__custom_print"] = nil
+        ilua.detail.__original_print = print
 
         function print(...)
             if ilua.config.printer == "print" then
-                ilua.detail.__custom_print(...)
+                ilua.detail.__original_print(...)
             elseif ilua.config.printer == "pprint" then
                 pprint(...)
             else
@@ -611,76 +541,203 @@ void setup_io(
         end
     )"""");
 
-    sol::table ilua_table = lua["ilua"];
-    sol::table detail_table = ilua_table["detail"];
-    auto self = &interp;
-    detail_table.set_function("__io_read_custom", [self]( ) {
-        if(self->allow_stdin())
+
+    detail_table.set_function("__io_read_custom", [](
+       sol::variadic_args /*ingnored args*/
+    ) {
+        
+        auto & self = static_cast<interpreter&>(xeus::get_interpreter());
+        if(self.allow_stdin())
         {
             return xeus::blocking_input_request("", false);
         }
         else
         {
             std::string error_str = "stdin is not allowed";
-            self->publish_execution_error(error_str,error_str, std::vector<std::string>());
+            self.publish_execution_error(error_str,error_str, std::vector<std::string>());
             return std::string();
         }
     });
 
+    detail_table.set_function("__io_write_to_stream", []( 
+        std::string stream_name,
+        sol::variadic_args to_write ) 
+    {
+        auto & interpreter = xeus::get_interpreter();
+        std::stringstream ss;
+        for (auto arg : to_write) {
+            // call tostring on each argument to respect __tostring metamethods
+            sol::state_view lua(arg.lua_state());
+            sol::protected_function tostring = lua["tostring"];
+            sol::protected_function_result tostring_result = tostring(arg);
+            if (!tostring_result.valid()) {
+                sol::error err = tostring_result;
+                std::stringstream ss_err;
+                ss_err << "Error in tostring call for io.write argument: " << err.what();
+                interpreter.publish_stream("stderr", ss_err.str());
+                continue; // skip this argument but continue with others
+            }
+            ss << tostring_result.get<std::string>();
+        }
+        interpreter.publish_stream(stream_name, ss.str());
+    });
+
+    detail_table.set_function("__unredirected_cout", []( 
+        sol::variadic_args to_write ) 
+    {
+        auto & interpreter = xeus::get_interpreter();
+        std::stringstream ss;
+        for (auto arg : to_write) {
+            // call tostring on each argument to respect __tostring metamethods
+            sol::state_view lua(arg.lua_state());
+            sol::protected_function tostring = lua["tostring"];
+            sol::protected_function_result tostring_result = tostring(arg);
+            if (!tostring_result.valid()) {
+                sol::error err = tostring_result;
+                std::stringstream ss_err;
+                ss_err << "Error in tostring call for unredirected_cout argument: " << err.what();
+                interpreter.publish_stream("stderr", ss_err.str());
+                continue; // skip this argument but continue with others
+            }
+            ss << tostring_result.get<std::string>();
+        }
+        std::cout << ss.str()<< std::flush;
+    });
+
     const std::string monkeypatch = R""""(
         require "io"
-        ilua.detail.__io_read = io.read
-        ilua.detail.__io_write = io.write
-        ilua.detail.__io_flush = io.flush
-        function ilua.detail.__io_read_dispatch(...)
-            local args = table.pack(...)
-            if io.input() == io.stdin and args.n == 0 then
+
+        ilua.detail.__original_stdout_file = io.stdout
+        ilua.detail.__original_stderr_file = io.stderr
+
+        ilua.detail.__original_io_output = io.output
+        ilua.detail.__original_io_input = io.input
+        ilua.detail.__original_print = print
+        ilua.detail.__original_io_write = io.write
+        ilua.detail.__original_io_read = io.read
+
+        
+        ilua.detail.__stdout_filename = os.tmpname()
+        ilua.detail.__stderr_filename = os.tmpname() 
+        ilua.detail.__stdin_filename = os.tmpname()
+
+
+        
+
+        ilua.detail.__stdout_file = io.open(ilua.detail.__stdout_filename, "w+")
+        ilua.detail.__stderr_file = io.open(ilua.detail.__stderr_filename, "w+")
+        ilua.detail.__stdin_file = io.open(ilua.detail.__stdin_filename, "w+")
+
+
+        ilua.detail.__is_redirect_file = function(arg)
+            return arg == ilua.detail.__stdout_file or arg == ilua.detail.__stderr_file or arg == ilua.detail.__stdin_file
+        end
+
+
+        ilua.detail.__redirect_output = function()
+
+
+            local function redirect_output(file, stream_name)
+                file:seek("set") 
+                local file_content = file:read("*a")
+                if file_content and #file_content > 0 then
+                    ilua.detail.__io_write_to_stream(stream_name, file_content)
+                end
+            end
+            redirect_output(ilua.detail.__stdout_file, "stdout")
+            redirect_output(ilua.detail.__stderr_file, "stderr")
+
+            local function flush_file(file, path)
+                file:close()
+                local new_file = io.open(path, "w+")  -- truncates file
+                return new_file
+            end
+            
+            local is_stdout_file = io.stdout == ilua.detail.__stdout_file
+            local is_stderr_file = io.stderr == ilua.detail.__stderr_file
+
+            ilua.detail.__stdout_file = flush_file(ilua.detail.__stdout_file, ilua.detail.__stdout_filename)
+            ilua.detail.__stderr_file = flush_file(ilua.detail.__stderr_file, ilua.detail.__stderr_filename)
+
+            if is_stdout_file then
+                io.stdout = ilua.detail.__stdout_file
+                io.output(ilua.detail.__stdout_file)
+            end
+
+            if is_stderr_file then
+                io.stderr = ilua.detail.__stderr_file
+            end
+
+        end
+
+
+
+        io.stdout = ilua.detail.__stdout_file
+        io.stderr = ilua.detail.__stderr_file
+        io.stdin = ilua.detail.__stdin_file
+        io.output(ilua.detail.__stdout_file)
+
+
+
+        -- even though we have the filebased redirection
+        -- they have the drawback that they are only printed after the execute request is done
+        -- therefore we still overwrite print / io.write to redirect output immediately,
+        --  but still keep the file redirection as a backup for any output that doesn't go through those functions.
+
+        -- custom print function
+        ilua.detail.__print_dispatch =  function(...)
+            if ilua.config.printer == "print" then
+                local args = {...}
+                local str_args = {}
+                for i, arg in ipairs(args) do
+                    table.insert(str_args, tostring(arg))   
+                end
+                ilua.detail.__io_write_to_stream("stdout", table.concat(str_args, "\t"), "\n")
+            elseif ilua.config.printer == "pprint" then
+                pprint(...)
+            else
+                error(string.format("%s is an unknown printer", ilua.config.printer))
+            end
+        end
+
+    
+        -- replace global print with print above
+        _G.print = ilua.detail.__print_dispatch
+        
+
+        -- for write we need to be careful, only when io.output is set to our redirected file, we redirect it to kernel, otherwise we write to the io.output 
+        io.write = function(...)
+            if io.output() == ilua.detail.__stdout_file then    
+                ilua.detail.__io_write_to_stream("stdout", ...)
+            else
+                return ilua.detail.__original_io_write(...)
+            end    
+        end
+
+        io.read = function(...)
+            if io.input() == ilua.detail.__stdin_file then
                 return ilua.detail.__io_read_custom(...)
             else
-                return ilua.detail.__io_read(...)
+                return ilua.detail.__original_io_read(...)
             end
         end
-        io.read = ilua.detail.__io_read_dispatch
-
-        function ilua.detail.__io_write_dispatch(...)
-            return ilua.detail.__io_write_custom(...)
-        end
-        io.write = ilua.detail.__io_write_dispatch
-
-        my_stdout = {
-            write = function(self, ...)
-                for i = 1, select("#", ...) do
-                    io.write(tostring(select(i, ...)))
-                end
-            end
-        }
-        io.stdout = my_stdout
 
 
-        my_stderr = {
-            write = function(self, ...)
-                for i = 1, select("#", ...) do
-                    __write_to_kernel_stderr(tostring(select(i, ...)))
-                end
-            end
-        }
-        io.stderr = my_stderr
-
-
-
-        function ilua.detail.__io_flush_dispatch(...)
-            if io.output() == io.stdout then
-                return ilua.detail.__io_write_custom('\n')
-            else
-                return ilua.detail.__io_flush(...)
-            end
-        end
-        io.flush = ilua.detail.__io_flush_dispatch
 
     )"""";
-    lua.script(monkeypatch);  
-
+    
     add_pprint_module(lua);
+
+    sol::protected_function_result code_result  = lua.safe_script(monkeypatch, &sol::script_pass_on_error);
+    if (!code_result.valid()) {
+        sol::error err = code_result;
+        std::cerr << "failed to load string-based script into the program for xio" << err.what() << std::endl;
+        std::cout << "monkeypatch was: " << monkeypatch << std::endl;        throw std::runtime_error(err.what());
+    }
+
+
+
+   
 }
 
 }
