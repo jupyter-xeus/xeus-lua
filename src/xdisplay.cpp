@@ -45,11 +45,12 @@ void setup_display(
             const auto data = nl::json::parse(data_str);
             const auto metadata = nl::json::parse(metadata_str);
             const auto transient = nl::json::parse(transient_str);
-            self->display_data(data, metadata, transient);
+            return self->display_data(data, metadata, transient);
         }
         catch (nl::json::parse_error& ex)
         {
             self->publish_execution_error("json::parse_error",ex.what(),std::vector<std::string>());
+            
         }
     });
 
@@ -83,37 +84,108 @@ void setup_display(
     local display = ilua.display
 
 
-    function display.display(...)
-        args = table.pack(...)
-        for i=1,args.n do
-            local arg = args[i]
-            arg:display()
+    display.mime_bundle_repr = function(data)
+        -- if data has a mime_bundle_repr has
+        -- a function mime_bundle_repr, use it to get the mimetype representation
+        if type(data) == "table" and type(data.mime_bundle_repr) == "function" then
+            local success, result = pcall(function() return data:mime_bundle_repr(mimetype) end)
+            if success then
+                -- if the result is a string, we assume it is a json string with mimetype as key and encoded data as value, and we pass it to the display function
+                if type(result) == "string" then
+                    return result
+                else
+                    -- assume json encodable 
+                    local encoded = ilua.json.encode(result)    
+                    return encoded
+                end
+                      
+
+            else
+                -- if the mime_bundle_repr function fails, we catch the error and print it to stderr, but we dont want to fail the whole display process, so we just return nil and let the caller handle it
+                local err_msg = string.format("Error in mime_bundle_repr function for mimetype %s: %s", mimetype, result)
+                ilua.detail.__io_write_to_stream("stderr", err_msg)
+                return nil
+            end
+        else
+            local str_data = pprint.pprint_str(data)
+            local encoded = ilua.json.detail.string_encoder(str_data)
+            return string.format('{"%s" : %s}', "text/plain", encoded)
         end
     end
 
 
-    local function display_mimetype(mimetype, encoded_str)
-        local data_json_str = string.format('{"%s" : %s}', mimetype, encoded_str)
-        return ilua.display.detail._display_data(data_json_str,"{}","{}")
+
+    function display.display(...)
+        args = table.pack(...)
+        for i=1,args.n do
+            local arg = args[i]
+            -- if arg.display, is a function, we call it
+            if type(arg) == "table" and type(arg.display) == "function" then
+                arg:display()
+            else
+                local repr = display.mime_bundle_repr(arg)
+                return ilua.display.detail._display_data(repr,"{}","{}")
+            end
+        end
     end
+
+    function display.display_data(data, metadata, transient)
+        local repr = display.mime_bundle_repr(data) 
+        if metadata == nil then
+            metadata = "{}"
+        else
+            metadata = ilua.json.encode(metadata)
+        end
+        if transient == nil then
+            transient = "{}"
+        else
+            transient = ilua.json.encode(transient)
+        end
+        return ilua.display.detail._display_data(repr, metadata, transient)
+    end
+
+    function display.update_display_data(data, metadata, transient)
+        local repr = display.mime_bundle_repr(data)
+        if metadata == nil then
+            metadata = "{}"
+        else
+            metadata = ilua.json.encode(metadata)
+        end
+        if transient == nil then
+            transient = "{}"
+        else
+            transient = ilua.json.encode(transient)
+        end
+        return ilua.display.detail._update_display_data(repr, metadata, transient)
+    end
+
+
+
+
+    local function _display_mimetype(mimetype, data)
+        return {
+            mime_bundle_repr = function()
+                bundle = {}
+                bundle[mimetype] = data
+                return ilua.json.encode(bundle)
+            end
+        }
+    end
+
     function  ilua.display.plain_text(data)
-        local encoded = ilua.json.detail.string_encoder(data)
-        display_mimetype("text/plain", encoded)
+        return _display_mimetype("text/plain", data)
     end
     function  ilua.display.latex(data)
-        local encoded = ilua.json.detail.string_encoder(data)
-        display_mimetype("text/latex", encoded)
+        return _display_mimetype("text/latex", data)
     end
     function  ilua.display.html(data)
-        local encoded = ilua.json.detail.string_encoder(data)
-        display_mimetype("text/html", encoded)
+        return _display_mimetype("text/html", data)
     end
-    function  ilua.display.json(jsondata)
-        local data = {
-            ["application/json"] = jsondata
-        }
-        local encoded = ilua.json.encode(data)
-        return ilua.display.detail._display_data(encoded,"{}","{}")
+    function ilua.display.markdown(data)
+        return _display_mimetype("text/markdown", data)
+    end
+    function  ilua.display.json(data)
+        return _display_mimetype("application/json", data)
     end
 
     
