@@ -42,15 +42,9 @@ void setup_display(
     ){
         try
         {
-            std::cout<<"data string is "<<data_str<<std::endl;
-            std::cout<<"metadata string is "<<metadata_str<<std::endl;
-            std::cout<<"transient string is "<<transient_str<<std::endl;
             const auto data = nl::json::parse(data_str);
             const auto metadata = nl::json::parse(metadata_str);
             const auto transient = nl::json::parse(transient_str);
-            std::cout<<"data is"<<data.dump(4)<<std::endl;
-            std::cout<<"metadata is"<<metadata.dump(4)<<std::endl;
-            std::cout<<"transient is"<<transient.dump(4)<<std::endl;
             return self->display_data(data, metadata, transient);
         }
         catch (nl::json::parse_error& ex)
