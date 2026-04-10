@@ -328,6 +328,24 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
         # delete the tempfile
         import os
         os.remove("_xeus_lua_test_temp_output.txt")
+    
+    def test_display_data_empty_metadata(self):
+        self.flush_channels()
+        code = R"""ilua.display.display_data(ilua.display.html('<b>bold</b>'), {}, {})"""
+        reply, output_msgs = self.execute_helper(code=code)
+        self.assertEqual(reply["content"]["status"], "ok")
+        self.assertEqual(output_msgs[0]['msg_type'], 'display_data')
+        self.assertEqual(output_msgs[0]['content']['metadata'], {})
+
+    def test_display_data_metadata(self):
+        self.flush_channels()
+        code = R"""ilua.display.display_data(ilua.display.html('<b>bold</b>'), {display_id = "id1"}, {})"""
+        reply, output_msgs = self.execute_helper(code=code)
+        self.assertEqual(reply["content"]["status"], "ok")
+        self.assertEqual(output_msgs[0]['msg_type'], 'display_data')
+        self.assertEqual(output_msgs[0]['content']['metadata'], {"display_id": "id1"})
+
+        
 
 if __name__ == '__main__':
     unittest.main()

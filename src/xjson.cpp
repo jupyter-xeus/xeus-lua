@@ -56,6 +56,9 @@ local json_encoder_impl
 local table_encoder
 
 is_array = function(t)
+  if #t == 0 then 
+    return false 
+  end
   local i = 0
   for _ in pairs(t) do
       i = i + 1
