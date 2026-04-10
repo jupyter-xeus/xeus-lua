@@ -170,7 +170,6 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
             io.stdout:flush();
         """
         reply, output_msgs = self.execute_helper(code=code)
-        print(json.dumps(output_msgs, indent=4, sort_keys=True, default=str))
 
         # find first stream message 
 
