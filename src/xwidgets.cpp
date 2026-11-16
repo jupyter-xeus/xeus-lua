@@ -138,7 +138,7 @@ namespace xlua
                 interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str)); \
             } \
         }; \
-        XOBSERVE(widget, value, callback); \
+        widget.observe(widget.PROPERTY_NAME.name(), std::function<void(xwidgets_type&)>(callback)); \
     }; 
 
 #define XLUA_REGISTER_INDEX_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
@@ -153,7 +153,7 @@ namespace xlua
                 interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str)); \
             } \
         }; \
-        XOBSERVE(widget, PROPERTY_NAME, callback); \
+        widget.observe(widget.PROPERTY_NAME.name(), std::function<void(xwidgets_type&)>(callback)); \
     }; 
 
 #define XLUA_REGISTER_OPTIONAL_INDEX_OBSERVER(CLS_OBJ, PROPERTY_TYPE, PROPERTY_NAME) \
@@ -168,7 +168,7 @@ namespace xlua
                 interpreter.publish_execution_error(error_str,error_str,std::vector<std::string>(1,error_str)); \
             } \
         }; \
-        XOBSERVE(widget, PROPERTY_NAME, callback); \
+        widget.observe(widget.PROPERTY_NAME.name(), std::function<void(xwidgets_type&)>(callback)); \
     }; 
 
 

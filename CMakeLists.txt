@@ -6,7 +6,7 @@
 #The full license is in the file LICENSE, distributed with this software.
 #############################################################################
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.24)
 project(xeus-lua)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
@@ -69,6 +69,7 @@ OPTION(XLUA_WITH_XCANVAS      "Build xeus-lua with xcanvas" ON)
 OPTION(XLUA_USE_SHARED_XCANVAS "Link xlua  with the xcanvas shared library (instead of the static library)" ON)
 
 if(EMSCRIPTEN)
+    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_emscripten;${CMAKE_MODULE_PATH}")
     add_compile_definitions(XEUS_LUA_EMSCRIPTEN_WASM_BUILD)
     message("Build with emscripten")
@@ -88,10 +89,10 @@ endif()
 # ============
 
 
-set(xeus_REQUIRED_VERSION 6.0.0)
-set(xwidgets_REQUIRED_VERSION 0.30.0)
-set(xcanvas_REQUIRED_VERSION 0.7.0)
-set(xproperty_REQUIRED_VERSION 0.12.1)
+set(xeus_REQUIRED_VERSION 6.2.0)
+set(xwidgets_REQUIRED_VERSION 0.31.1)
+set(xcanvas_REQUIRED_VERSION 0.8.0)
+set(xproperty_REQUIRED_VERSION 0.13.1)
 set(Lua_REQUIRED_VERSION 5.4.0)
 
 find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)

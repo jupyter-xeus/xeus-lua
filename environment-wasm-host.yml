@@ -1,12 +1,12 @@
 name: xeus-lua-wasm-host
 channels:
+  - https://prefix.dev/emscripten-forge/4x
   - https://prefix.dev/conda-forge
-  - https://prefix.dev/emscripten-forge-4x
 
 dependencies:
   - lua <5.5
   - nlohmann_json
   - xeus-lite >=5.0,<6.0
   - xeus>=6.0,<=7
-  - xcanvas >=0.7,<0.8
-  - xwidgets >=0.30.0,<0.31
+  - xcanvas >=0.8,<0.9
+  - xwidgets >=0.31.1,<0.32
