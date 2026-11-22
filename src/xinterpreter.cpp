@@ -370,29 +370,14 @@ namespace xlua
             cb(xeus::create_successful_reply());
         }
         else{
-            // execute the head without printing anything
-            if(!head.empty()) {
-                 auto head_result = lua.safe_script(head, sol::script_pass_on_error);
-                if(handle_err(*this, cb, head_result, config.silent, "executing head block")) {
-                    return;
-                }
-            }
-            // wrap tail in a function
-            std::string wrapped_tail = "function _xeus_lua_return_expression() return \n " + tail + "\n end";
-            auto wrapped_tail_result = lua.safe_script(wrapped_tail, sol::script_pass_on_error);
-            if(handle_err(*this, cb, wrapped_tail_result, config.silent, "executing wrapped tail block")) {
+            // One chunk, so locals declared in the head are in scope for the tail.
+            std::string combined = head.empty() ? "return " + tail : head + "\nreturn " + tail;
+            sol::protected_function_result tail_value = lua.safe_script(combined, sol::script_pass_on_error);
+            if(handle_err(*this, cb, tail_value, config.silent, "executing block")) {
                 return;
             }
-            // get the result value
-            sol::protected_function  tail_func = lua["_xeus_lua_return_expression"];
-            sol::protected_function_result tail_value = tail_func();
-
 
             if(!ends_with_semicolon(tail) && auto_print) {
-                
-                if(handle_err(*this, cb, tail_value, config.silent, "tail function call")) {
-                    return;
-                }
                 print_last_value(*this, lua, cb, tail_value, config.silent, execution_count);
             }
 
