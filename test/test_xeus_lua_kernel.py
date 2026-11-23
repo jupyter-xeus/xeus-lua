@@ -219,6 +219,18 @@ class XeusLuaTests(jupyter_kernel_test.KernelTests):
         self.assertNormalizedEqualStr(output_msgs[0]['content']['data']['text/plain'], '2')
     
 
+    def test_last_value_sees_locals(self):
+        self.flush_channels()
+        reply, output_msgs = self.execute_helper(code="local a = 1\nlocal b = 2\na + b")
+        self.assertEqual(reply["content"]["status"], "ok")
+        self.assertEqual(output_msgs[0]['msg_type'], 'execute_result')
+        self.assertNormalizedEqualStr(output_msgs[0]['content']['data']['text/plain'], '3')
+
+    def test_error_before_silenced_last_value(self):
+        self.flush_channels()
+        reply, output_msgs = self.execute_helper(code="error('boom')\n1;")
+        self.assertEqual(reply["content"]["status"], "error")
+
     def test_last_value_mime_bundle(self):
         cases = [
             dict(
